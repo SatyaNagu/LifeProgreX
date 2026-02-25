@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'onboarding_screen.dart';
+import 'signup_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -232,7 +233,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Expanded(child: _buildSecondaryButton('LOGIN', () {})),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildSecondaryButton('SIGN UP', () {})),
+                  Expanded(
+                    child: _buildSecondaryButton('SIGN UP', () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignupScreen(),
+                        ),
+                      );
+                    }),
+                  ),
                 ],
               ),
             ),
