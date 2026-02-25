@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pagination_dots.dart';
+import 'signup_screen.dart';
 
 class OnboardingScreen3 extends StatelessWidget {
   const OnboardingScreen3({super.key});
@@ -247,7 +248,14 @@ class OnboardingScreen3 extends StatelessWidget {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignupScreen(),
+                                ),
+                              );
+                            },
                             borderRadius: BorderRadius.circular(16),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
