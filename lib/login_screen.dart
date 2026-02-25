@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import 'signup_screen.dart';
 
-class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class SignupScreen extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Consistent flat gradient matching Onboarding
+          // Consistent flat gradient matching Onboarding & Signup
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -23,6 +23,7 @@ class SignupScreen extends StatelessWidget {
         child: SafeArea(
           child: Stack(
             children: [
+              // Main content (Keyboard safe scroll view)
               CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
@@ -31,13 +32,12 @@ class SignupScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(
-                            height: 24,
-                          ), // Pushed down for back button
-                          // Top Join Badge
+                            height: 64,
+                          ), // Space padding for top back button
+                          // Top Welcome Badge
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -66,7 +66,7 @@ class SignupScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 const Text(
-                                  'Join LifeProgreX',
+                                  'Welcome Back',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -80,7 +80,7 @@ class SignupScreen extends StatelessWidget {
 
                           // Headers
                           const Text(
-                            'Create Account',
+                            'Login to LifeProgreX',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -90,7 +90,7 @@ class SignupScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Start your personal growth journey today',
+                            'Continue your journey to greatness',
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.6),
                               fontSize: 12,
@@ -98,111 +98,47 @@ class SignupScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
 
-                          // Features Checklist Box
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF16131A), // Dark surface
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.05),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Track unlimited habits',
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Get AI-powered insights',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Unlock achievements',
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Access detailed analytics',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildCheckItem('Join 50k+ users'),
-                                    ),
-                                    Expanded(
-                                      child: const SizedBox(),
-                                    ), // Empty space for alignment
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-
                           // Form Fields
                           _buildTextField(
-                            hint: 'Email address',
+                            hint: 'Email or Mobile',
                             icon: Icons.mail_outline,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 16),
                           _buildTextField(
-                            hint: 'Mobile number (optional)',
-                            icon: Icons.phone_outlined,
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildTextField(
-                                  hint: 'First Name',
-                                  icon: Icons.person_outline,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildTextField(
-                                  hint: 'Last Name',
-                                  icon: Icons.person_outline,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            hint: 'Create Password',
-                            icon: Icons.lock_outline,
-                            isPassword: true,
-                          ),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            hint: 'Confirm Password',
+                            hint: 'Password',
                             icon: Icons.lock_outline,
                             isPassword: true,
                           ),
                           const SizedBox(height: 12),
 
-                          // Create Account Button
+                          // Forgot Password
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {}, // TODO: Forgot Password routing
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                  color: Color(0xFF8B5CF6), // Primary Purple
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Login Button
                           Container(
                             width: double.infinity,
                             height: 44,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                               gradient: const LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
@@ -216,15 +152,15 @@ class SignupScreen extends StatelessWidget {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {}, // TODO: Add auth validation
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(16),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     const Text(
-                                      'CREATE ACCOUNT',
+                                      'LOGIN',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 14,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 0.5,
                                       ),
@@ -240,7 +176,7 @@ class SignupScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
 
                           // Divider OR
                           Row(
@@ -272,7 +208,7 @@ class SignupScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
 
                           // Continue with Google Button
                           Container(
@@ -293,7 +229,6 @@ class SignupScreen extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    // Native Google Logo built with CustomPaint
                                     const SizedBox(
                                       width: 18,
                                       height: 18,
@@ -313,15 +248,14 @@ class SignupScreen extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 30),
 
-                          const Spacer(),
-
-                          // Login Link
+                          // Sign Up Link
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Already have an account? ',
+                                "Don't have an account? ",
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.6),
                                   fontSize: 12,
@@ -332,7 +266,8 @@ class SignupScreen extends StatelessWidget {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const LoginScreen(),
+                                      builder: (context) =>
+                                          const SignupScreen(),
                                     ),
                                   );
                                 },
@@ -343,7 +278,7 @@ class SignupScreen extends StatelessWidget {
                                       MaterialTapTargetSize.shrinkWrap,
                                 ),
                                 child: const Text(
-                                  'Login',
+                                  'Sign Up',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -353,7 +288,7 @@ class SignupScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const Spacer(),
 
                           // Terms & Privacy Text
                           Text(
@@ -407,35 +342,7 @@ class SignupScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget to construct the orange check list items
-  Widget _buildCheckItem(String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment:
-          CrossAxisAlignment.start, // Align to top of text if it wraps
-      children: [
-        Icon(
-          Icons.check_circle_outline,
-          color: const Color(0xFFF97316), // Orange Theme
-          size: 16,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          // So long text wraps safely in columns
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Helper widget to generate consistent dark form fields
+  // Consistent dark form fields
   Widget _buildTextField({
     required String hint,
     required IconData icon,
@@ -449,17 +356,17 @@ class SignupScreen extends StatelessWidget {
       ),
       child: TextField(
         obscureText: isPassword,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
             color: Colors.white.withValues(alpha: 0.3),
-            fontSize: 14,
+            fontSize: 16,
           ),
           prefixIcon: Icon(
             icon,
             color: Colors.white.withValues(alpha: 0.3),
-            size: 20,
+            size: 22,
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
