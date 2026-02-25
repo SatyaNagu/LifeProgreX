@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'onboarding_screen.dart';
 import 'signup_screen.dart';
+import 'login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,41 +35,20 @@ class BackgroundWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Base Linear Gradient (Deep purple to black)
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF27194A), // Rich deep purple
-                  Color(0xFF0E0C10), // Very dark near-black
-                ],
-                stops: [0.0, 0.65],
-              ),
-            ),
+      backgroundColor: Colors.black,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          // Consistent flat gradient matching Onboarding
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1B113D), Color(0xFF050505), Color(0xFF140A05)],
+            stops: [0.0, 0.5, 1.0],
           ),
-          // Bottom-left Orange/Amber Bloom Glow
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.bottomLeft,
-                  radius: 0.8, // Adjust for the spread of the glow
-                  colors: [
-                    const Color(0xFF422818), // Inner intense orange/amber glow
-                    const Color(0x000E0C10), // Fade to transparent
-                  ],
-                  stops: const [0.0, 1.0],
-                ),
-              ),
-            ),
-          ),
-          // Main Content passed from parent
-          child,
-        ],
+        ),
+        child: child,
       ),
     );
   }
@@ -231,7 +211,16 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Row(
                 children: [
-                  Expanded(child: _buildSecondaryButton('LOGIN', () {})),
+                  Expanded(
+                    child: _buildSecondaryButton('LOGIN', () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    }),
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildSecondaryButton('SIGN UP', () {

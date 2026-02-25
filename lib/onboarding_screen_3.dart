@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pagination_dots.dart';
 import 'signup_screen.dart';
+import 'login_screen.dart'; // Added import
 
 class OnboardingScreen3 extends StatelessWidget {
   const OnboardingScreen3({super.key});
@@ -293,7 +294,14 @@ class OnboardingScreen3 extends StatelessWidget {
                       // Login Text Button (Brought BACK into Main Column to stabilize math)
                       Center(
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          },
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white.withValues(
                               alpha: 0.7,
