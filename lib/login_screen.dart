@@ -1,8 +1,92 @@
 import 'package:flutter/material.dart';
 import 'signup_screen.dart';
+import 'landing_screen.dart'; // For routing Home
+import 'auth_service.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final AuthService _authService = AuthService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _isGoogleLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email and password')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _authService.signInWithEmailAndPassword(
+        email,
+        password,
+      );
+      if (user != null && mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final user = await _authService.signInWithGoogle();
+      if (user != null && mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,12 +186,14 @@ class LoginScreen extends StatelessWidget {
                           _buildTextField(
                             hint: 'Email or Mobile',
                             icon: Icons.mail_outline,
+                            controller: _emailController,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
                             hint: 'Password',
                             icon: Icons.lock_outline,
                             isPassword: true,
+                            controller: _passwordController,
                           ),
                           const SizedBox(height: 12),
 
@@ -151,26 +237,39 @@ class LoginScreen extends StatelessWidget {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () {}, // TODO: Add auth validation
+                                onTap: (_isLoading || _isGoogleLoading)
+                                    ? null
+                                    : _handleLogin,
                                 borderRadius: BorderRadius.circular(16),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text(
-                                      'LOGIN',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
+                                    if (_isLoading)
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    else ...[
+                                      const Text(
+                                        'LOGIN',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
+                                      const SizedBox(width: 8),
+                                      const Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -224,25 +323,38 @@ class LoginScreen extends StatelessWidget {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () {}, // TODO: Add Google Auth
+                                onTap: (_isLoading || _isGoogleLoading)
+                                    ? null
+                                    : _handleGoogleSignIn,
                                 borderRadius: BorderRadius.circular(12),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: GoogleLogoPainterWidget(),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Text(
-                                      'Continue with Google',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
+                                    if (_isGoogleLoading)
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    else ...[
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: GoogleLogoPainterWidget(),
                                       ),
-                                    ),
+                                      const SizedBox(width: 12),
+                                      const Text(
+                                        'Continue with Google',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -347,6 +459,7 @@ class LoginScreen extends StatelessWidget {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    TextEditingController? controller,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -355,8 +468,9 @@ class LoginScreen extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: TextField(
+        controller: controller,
         obscureText: isPassword,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(

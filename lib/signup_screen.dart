@@ -1,8 +1,105 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'landing_screen.dart'; // For routing to home
+import 'auth_service.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final AuthService _authService = AuthService();
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  bool _isLoading = false;
+  bool _isGoogleLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final user = await _authService.signInWithGoogle();
+      if (user != null && mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleSignUp() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _authService.signUpWithEmailAndPassword(
+        email,
+        password,
+      );
+      if (user != null && mounted) {
+        // Successfully registered! Route them to the main app dashboard.
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +256,7 @@ class SignupScreen extends StatelessWidget {
                           _buildTextField(
                             hint: 'Email address',
                             icon: Icons.mail_outline,
+                            controller: _emailController,
                           ),
                           const SizedBox(height: 6),
                           _buildTextField(
@@ -188,12 +286,14 @@ class SignupScreen extends StatelessWidget {
                             hint: 'Create Password',
                             icon: Icons.lock_outline,
                             isPassword: true,
+                            controller: _passwordController,
                           ),
                           const SizedBox(height: 6),
                           _buildTextField(
                             hint: 'Confirm Password',
                             icon: Icons.lock_outline,
                             isPassword: true,
+                            controller: _confirmPasswordController,
                           ),
                           const SizedBox(height: 12),
 
@@ -215,26 +315,39 @@ class SignupScreen extends StatelessWidget {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () {}, // TODO: Add auth validation
+                                onTap: (_isLoading || _isGoogleLoading)
+                                    ? null
+                                    : _handleSignUp,
                                 borderRadius: BorderRadius.circular(12),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text(
-                                      'CREATE ACCOUNT',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
+                                    if (_isLoading)
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    else ...[
+                                      const Text(
+                                        'CREATE ACCOUNT',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
+                                      const SizedBox(width: 8),
+                                      const Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -288,26 +401,39 @@ class SignupScreen extends StatelessWidget {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () {}, // TODO: Add Google Auth
+                                onTap: (_isLoading || _isGoogleLoading)
+                                    ? null
+                                    : _handleGoogleSignIn,
                                 borderRadius: BorderRadius.circular(12),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    // Native Google Logo built with CustomPaint
-                                    const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: GoogleLogoPainterWidget(),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Text(
-                                      'Continue with Google',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
+                                    if (_isGoogleLoading)
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    else ...[
+                                      // Native Google Logo built with CustomPaint
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: GoogleLogoPainterWidget(),
                                       ),
-                                    ),
+                                      const SizedBox(width: 12),
+                                      const Text(
+                                        'Continue with Google',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -440,6 +566,7 @@ class SignupScreen extends StatelessWidget {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    TextEditingController? controller,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -448,6 +575,7 @@ class SignupScreen extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: TextField(
+        controller: controller,
         obscureText: isPassword,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(

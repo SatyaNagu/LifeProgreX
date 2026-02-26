@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "525714754496",
+    "project_id": "lifeprogrex-9153a",
+    "storage_bucket": "lifeprogrex-9153a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:525714754496:android:fdecac0bb4957870ea5625",
+        "android_client_info": {
+          "package_name": "com.example.life_progex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "525714754496-8vogkplp3f1rljrb4upiubo3mp1vge9t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.life_progex",
+            "certificate_hash": "411918cfe1c8f439b3a195d9b061058f169966ad"
+          }
+        },
+        {
+          "client_id": "525714754496-m8t403ppt40uufq2eaic2pp4nqd6b38g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACcKtfQJ3u5O8rjUcVuN0rAabwe6XG1OQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "525714754496-m8t403ppt40uufq2eaic2pp4nqd6b38g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
