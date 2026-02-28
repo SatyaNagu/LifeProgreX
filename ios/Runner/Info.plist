@@ -11,7 +11,7 @@
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-					<string>UPDATE_ME_FROM_GOOGLE_SERVICE_INFO</string>
+					<string>com.googleusercontent.apps.525714754496-23reofi4b8kj6tjspmio67otbs8ublaq</string>
 				</array>
 			</dict>
 		</array>
