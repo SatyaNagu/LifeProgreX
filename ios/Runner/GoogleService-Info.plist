@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>525714754496-23reofi4b8kj6tjspmio67otbs8ublaq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.525714754496-23reofi4b8kj6tjspmio67otbs8ublaq</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>525714754496-8vogkplp3f1rljrb4upiubo3mp1vge9t.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCoSO6v7OSnNHKJ-YYOLCMiUDxWVbANxZI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>525714754496</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.lifeprogex</string>
+	<key>PROJECT_ID</key>
+	<string>lifeprogrex-9153a</string>
+	<key>STORAGE_BUCKET</key>
+	<string>lifeprogrex-9153a.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:525714754496:ios:01b8334f97dd7dfdea5625</string>
+</dict>
+</plist>
