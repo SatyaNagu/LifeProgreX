@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'signup_screen.dart';
-import 'landing_screen.dart'; // For routing Home
+import 'welcome.dart';
+import 'email_verification.dart';
+import 'forget_password.dart';
 import 'auth_service.dart';
+import 'terms_and_conditions.dart';
+import 'utils/custom_popup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,12 +35,17 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email and password')),
+      CustomPopup.show(
+        context: context,
+        title: 'Missing Fields',
+        message: 'Please enter your email and password',
       );
       return;
     }
 
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+    
     setState(() => _isLoading = true);
 
     try {
@@ -46,15 +56,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          MaterialPageRoute(
+            builder: (context) => user.user?.emailVerified == true
+                ? const WelcomeScreen(isNewUser: false)
+                : const EmailVerificationScreen(isNewUser: false),
+          ),
           (route) => false,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        CustomPopup.show(
+          context: context,
+          title: 'Login Error',
+          message: e.toString(),
+          primaryColor: const Color(0xFFF98E2F), // Orange
+        );
       }
     } finally {
       if (mounted) {
@@ -64,6 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    HapticFeedback.lightImpact();
     setState(() => _isGoogleLoading = true);
 
     try {
@@ -71,15 +89,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          MaterialPageRoute(
+            builder: (context) => user.user?.emailVerified == true
+                ? const WelcomeScreen(isNewUser: false)
+                : const EmailVerificationScreen(isNewUser: false),
+          ),
           (route) => false,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        CustomPopup.show(
+          context: context,
+          title: 'Google Sign-In Error',
+          message: e.toString(),
+          primaryColor: const Color(0xFFF98E2F), // Orange
+        );
       }
     } finally {
       if (mounted) {
@@ -160,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
 
                           // Headers
                           const Text(
@@ -172,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
                             'Continue your journey to greatness',
                             style: TextStyle(
@@ -180,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontSize: 12,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 32),
 
                           // Form Fields
                           _buildTextField(
@@ -201,7 +226,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {}, // TODO: Forgot Password routing
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ForgetPasswordScreen(),
+                                  ),
+                                );
+                              },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: const Size(0, 0),
@@ -222,22 +254,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Login Button
                           Container(
                             width: double.infinity,
-                            height: 44,
+                            height: 56,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
-                                colors: [
-                                  Color(0xFF643DF2), // Left position
-                                  Color(0xFF3A1F73), // Right position
-                                ],
+                                colors: (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty)
+                                    ? [const Color(0xFF643DF2), const Color(0xFF3A1F73)]
+                                    : [const Color(0xFF333333), const Color(0xFF222222)],
                               ),
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: (_isLoading || _isGoogleLoading)
+                                onTap: (_isLoading || _isGoogleLoading || _emailController.text.isEmpty || _passwordController.text.isEmpty)
                                     ? null
                                     : _handleLogin,
                                 borderRadius: BorderRadius.circular(16),
@@ -307,12 +338,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 24),
 
                           // Continue with Google Button
                           Container(
                             width: double.infinity,
-                            height: 44,
+                            height: 56,
                             decoration: BoxDecoration(
                               color: const Color(0xFF232029), // Dark Grey
                               borderRadius: BorderRadius.circular(12),
@@ -402,15 +433,35 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const Spacer(),
 
-                          // Terms & Privacy Text
-                          Text(
-                            'By continuing, you agree to our Terms & Privacy Policy',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              fontSize: 10,
+                          // Terms & Conditions Text
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TermsAndConditionsScreen(),
+                                ),
+                              );
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'By continuing, you agree to our ',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                  fontSize: 10,
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text: 'terms and conditions',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                         ],
                       ),
                     ),
@@ -469,6 +520,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: TextField(
         controller: controller,
+        onChanged: (value) => setState(() {}),
         obscureText: isPassword,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(

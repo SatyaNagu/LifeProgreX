@@ -47,6 +47,22 @@ class AuthService {
     }
   }
 
+  // 2.a Email Verification
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  // 2.b Reload User
+  Future<void> reloadUser() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await user.reload();
+    }
+  }
+
   // 3. Google Sign-In
   Future<UserCredential?> signInWithGoogle() async {
     try {
@@ -99,7 +115,48 @@ class AuthService {
     }
   }
 
-  // 4. Sign Out
+  // 4. Password Reset
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthError(e);
+    } catch (e) {
+      throw 'Failed to send password reset email: $e';
+    }
+  }
+
+  // 5. Change Password
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw 'No user is currently signed in.';
+    }
+
+    // Check if the user is authenticated via email/password
+    final isPasswordProvider = user.providerData.any((info) => info.providerId == 'password');
+    if (!isPasswordProvider) {
+      throw 'Your account uses a different sign-in method. You cannot change your password here.';
+    }
+
+    try {
+      // Re-authenticate the user
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthError(e);
+    } catch (e) {
+      throw 'Failed to update password: $e';
+    }
+  }
+
+  // 6. Sign Out
   Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
@@ -112,6 +169,8 @@ class AuthService {
         return 'No user found for that email.';
       case 'wrong-password':
         return 'Wrong password provided.';
+      case 'invalid-credential':
+        return 'Invalid credentials provided.';
       case 'email-already-in-use':
         return 'An account already exists for that email.';
       case 'weak-password':

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'login_screen.dart';
-import 'landing_screen.dart'; // For routing to home
+import 'welcome.dart';
+import 'email_verification.dart';
 import 'auth_service.dart';
+import 'terms_and_conditions.dart';
+import 'utils/custom_popup.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -30,6 +34,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    HapticFeedback.lightImpact();
     setState(() => _isGoogleLoading = true);
 
     try {
@@ -37,15 +42,22 @@ class _SignupScreenState extends State<SignupScreen> {
       if (user != null && mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          MaterialPageRoute(
+            builder: (context) => user.user?.emailVerified == true
+                ? const WelcomeScreen(isNewUser: true)
+                : const EmailVerificationScreen(isNewUser: true),
+          ),
           (route) => false,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        CustomPopup.show(
+          context: context,
+          title: 'Google Sign-In Error',
+          message: e.toString(),
+          primaryColor: const Color(0xFFF98E2F), // Orange
+        );
       }
     } finally {
       if (mounted) {
@@ -60,18 +72,27 @@ class _SignupScreenState extends State<SignupScreen> {
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
+      CustomPopup.show(
+        context: context,
+        title: 'Missing Fields',
+        message: 'Please fill all required fields',
+        primaryColor: const Color(0xFFF98E2F), // Orange
       );
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      CustomPopup.show(
+        context: context,
+        title: 'Password Mismatch',
+        message: 'Passwords do not match. Please try again.',
+        primaryColor: const Color(0xFFF98E2F), // Orange
+      );
       return;
     }
+
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
 
     setState(() => _isLoading = true);
 
@@ -81,18 +102,25 @@ class _SignupScreenState extends State<SignupScreen> {
         password,
       );
       if (user != null && mounted) {
-        // Successfully registered! Route them to the main app dashboard.
+        // Successfully registered! Route them to the welcome screen
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          MaterialPageRoute(
+            builder: (context) => user.user?.emailVerified == true
+                ? const WelcomeScreen(isNewUser: true)
+                : const EmailVerificationScreen(isNewUser: true),
+          ),
           (route) => false,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        CustomPopup.show(
+          context: context,
+          title: 'Signup Error',
+          message: e.toString(),
+          primaryColor: const Color(0xFFF98E2F), // Orange
+        );
       }
     } finally {
       if (mounted) {
@@ -132,7 +160,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(
-                            height: 24,
+                            height: 40,
                           ), // Pushed down for back button
                           // Top Join Badge
                           Container(
@@ -173,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
 
                           // Headers
                           const Text(
@@ -185,7 +213,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
                             'Start your personal growth journey today',
                             style: TextStyle(
@@ -193,7 +221,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontSize: 12,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
 
                           // Features Checklist Box
                           Container(
@@ -250,7 +278,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 24),
 
                           // Form Fields
                           _buildTextField(
@@ -295,27 +323,26 @@ class _SignupScreenState extends State<SignupScreen> {
                             isPassword: true,
                             controller: _confirmPasswordController,
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 24),
 
                           // Create Account Button
                           Container(
                             width: double.infinity,
-                            height: 44,
+                            height: 56,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
-                                colors: [
-                                  Color(0xFF643DF2), // Left position
-                                  Color(0xFF3A1F73), // Right position
-                                ],
+                                colors: (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty && _confirmPasswordController.text.isNotEmpty)
+                                    ? [const Color(0xFF643DF2), const Color(0xFF3A1F73)]
+                                    : [const Color(0xFF333333), const Color(0xFF222222)],
                               ),
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: (_isLoading || _isGoogleLoading)
+                                onTap: (_isLoading || _isGoogleLoading || _emailController.text.isEmpty || _passwordController.text.isEmpty || _confirmPasswordController.text.isEmpty)
                                     ? null
                                     : _handleSignUp,
                                 borderRadius: BorderRadius.circular(12),
@@ -353,7 +380,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 24),
 
                           // Divider OR
                           Row(
@@ -385,12 +412,12 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 24),
 
                           // Continue with Google Button
                           Container(
                             width: double.infinity,
-                            height: 44,
+                            height: 56,
                             decoration: BoxDecoration(
                               color: const Color(0xFF232029), // Dark Grey
                               borderRadius: BorderRadius.circular(12),
@@ -481,12 +508,32 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           const SizedBox(height: 6),
 
-                          // Terms & Privacy Text
-                          Text(
-                            'By continuing, you agree to our Terms & Privacy Policy',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              fontSize: 10,
+                          // Terms & Conditions Text
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TermsAndConditionsScreen(),
+                                ),
+                              );
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'By continuing, you agree to our ',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                  fontSize: 10,
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text: 'terms and conditions',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -576,6 +623,7 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       child: TextField(
         controller: controller,
+        onChanged: (value) => setState(() {}),
         obscureText: isPassword,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(

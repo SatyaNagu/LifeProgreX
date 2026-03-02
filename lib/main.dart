@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 32),
 
             // Feature Chips
             Padding(
