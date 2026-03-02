@@ -107,7 +107,7 @@ class OnboardingScreen2 extends StatelessWidget {
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
 
                       // Image Placeholder Card
                       Flexible(
@@ -255,7 +255,7 @@ class OnboardingScreen2 extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Interactive Charts Header
                       Row(
@@ -277,7 +277,7 @@ class OnboardingScreen2 extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       // Action Cards Row
                       Row(
@@ -304,7 +304,7 @@ class OnboardingScreen2 extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 32),
 
                       // Continue Button
                       SizedBox(

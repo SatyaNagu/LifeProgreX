@@ -153,7 +153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
 
                       // Image Placeholder Card (Flexes gracefully on smaller screens without crashing)
                       Flexible(
@@ -330,7 +330,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 32),
 
                       // Continue Button
                       SizedBox(

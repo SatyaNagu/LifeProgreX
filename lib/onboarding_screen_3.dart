@@ -108,7 +108,7 @@ class OnboardingScreen3 extends StatelessWidget {
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 24), // Reverted back to exactly 24
+                      const SizedBox(height: 32), // Reverted back to exactly 24
                       // Central Image Card Placeholder
                       Flexible(
                         child: Container(
@@ -230,7 +230,7 @@ class OnboardingScreen3 extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20), // Reverted back to exactly 20
+                      const SizedBox(height: 32), // Reverted back to exactly 20
                       // Start Your Journey Button with the Custom Angle Gradient
                       Container(
                         width: double.infinity,
@@ -289,7 +289,7 @@ class OnboardingScreen3 extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(
-                        height: 16,
+                        height: 24,
                       ), // Bottom cushion for the inserted Login button
                       // Login Text Button (Brought BACK into Main Column to stabilize math)
                       Center(
