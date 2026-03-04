@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'onboarding_screen.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
+import 'utils/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,8 +12,31 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final ThemeManager _themeManager = ThemeManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _themeManager.addListener(_updateTheme);
+  }
+
+  @override
+  void dispose() {
+    _themeManager.removeListener(_updateTheme);
+    super.dispose();
+  }
+
+  void _updateTheme() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +45,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2E1A50),
-          brightness: Brightness.dark,
+          seedColor: const Color(0xFF7B4DFF),
+          brightness: _themeManager.isDarkMode ? Brightness.dark : Brightness.light,
         ),
         useMaterial3: true,
       ),
@@ -38,16 +62,20 @@ class BackgroundWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Consistent flat gradient matching Onboarding
+          // Soft bright gradient as shown in image
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1B113D), Color(0xFF050505), Color(0xFF140A05)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFEAF5F3), // very soft mint tint
+              Color(0xFFF6F8FB), // soft white/blueish
+              Color(0xFFF3EAF2), // soft lavender tint
+            ],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
@@ -71,32 +99,48 @@ class _MyHomePageState extends State<MyHomePage> {
       child: SafeArea(
         child: Column(
           children: [
-            // Push content up slightly by removing the top Spacer and using a fixed small padding
-            const SizedBox(height: 50),
+            const SizedBox(height: 40),
 
-            // X Logo
+            // Logo in circular white container
             Center(
-              child: SvgPicture.asset(
-                'Assets/ui_icon.svg',
-                width: 120, // Slightly reduced to ensure it fits small screens
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    'Assets/ui_icon.svg',
+                    width: 55, 
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Gradient App Title
             ShaderMask(
               blendMode: BlendMode.srcIn,
               shaderCallback: (bounds) => const LinearGradient(
-                colors: [Color(0xFFFFFFFF), Color(0xFFFFB380)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                colors: [Color(0xFF13D3E8), Color(0xFF66BB6A)], // Cyan to Green
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
               child: const Text(
                 'LifeProgreX',
                 style: TextStyle(
-                  fontSize: 44, // Slightly scaled to prevent word wrap
+                  fontSize: 38, 
                   fontWeight: FontWeight.w900,
-                  letterSpacing: -1,
+                  letterSpacing: -0.5,
                 ),
               ),
             ),
@@ -104,51 +148,100 @@ class _MyHomePageState extends State<MyHomePage> {
 
             // Subtitle
             const Text(
-              'Progress made simple',
+              'Your Personal Growth Companion',
               style: TextStyle(
-                color: Color(0xFFD3D3D3),
+                color: Color(0xFF5A5A5A),
                 fontSize: 15,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 32),
 
             // Feature Chips
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
+            Column(
+              children: [
+                _buildPill('Track Progress', Icons.trending_up, const Color(0xFF13C6DF)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildFeatureChip(
-                          Icons.show_chart,
-                          const Color(0xFF4B23B7), // Deep purple
-                          'Track Progress',
-                        ),
-                        const SizedBox(width: 12),
-                        _buildFeatureChip(
-                          Icons.emoji_events_outlined,
-                          const Color(0xFFE26830), // Warm orange
-                          'Earn Rewards',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFeatureChip(
-                      Icons.bolt,
-                      const Color(0xFF4B23B7), // Deep purple
-                      'AI Insights',
-                    ),
+                    _buildPill('Earn Rewards', Icons.workspace_premium, const Color(0xFFFDB913)),
+                    const SizedBox(width: 12),
+                    _buildPill('AI Insights', Icons.bolt, const Color(0xFFA565FF)),
                   ],
                 ),
-              ),
+              ],
             ),
 
-            // The main spacer to push the buttons firmly to the bottom
             const Spacer(),
+
+            // Card with Emojis & Info
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    '🎯 ✨ 🚀',
+                    style: TextStyle(fontSize: 22),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Transform your daily habits into lasting achievements with AI-powered insights',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF1A1A1A),
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF10C655), // Bright green dot
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Free forever',
+                        style: TextStyle(color: Color(0xFF7A7A7A), fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        '•',
+                        style: TextStyle(color: Color(0xFF7A7A7A), fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'No credit card required',
+                        style: TextStyle(color: Color(0xFF7A7A7A), fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 16),
 
             // Get Started Button
             Padding(
@@ -158,16 +251,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF7B4DFF), Color(0xFF5A31F4)],
+                    colors: [Color(0xFF8B5CF6), Color(0xFF5095FC), Color(0xFF13C6DF)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF7B4DFF).withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 5),
+                      color: const Color(0xFF5095FC).withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -195,13 +288,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         'GET STARTED',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1.0,
+                          letterSpacing: 0.5,
                         ),
                       ),
                       SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                      Icon(Icons.arrow_forward, color: Colors.white, size: 18),
                     ],
                   ),
                 ),
@@ -239,7 +332,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
-            const Spacer(),
+            const SizedBox(height: 32),
 
             // Bottom Statistics Row
             Padding(
@@ -248,9 +341,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildStatItem('• 50K+ USERS'),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   _buildStatItem('• 1M+ HABITS'),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   _buildStatItem('• 4.9 RATING'),
                 ],
               ),
@@ -261,38 +354,31 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildFeatureChip(IconData iconData, Color iconBgColor, String label) {
+  Widget _buildPill(String text, IconData iconData, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(
-          0xFF1B1824,
-        ).withValues(alpha: 0.8), // Semi-transparent dark bg
+        color: color,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 1.5,
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(iconData, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 12),
+          Icon(iconData, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
           Text(
-            label,
+            text,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -302,27 +388,36 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildSecondaryButton(String text, VoidCallback onPressed) {
-    return SizedBox(
+    return Container(
       height: 56,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1.5,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.4), // Soft transparent white
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.8),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: const Color(0xFF0F0C16).withValues(alpha: 0.5),
         ),
         child: Text(
           text,
           style: const TextStyle(
-            color: Colors.white,
+            color: Color(0xFF1A1A1A),
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
           ),
         ),
       ),
@@ -333,10 +428,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return Text(
       text,
       style: const TextStyle(
-        color: Color(0xFF8E8E8E),
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.2,
+        color: Color(0xFF9E9E9E), // Light grey
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.0,
       ),
     );
   }

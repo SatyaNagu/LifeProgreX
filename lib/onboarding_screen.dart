@@ -46,21 +46,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Ensure no system shadows or default app bar colors bleed through
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Clean, flat gradient matching the provided image:
-          // deep purple top-left -> pure black -> very subtle dark warm bottom-right
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1B113D), // Deep dark purple glow
-              Color(0xFF050505), // Near absolute black center
-              Color(0xFF140A05), // Faint warm tone at bottom right
+              Color(0xFFEAF5F3), // very soft mint tint
+              Color(0xFFF6F8FB), // soft white/blueish
+              Color(0xFFF3EAF2), // soft lavender tint
             ],
             stops: [0.0, 0.5, 1.0],
           ),
@@ -84,14 +81,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       height: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(
-                          alpha: 0.08,
-                        ), // Subtle frosted background
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
                       ),
                       child: const Center(
                         child: Icon(
                           Icons.arrow_back_ios_new,
-                          color: Colors.white,
+                          color: Color(0xFF1F2937),
                           size: 18,
                         ),
                       ),
@@ -111,13 +114,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 48,
-                      ), // Pushed down firmly to clear the Back button area
+                      const SizedBox(height: 60),
                       const Text(
                         'Build Better',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF111827),
                           fontSize: 38,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1.0,
@@ -128,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         blendMode: BlendMode.srcIn,
                         shaderCallback: (bounds) =>
                             const LinearGradient(
-                              colors: [Color(0xFF8B5CF6), Color(0xFFF97316)],
+                              colors: [Color(0xFFEF4444), Color(0xFFF59E0B)], // Red to Orange gradient
                               begin: Alignment.centerLeft,
                               end: Alignment.centerRight,
                             ).createShader(
@@ -145,34 +146,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Transform your life one habit at a time\nwith intelligent tracking.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: Color(0xFF4B5563),
                           fontSize: 16,
                           height: 1.5,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 32),
 
-                      // Image Placeholder Card (Flexes gracefully on smaller screens without crashing)
+                      // Image Placeholder Card
                       Flexible(
                         child: Container(
                           width: double.infinity,
                           constraints: const BoxConstraints(
-                            maxHeight: 270,
-                          ), // Reduced ~5% per user request
+                            maxHeight: 300,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF1E1A29,
-                            ), // Fallback background color
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 30,
+                                offset: const Offset(0, 20),
+                              ),
+                            ],
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              // Animated Automatic Image Slider
                               AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 800),
                                 child: Image.asset(
@@ -184,13 +190,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
                                       key: const ValueKey('error_container'),
-                                      color: const Color(0xFF231E30),
+                                      color: const Color(0xFFE5E7EB),
                                       child: Center(
                                         child: Icon(
                                           Icons.image_outlined,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.1,
-                                          ),
+                                          color: Colors.black.withValues(alpha: 0.1),
                                           size: 48,
                                         ),
                                       ),
@@ -199,48 +203,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 ),
                               ),
 
-                              // Bottom Gradient Overlay for Text Readability
+                              // Bottom Gradient Overlay
                               Positioned(
                                 bottom: 0,
                                 left: 0,
                                 right: 0,
-                                height: 140,
+                                height: 160,
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.bottomCenter,
                                       end: Alignment.topCenter,
                                       colors: [
-                                        Colors.black.withValues(alpha: 0.9),
+                                        Colors.black.withValues(alpha: 0.6),
                                         Colors.transparent,
                                       ],
                                     ),
-                                  ),
-                                ),
-                              ),
-
-                              // Top Right Green Checkbox
-                              Positioned(
-                                top: 16,
-                                right: 16,
-                                child: Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF00D12E),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 24,
-                                    weight: 700,
                                   ),
                                 ),
                               ),
@@ -252,16 +230,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Motivation Pill
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 10,
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF3F2B66,
-                                        ).withValues(alpha: 0.9),
+                                        color: const Color(0xFF6366F1).withValues(alpha: 0.8),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: const Text(
@@ -284,13 +259,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
+                                    const Text(
                                       'Consistency is the key to success',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.7,
-                                        ),
+                                        color: Colors.white,
                                         fontSize: 13,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
@@ -308,7 +282,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Expanded(
                             child: _buildMetricCard(
                               '85%',
-                              const Color(0xFF8B5CF6), // Purple
+                              const Color(0xFF8B5CF6),
                               'SUCCESS\nRATE',
                             ),
                           ),
@@ -316,7 +290,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Expanded(
                             child: _buildMetricCard(
                               '2.3x',
-                              const Color(0xFFF97316), // Orange
+                              const Color(0xFFF97316),
                               'FASTER\nGROWTH',
                             ),
                           ),
@@ -324,7 +298,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Expanded(
                             child: _buildMetricCard(
                               '50k+',
-                              Colors.white, // White
+                              const Color(0xFF111827),
                               'ACTIVE\nUSERS',
                             ),
                           ),
@@ -333,9 +307,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(height: 32),
 
                       // Continue Button
-                      SizedBox(
+                      Container(
                         width: double.infinity,
                         height: 56,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8B5CF6), Color(0xFF5095FC), Color(0xFF13C6DF)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF5095FC).withValues(alpha: 0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.push(
@@ -345,27 +334,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     (context, animation, secondaryAnimation) =>
                                         const OnboardingScreen2(),
                                 transitionsBuilder:
-                                    (
-                                      context,
-                                      animation,
-                                      secondaryAnimation,
-                                      child,
-                                    ) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: child,
-                                      );
-                                    },
+                                    (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(opacity: animation, child: child);
+                                },
                               ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            elevation: 0,
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -373,16 +353,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               Text(
                                 'Continue',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w800,
+                                  color: Colors.white,
                                 ),
                               ),
                               SizedBox(width: 8),
-                              Icon(
-                                Icons.arrow_forward,
-                                size: 20,
-                                color: Colors.black,
-                              ),
+                              Icon(Icons.arrow_forward, size: 20, color: Colors.white),
                             ],
                           ),
                         ),
@@ -403,8 +380,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF16131A), // Very dark background
+        color: Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -420,8 +405,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+            style: const TextStyle(
+              color: Color(0xFF6B7280),
               fontSize: 10,
               fontWeight: FontWeight.w800,
               height: 1.2,

@@ -9,6 +9,8 @@ import 'email_preferences.dart';
 import 'privacy_and_security.dart';
 import 'appearance.dart';
 import 'help_and_support.dart';
+import 'utils/premium_background.dart';
+import 'utils/theme_manager.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,11 +21,27 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
+  final ThemeManager _themeManager = ThemeManager();
   
   // Mock state for switches
   bool _pushNotifications = true;
   bool _weeklyReports = true;
-  bool _darkMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeManager.addListener(_updateTheme);
+  }
+
+  @override
+  void dispose() {
+    _themeManager.removeListener(_updateTheme);
+    super.dispose();
+  }
+
+  void _updateTheme() {
+    if (mounted) setState(() {});
+  }
 
   void _handleSignOut() async {
     await _authService.signOut();
@@ -42,9 +60,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Extract name from email or set default
     final userName = user?.email?.split('@')[0] ?? 'User';
     final userEmail = user?.email ?? 'No email found';
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final cardBgColor = isDark ? const Color(0xFF141414) : Colors.white;
 
-    return Scaffold(
-      backgroundColor: Colors.black, // Dark background
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           // Main Scrollable Content
@@ -60,15 +83,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // Header with Back Button
                   Row(
                     children: [
-                      _buildBackButton(context),
+                      _buildBackButton(context, isDark),
                       const SizedBox(width: 16),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Profile',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: textColor,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -76,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             'Manage your account',
                             style: TextStyle(
-                              color: Colors.white54,
+                              color: subTextColor,
                               fontSize: 14,
                             ),
                           ),
@@ -87,12 +110,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 30),
 
                   // Profile Card
-                  _buildProfileCard(userName, userEmail),
+                  _buildProfileCard(userName, userEmail, isDark),
                   const SizedBox(height: 24),
 
                   // Settings Section
-                  _buildSectionHeader('SETTINGS'),
+                  _buildSectionHeader('SETTINGS', subTextColor),
                   _buildSectionCard(
+                    color: cardBgColor,
                     child: Column(
                       children: [
                         _buildSwitchTile(
@@ -100,21 +124,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           subtitle: 'Get daily reminders',
                           value: _pushNotifications,
                           onChanged: (val) => setState(() => _pushNotifications = val),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
-                        _buildDivider(),
+                        _buildDivider(isDark),
                         _buildSwitchTile(
                           title: 'Weekly Reports',
                           subtitle: 'Progress summaries',
                           value: _weeklyReports,
                           onChanged: (val) => setState(() => _weeklyReports = val),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
-                        _buildDivider(),
+                        _buildDivider(isDark),
                         _buildSwitchTile(
                           title: 'Dark Mode',
-                          subtitle: 'Always on for this theme',
-                          value: _darkMode,
-                          onChanged: (val) => setState(() => _darkMode = val),
-                          activeColor: Colors.white54, // Example customization for dark mode toggle
+                          subtitle: 'Toggle app theme',
+                          value: isDark,
+                          onChanged: (val) => _themeManager.toggleTheme(val),
+                          activeColor: const Color(0xFF8B5CF6),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
                       ],
                     ),
@@ -122,8 +152,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 24),
 
                   // Account Section
-                  _buildSectionHeader('ACCOUNT'),
+                  _buildSectionHeader('ACCOUNT', subTextColor),
                   _buildSectionCard(
+                    color: cardBgColor,
                     child: Column(
                       children: [
                         _buildNavigationTile(
@@ -134,8 +165,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const PersonalInformationScreen()),
                           ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
-                        _buildDivider(),
+                        _buildDivider(isDark),
                         _buildNavigationTile(
                           icon: Icons.mail_outline,
                           title: 'Email Preferences',
@@ -144,8 +177,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const EmailPreferencesScreen()),
                           ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
-                        _buildDivider(),
+                        _buildDivider(isDark),
                         _buildNavigationTile(
                           icon: Icons.lock_outline,
                           title: 'Privacy & Security',
@@ -154,6 +189,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const PrivacyAndSecurityScreen()),
                           ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
                       ],
                     ),
@@ -161,8 +198,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 24),
 
                   // App Section
-                  _buildSectionHeader('APP'),
+                  _buildSectionHeader('APP', subTextColor),
                   _buildSectionCard(
+                    color: cardBgColor,
                     child: Column(
                       children: [
                         _buildNavigationTile(
@@ -173,8 +211,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const AppearanceScreen()),
                           ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
-                        _buildDivider(),
+                        _buildDivider(isDark),
                         _buildNavigationTile(
                           icon: Icons.help_outline,
                           title: 'Help & Support',
@@ -183,6 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const HelpAndSupportScreen()),
                           ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
                         ),
                       ],
                     ),
@@ -196,11 +238,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: ElevatedButton(
                       onPressed: _handleSignOut,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2B1D16), // Dark brownish tint
+                        backgroundColor: isDark ? const Color(0xFF2B1D16) : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        elevation: 0,
+                        elevation: isDark ? 0 : 5,
+                        shadowColor: Colors.black.withValues(alpha: 0.05),
+                        side: isDark ? null : const BorderSide(color: Color(0xFFF1F5F9)),
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -222,11 +266,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 20),
 
                   // Version Code
-                  const Center(
+                  Center(
                     child: Text(
                       'LIFEPROGREX V1.0.0',
                       style: TextStyle(
-                        color: Colors.white24,
+                        color: isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.4),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
@@ -246,16 +290,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             bottom: 30, // Distance from bottom
             left: 20, // Distance from left edge
             right: 20, // Distance from right edge
-            child: _buildBottomNavigationBar(),
+            child: _buildBottomNavigationBar(isDark),
           ),
         ],
       ),
+     ),
     );
   }
 
   // --- Widgets ---
 
-  Widget _buildBackButton(BuildContext context) {
+  Widget _buildBackButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () => Navigator.pop(context),
       borderRadius: BorderRadius.circular(22),
@@ -264,12 +309,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.white70,
+            color: isDark ? Colors.white70 : const Color(0xFF111827),
             size: 18,
           ),
         ),
@@ -277,13 +329,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileCard(String name, String email) {
+  Widget _buildProfileCard(String name, String email, bool isDark) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF221A3D), // Deep purple card
+        color: isDark ? const Color(0xFF221A3D) : Colors.white,
         borderRadius: BorderRadius.circular(24),
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: isDark ? null : Border.all(color: Colors.white, width: 2),
       ),
       child: Column(
         children: [
@@ -314,8 +374,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -325,8 +385,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       email,
-                      style: const TextStyle(
-                        color: Colors.white54,
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : const Color(0xFF6B7280),
                         fontSize: 14,
                       ),
                       maxLines: 1,
@@ -336,13 +396,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3B2A42), // Brown/purple mix
+                        color: isDark ? const Color(0xFF3B2A42) : const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
+                      child: Text(
                         'PREMIUM',
                         style: TextStyle(
-                          color: Color(0xFFF98E2F), // Orange text
+                          color: const Color(0xFFF98E2F), // Orange text
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.0,
@@ -359,9 +419,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatBox('7', 'STREAK', const Color(0xFFF98E2F)),
-              _buildStatBox('140', 'HABITS', const Color(0xFF8B5CF6)), // Purple
-              _buildStatBox('4', 'CATS', Colors.white),
+              _buildStatBox('7', 'STREAK', const Color(0xFFF98E2F), isDark),
+              _buildStatBox('140', 'HABITS', const Color(0xFF8B5CF6), isDark), // Purple
+              _buildStatBox('4', 'CATS', isDark ? Colors.white : const Color(0xFF111827), isDark),
             ],
           ),
         ],
@@ -369,13 +429,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatBox(String value, String label, Color valueColor) {
+  Widget _buildStatBox(String value, String label, Color valueColor, bool isDark) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.2), // Dark inset
+          color: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -391,8 +451,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white54,
+              style: TextStyle(
+                color: isDark ? Colors.white54 : const Color(0xFF6B7280),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
@@ -404,13 +464,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, Color subColor) {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white54,
+        style: TextStyle(
+          color: subColor,
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,
@@ -419,11 +479,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSectionCard({required Widget child}) {
+  Widget _buildSectionCard({required Widget child, required Color color}) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141414), // Very dark gray, almost black
+        color: color,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: _themeManager.isDarkMode ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: child,
     );
@@ -434,7 +501,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String subtitle,
     required bool value,
     required Function(bool) onChanged,
-    Color activeColor = const Color(0xFF8B5CF6), // Default Purple
+    required Color textColor,
+    required Color subTextColor,
+    Color activeColor = const Color(0xFF8B5CF6), 
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -446,8 +515,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: textColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -455,8 +524,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: subTextColor,
                     fontSize: 13,
                   ),
                 ),
@@ -466,7 +535,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           CupertinoSwitch(
             value: value,
             activeColor: activeColor,
-            trackColor: Colors.white24,
+            trackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],
@@ -479,6 +548,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required Color textColor,
+    required Color subTextColor,
   }) {
     return InkWell(
       onTap: onTap,
@@ -490,12 +561,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF221A3D), // Deep purple for icon background
+                color: _themeManager.isDarkMode ? const Color(0xFF221A3D) : const Color(0xFFF1F5F9), 
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: Colors.white70,
+                color: _themeManager.isDarkMode ? Colors.white70 : const Color(0xFF4B5563),
                 size: 20,
               ),
             ),
@@ -506,8 +577,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: textColor,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -515,17 +586,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: Colors.white54,
+                    style: TextStyle(
+                      color: subTextColor,
                       fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
-              color: Colors.white30,
+              color: subTextColor.withValues(alpha: 0.5),
               size: 20,
             ),
           ],
@@ -534,23 +605,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(left: 64.0, right: 16.0), // Align with text
       child: Divider(
         height: 1,
         thickness: 1,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       ),
     );
   }
 
   // --- Bottom Navigation Bar ---
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF2B2B2B), // Dark gray
+        color: const Color(0xFF2B2B2B), // Dark gray remains fixed
         borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
