@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'utils/custom_popup.dart';
+import 'utils/premium_background.dart';
+import 'utils/theme_manager.dart';
 
 class AppearanceScreen extends StatefulWidget {
   const AppearanceScreen({super.key});
@@ -10,8 +12,9 @@ class AppearanceScreen extends StatefulWidget {
 }
 
 class _AppearanceScreenState extends State<AppearanceScreen> {
+  final ThemeManager _themeManager = ThemeManager();
+
   // Appearance Settings
-  bool _darkMode = false;
   bool _reducedMotion = true;
   bool _compactView = true;
   
@@ -20,10 +23,32 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   bool _isSaving = false;
 
   @override
+  void initState() {
+    super.initState();
+    _themeManager.addListener(_updateTheme);
+  }
+
+  @override
+  void dispose() {
+    _themeManager.removeListener(_updateTheme);
+    super.dispose();
+  }
+
+  void _updateTheme() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black, // Dark background
-      body: SafeArea(
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final cardBgColor = isDark ? const Color(0xFF141414) : Colors.white;
+
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
         child: Stack(
           children: [
             SingleChildScrollView(
@@ -38,15 +63,15 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     // Header Loop
                     Row(
                       children: [
-                        _buildBackButton(context),
+                        _buildBackButton(context, isDark),
                         const SizedBox(width: 16),
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Appearance',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: textColor,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -54,7 +79,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                             Text(
                               'Customize your experience',
                               style: TextStyle(
-                                color: Colors.white54,
+                                color: subTextColor,
                                 fontSize: 14,
                               ),
                             ),
@@ -69,8 +94,15 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 40),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF221A3D), // Deep purple card
+                        color: isDark ? const Color(0xFF221A3D) : Colors.white,
                         borderRadius: BorderRadius.circular(24),
+                        boxShadow: isDark ? null : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
                       child: Column(
                         children: [
@@ -87,19 +119,19 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          const Text(
+                          Text(
                             'Current Theme',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: textColor,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Dark Mode with Purple Accent',
+                          Text(
+                            isDark ? 'Dark Mode with Purple Accent' : 'Light Mode with Purple Accent',
                             style: TextStyle(
-                              color: Colors.white54,
+                              color: subTextColor,
                               fontSize: 14,
                             ),
                           ),
@@ -109,20 +141,24 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     const SizedBox(height: 24),
 
                     // DISPLAY SECTION
-                    _buildSectionHeader('DISPLAY'),
+                    _buildSectionHeader('DISPLAY', subTextColor),
                     _buildSectionCard(
+                      color: cardBgColor,
+                      isDark: isDark,
                       child: Column(
                         children: [
                           _buildSwitchTile(
                             icon: Icons.nightlight_round,
                             title: 'Dark Mode',
-                            subtitle: 'Required for this theme',
-                            value: _darkMode,
-                            onChanged: (val) => setState(() => _darkMode = val),
+                            subtitle: 'Toggle app theme',
+                            value: isDark,
+                            onChanged: (val) => _themeManager.toggleTheme(val),
                             iconColor: const Color(0xFF8B5CF6),
-                            iconBgColor: const Color(0xFF221A3D),
+                            iconBgColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF1F5F9),
+                            textColor: textColor,
+                            subTextColor: subTextColor,
                           ),
-                          _buildDivider(),
+                          _buildDivider(isDark),
                           _buildSwitchTile(
                             icon: Icons.grid_view,
                             title: 'Reduced Motion',
@@ -130,17 +166,21 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                             value: _reducedMotion,
                             onChanged: (val) => setState(() => _reducedMotion = val),
                             iconColor: const Color(0xFFF98E2F),
-                            iconBgColor: const Color(0xFF2B1D16),
+                            iconBgColor: isDark ? const Color(0xFF2B1D16) : const Color(0xFFFEF3C7),
+                            textColor: textColor,
+                            subTextColor: subTextColor,
                           ),
-                          _buildDivider(),
+                          _buildDivider(isDark),
                           _buildSwitchTile(
                             icon: Icons.text_fields,
                             title: 'Compact View',
                             subtitle: 'Show more content',
                             value: _compactView,
                             onChanged: (val) => setState(() => _compactView = val),
-                            iconColor: Colors.white70,
-                            iconBgColor: const Color(0xFF221A3D),
+                            iconColor: isDark ? Colors.white70 : const Color(0xFF4B5563),
+                            iconBgColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF1F5F9),
+                            textColor: textColor,
+                            subTextColor: subTextColor,
                           ),
                         ],
                       ),
@@ -148,7 +188,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     const SizedBox(height: 24),
 
                     // ACCENT COLOR SECTION
-                    _buildSectionHeader('ACCENT COLOR'),
+                    _buildSectionHeader('ACCENT COLOR', subTextColor),
                     
                     GridView.count(
                       crossAxisCount: 2,
@@ -158,10 +198,10 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        _buildColorCard('Purple', const Color(0xFF7C3AED), const Color(0xFF5B21B6)),
-                        _buildColorCard('Orange', const Color(0xFFF98E2F), const Color(0xFFC2410C)),
-                        _buildColorCard('Blue', const Color(0xFF3B82F6), const Color(0xFF1D4ED8)),
-                        _buildColorCard('Green', const Color(0xFF10B981), const Color(0xFF047857)),
+                        _buildColorCard('Purple', const Color(0xFF7C3AED), isDark ? const Color(0xFF5B21B6) : const Color(0xFFF5F3FF), isDark),
+                        _buildColorCard('Orange', const Color(0xFFF98E2F), isDark ? const Color(0xFFC2410C) : const Color(0xFFFFF7ED), isDark),
+                        _buildColorCard('Blue', const Color(0xFF3B82F6), isDark ? const Color(0xFF1D4ED8) : const Color(0xFFEFF6FF), isDark),
+                        _buildColorCard('Green', const Color(0xFF10B981), isDark ? const Color(0xFF047857) : const Color(0xFFECFDF5), isDark),
                       ],
                     ),
                     
@@ -180,7 +220,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
               child: SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _handleSave, // Save functionality later
+                  onPressed: _isSaving ? null : _handleSave, 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7C3AED), // Default Purple
                     shape: RoundedRectangleBorder(
@@ -205,12 +245,13 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
           ],
         ),
       ),
+     ),
     );
   }
 
   // --- Helper Widgets ---
 
-  Widget _buildBackButton(BuildContext context) {
+  Widget _buildBackButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () => Navigator.pop(context),
       borderRadius: BorderRadius.circular(22),
@@ -219,12 +260,19 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.white70,
+            color: isDark ? Colors.white70 : const Color(0xFF111827),
             size: 18,
           ),
         ),
@@ -232,13 +280,13 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, Color subColor) {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white54,
+        style: TextStyle(
+          color: subColor,
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,
@@ -247,11 +295,18 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     );
   }
 
-  Widget _buildSectionCard({required Widget child}) {
+  Widget _buildSectionCard({required Widget child, required Color color, required bool isDark}) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141414), // Very dark gray, almost black
+        color: color,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: child,
     );
@@ -265,6 +320,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     required Function(bool) onChanged,
     required Color iconColor,
     required Color iconBgColor,
+    required Color textColor,
+    required Color subTextColor,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
@@ -286,8 +343,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: textColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -295,8 +352,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: subTextColor,
                     fontSize: 13,
                   ),
                 ),
@@ -306,7 +363,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
           CupertinoSwitch(
             value: value,
             activeColor: const Color(0xFF7C3AED), // Purple
-            trackColor: Colors.white24,
+            trackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],
@@ -314,18 +371,18 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(left: 72.0, right: 16.0), // Indent past icon
       child: Divider(
         height: 1,
         thickness: 1,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       ),
     );
   }
 
-  Widget _buildColorCard(String label, Color circleColor, Color bgColor) {
+  Widget _buildColorCard(String label, Color circleColor, Color bgColor, bool isDark) {
     bool isSelected = _selectedColor == label;
 
     return GestureDetector(
@@ -341,6 +398,13 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
           border: isSelected 
               ? Border.all(color: const Color(0xFFF98E2F), width: 2) // Orange selected border
               : Border.all(color: Colors.transparent, width: 2),
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -375,8 +439,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
             const SizedBox(height: 12),
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF111827),
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),

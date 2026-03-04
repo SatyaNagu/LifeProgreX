@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
+import '../utils/premium_background.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -14,19 +15,10 @@ class _JournalScreenState extends State<JournalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1B113D), Color(0xFF050505), Color(0xFF140A05)],
-          ),
-        ),
-        child: SafeArea(
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
           child: Column(
             children: [
               _buildHeader(context),
@@ -43,6 +35,7 @@ class _JournalScreenState extends State<JournalScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

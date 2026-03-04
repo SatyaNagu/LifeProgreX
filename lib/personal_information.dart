@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'utils/custom_popup.dart';
+import 'utils/premium_background.dart';
+import 'utils/theme_manager.dart';
 
 class PersonalInformationScreen extends StatefulWidget {
   const PersonalInformationScreen({super.key});
@@ -9,6 +11,7 @@ class PersonalInformationScreen extends StatefulWidget {
 }
 
 class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
+  final ThemeManager _themeManager = ThemeManager();
   final TextEditingController _firstNameController = TextEditingController(text: 'Demo');
   final TextEditingController _lastNameController = TextEditingController(text: 'User');
   final TextEditingController _emailController = TextEditingController(text: 'demo@example.com');
@@ -18,7 +21,14 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   bool _isSaving = false;
 
   @override
+  void initState() {
+    super.initState();
+    _themeManager.addListener(_updateTheme);
+  }
+
+  @override
   void dispose() {
+    _themeManager.removeListener(_updateTheme);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
@@ -27,11 +37,21 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     super.dispose();
   }
 
+  void _updateTheme() {
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black, // Dark background
-      body: SafeArea(
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final cardBgColor = isDark ? const Color(0xFF141414) : Colors.white;
+
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
@@ -44,15 +64,15 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 // Header Loop
                 Row(
                   children: [
-                    _buildBackButton(context),
+                    _buildBackButton(context, isDark),
                     const SizedBox(width: 16),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Personal Information',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: textColor,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
@@ -60,7 +80,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         Text(
                           'Update your profile details',
                           style: TextStyle(
-                            color: Colors.white54,
+                            color: subTextColor,
                             fontSize: 14,
                           ),
                         ),
@@ -75,8 +95,15 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF221A3D), // Deep purple card
+                    color: isDark ? const Color(0xFF221A3D) : Colors.white,
                     borderRadius: BorderRadius.circular(24),
+                    boxShadow: isDark ? null : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -103,7 +130,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFF7C3AED), // Purple floating action button
                               shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFF221A3D), width: 3), // Match card background
+                              border: Border.all(color: isDark ? const Color(0xFF221A3D) : Colors.white, width: 3),
                             ),
                             child: const Icon(
                               Icons.camera_alt,
@@ -114,10 +141,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Click to change profile picture',
                         style: TextStyle(
-                          color: Colors.white54,
+                          color: subTextColor,
                           fontSize: 14,
                         ),
                       ),
@@ -130,8 +157,15 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF141414), // Very dark gray, almost black
+                    color: cardBgColor,
                     borderRadius: BorderRadius.circular(16),
+                    boxShadow: isDark ? null : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,6 +176,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         label: 'First Name',
                         hintText: 'Demo',
                         iconColor: const Color(0xFF7C3AED),
+                        isDark: isDark,
+                        textColor: textColor,
+                        subTextColor: subTextColor,
                       ),
                       const SizedBox(height: 20),
                       _buildInputField(
@@ -150,6 +187,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         label: 'Last Name',
                         hintText: 'User',
                         iconColor: const Color(0xFF7C3AED),
+                        isDark: isDark,
+                        textColor: textColor,
+                        subTextColor: subTextColor,
                       ),
                       const SizedBox(height: 20),
                       _buildInputField(
@@ -158,6 +198,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         label: 'Email Address',
                         hintText: 'demo@example.com',
                         iconColor: const Color(0xFF7C3AED),
+                        isDark: isDark,
+                        textColor: textColor,
+                        subTextColor: subTextColor,
                       ),
                       const SizedBox(height: 20),
                       _buildInputField(
@@ -165,6 +208,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         label: 'Phone Number',
                         hintText: '+1 (555) 000-0000',
                         optional: true,
+                        isDark: isDark,
+                        textColor: textColor,
+                        subTextColor: subTextColor,
                       ),
                       const SizedBox(height: 20),
                       _buildInputField(
@@ -173,6 +219,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         hintText: 'Tell us a bit about yourself...',
                         maxLines: 4,
                         optional: true,
+                        isDark: isDark,
+                        textColor: textColor,
+                        subTextColor: subTextColor,
                       ),
                     ],
                   ),
@@ -191,6 +240,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      elevation: 0,
                     ),
                     child: _isSaving 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -203,12 +253,13 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // --- Helper Widgets ---
 
-  Widget _buildBackButton(BuildContext context) {
+  Widget _buildBackButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () => Navigator.pop(context),
       borderRadius: BorderRadius.circular(22),
@@ -217,12 +268,19 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.white70,
+            color: isDark ? Colors.white70 : const Color(0xFF111827),
             size: 18,
           ),
         ),
@@ -238,6 +296,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     int maxLines = 1,
     bool optional = false,
     TextEditingController? controller,
+    required bool isDark,
+    required Color textColor,
+    required Color subTextColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,23 +306,23 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         Row(
           children: [
             if (icon != null) ...[
-              Icon(icon, color: iconColor ?? Colors.white54, size: 18),
+              Icon(icon, color: iconColor ?? subTextColor, size: 18),
               const SizedBox(width: 8),
             ],
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: textColor,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
             if (optional) ...[
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 '(Optional)',
                 style: TextStyle(
-                  color: Colors.white30,
+                  color: subTextColor.withValues(alpha: 0.5),
                   fontSize: 14,
                 ),
               ),
@@ -272,20 +333,20 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         TextField(
           controller: controller,
           maxLines: maxLines,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: textColor),
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: const TextStyle(color: Colors.white30),
+            hintStyle: TextStyle(color: subTextColor.withValues(alpha: 0.5)),
             filled: true,
-            fillColor: Colors.black.withValues(alpha: 0.2), // Dark inset
+            fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF1F5F9), 
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+              borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+              borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

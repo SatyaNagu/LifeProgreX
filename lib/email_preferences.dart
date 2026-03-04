@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'utils/custom_popup.dart';
+import 'utils/premium_background.dart';
+import 'utils/theme_manager.dart';
 
 class EmailPreferencesScreen extends StatefulWidget {
   const EmailPreferencesScreen({super.key});
@@ -10,6 +12,8 @@ class EmailPreferencesScreen extends StatefulWidget {
 }
 
 class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
+  final ThemeManager _themeManager = ThemeManager();
+
   // Habit & Progress Updates
   bool _dailyReminders = true;
   bool _weeklyReports = true;
@@ -25,9 +29,31 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
   bool _isSaving = false;
 
   @override
+  void initState() {
+    super.initState();
+    _themeManager.addListener(_updateTheme);
+  }
+
+  @override
+  void dispose() {
+    _themeManager.removeListener(_updateTheme);
+    super.dispose();
+  }
+
+  void _updateTheme() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black, // Dark background
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final cardBgColor = isDark ? const Color(0xFF141414) : Colors.white;
+
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -41,15 +67,15 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                 // Header Loop
                 Row(
                   children: [
-                    _buildBackButton(context),
+                    _buildBackButton(context, isDark),
                     const SizedBox(width: 16),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Email Preferences',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: textColor,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
@@ -57,7 +83,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                         Text(
                           'Manage your email notifications',
                           style: TextStyle(
-                            color: Colors.white54,
+                            color: subTextColor,
                             fontSize: 14,
                           ),
                         ),
@@ -70,37 +96,49 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                 // Habit & Progress Updates Section
                 _buildSectionCard(
                   icon: Icons.trending_up,
-                  iconBackgroundColor: const Color(0xFF2B1D16), // Dark brown/orange tint
+                  iconBackgroundColor: isDark ? const Color(0xFF2B1D16) : const Color(0xFFFEF3C7),
                   iconColor: const Color(0xFFF98E2F), // Orange
                   title: 'Habit & Progress Updates',
                   subtitle: 'Stay on track with your personal growth journey',
+                  color: cardBgColor,
+                  isDark: isDark,
+                  textColor: textColor,
+                  subTextColor: subTextColor,
                   children: [
                     _buildSwitchTile(
                       title: 'Daily Habit Reminders',
                       subtitle: 'Get notified to complete your daily habits',
                       value: _dailyReminders,
                       onChanged: (val) => setState(() => _dailyReminders = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
-                    _buildDivider(),
+                    _buildDivider(isDark),
                     _buildSwitchTile(
                       title: 'Weekly Progress Reports',
                       subtitle: 'Summary of your weekly achievements',
                       value: _weeklyReports,
                       onChanged: (val) => setState(() => _weeklyReports = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
-                    _buildDivider(),
+                    _buildDivider(isDark),
                     _buildSwitchTile(
                       title: 'Monthly Insights',
                       subtitle: 'Deep dive into your monthly trends',
                       value: _monthlyInsights,
                       onChanged: (val) => setState(() => _monthlyInsights = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
-                    _buildDivider(),
+                    _buildDivider(isDark),
                     _buildSwitchTile(
                       title: 'Streak Milestones',
                       subtitle: 'Celebrate when you hit streak goals',
                       value: _streakMilestones,
                       onChanged: (val) => setState(() => _streakMilestones = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
                   ],
                 ),
@@ -109,16 +147,22 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                 // AI Coach & Features Section
                 _buildSectionCard(
                   icon: Icons.auto_awesome,
-                  iconBackgroundColor: const Color(0xFF221A3D), // Deep purple tint
+                  iconBackgroundColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF5F3FF),
                   iconColor: const Color(0xFF8B5CF6), // Purple
                   title: 'AI Coach & Features',
                   subtitle: 'Personalized insights and recommendations',
+                  color: cardBgColor,
+                  isDark: isDark,
+                  textColor: textColor,
+                  subTextColor: subTextColor,
                   children: [
                     _buildSwitchTile(
                       title: 'AI Coach Updates',
                       subtitle: 'New insights and personalized tips',
                       value: _aiCoachUpdates,
                       onChanged: (val) => setState(() => _aiCoachUpdates = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
                   ],
                 ),
@@ -127,23 +171,31 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                 // Product & Marketing Section
                 _buildSectionCard(
                   icon: Icons.mail_outline,
-                  iconBackgroundColor: const Color(0xFF221A3D), // Deep purple tint
+                  iconBackgroundColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF1F5F9),
                   iconColor: const Color(0xFF8B5CF6), // Purple
                   title: 'Product & Marketing',
                   subtitle: 'Updates about LifeProgreX',
+                  color: cardBgColor,
+                  isDark: isDark,
+                  textColor: textColor,
+                  subTextColor: subTextColor,
                   children: [
                     _buildSwitchTile(
                       title: 'Product Updates',
                       subtitle: 'New features and improvements',
                       value: _productUpdates,
                       onChanged: (val) => setState(() => _productUpdates = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
-                    _buildDivider(),
+                    _buildDivider(isDark),
                     _buildSwitchTile(
                       title: 'Marketing Emails',
                       subtitle: 'Tips, stories, and inspiration',
                       value: _marketingEmails,
                       onChanged: (val) => setState(() => _marketingEmails = val),
+                      textColor: textColor,
+                      subTextColor: subTextColor,
                     ),
                   ],
                 ),
@@ -161,6 +213,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      elevation: 0,
                     ),
                     child: _isSaving 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -173,6 +226,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
           ),
         ),
       ),
+     ),
     );
   }
 
@@ -192,7 +246,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
 
   // --- Helper Widgets ---
 
-  Widget _buildBackButton(BuildContext context) {
+  Widget _buildBackButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () => Navigator.pop(context),
       borderRadius: BorderRadius.circular(22),
@@ -201,12 +255,19 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.white70,
+            color: isDark ? Colors.white70 : const Color(0xFF111827),
             size: 18,
           ),
         ),
@@ -221,11 +282,22 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
     required String title,
     required String subtitle,
     required List<Widget> children,
+    required Color color,
+    required bool isDark,
+    required Color textColor,
+    required Color subTextColor,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141414), // Very dark gray
+        color: color,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,8 +326,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: textColor,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -263,8 +335,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: const TextStyle(
-                          color: Colors.white54,
+                        style: TextStyle(
+                          color: subTextColor,
                           fontSize: 13,
                         ),
                       ),
@@ -286,6 +358,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
     required bool value,
     required Function(bool) onChanged,
     Color activeColor = const Color(0xFF8B5CF6), // Default Purple
+    required Color textColor,
+    required Color subTextColor,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -298,8 +372,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: textColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -307,8 +381,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: subTextColor,
                     fontSize: 13,
                   ),
                 ),
@@ -318,7 +392,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
           CupertinoSwitch(
             value: value,
             activeColor: activeColor,
-            trackColor: Colors.white24,
+            trackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],
@@ -326,13 +400,13 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Divider(
         height: 1,
         thickness: 1,
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       ),
     );
   }

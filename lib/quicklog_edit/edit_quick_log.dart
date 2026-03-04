@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
 import '../utils/quick_log_manager.dart';
+import '../utils/premium_background.dart';
 
 class EditQuickLogScreen extends StatefulWidget {
   const EditQuickLogScreen({super.key});
@@ -15,9 +16,10 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
       builder: (context, currentIds, child) {
-        return Scaffold(
-          backgroundColor: const Color(0xFF0A0A0A),
-          body: SafeArea(
+        return PremiumBackground(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
             child: Column(
               children: [
                 _buildHeader(context),
@@ -46,12 +48,13 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
                   ),
                 ),
               ],
-            ),
           ),
-        );
-      },
+        ),
+      ),
     );
-  }
+  },
+);
+}
 
   Widget _buildHeader(BuildContext context) {
     return Padding(

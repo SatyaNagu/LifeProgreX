@@ -8,16 +8,19 @@ class OnboardingScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Clean, flat gradient matching Onboarding 1
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1B113D), Color(0xFF050505), Color(0xFF140A05)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFEAF5F3), // very soft mint tint
+              Color(0xFFF6F8FB), // soft white/blueish
+              Color(0xFFF3EAF2), // soft lavender tint
+            ],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
@@ -40,12 +43,20 @@ class OnboardingScreen2 extends StatelessWidget {
                       height: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
                       ),
                       child: const Center(
                         child: Icon(
                           Icons.arrow_back_ios_new,
-                          color: Colors.white,
+                          color: Color(0xFF1F2937),
                           size: 18,
                         ),
                       ),
@@ -65,13 +76,11 @@ class OnboardingScreen2 extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 48,
-                      ), // Pushed down very firmly to clear the Back button completely
+                      const SizedBox(height: 60),
                       const Text(
                         'Track Your',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF111827),
                           fontSize: 38,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1.0,
@@ -82,7 +91,7 @@ class OnboardingScreen2 extends StatelessWidget {
                         blendMode: BlendMode.srcIn,
                         shaderCallback: (bounds) =>
                             const LinearGradient(
-                              colors: [Color(0xFF8B5CF6), Color(0xFFF97316)],
+                              colors: [Color(0xFF1D4ED8), Color(0xFF3B82F6)], // Dark blue to Light blue
                               begin: Alignment.centerLeft,
                               end: Alignment.centerRight,
                             ).createShader(
@@ -99,12 +108,13 @@ class OnboardingScreen2 extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Visualize your success with powerful analytics and insights.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: Color(0xFF4B5563),
                           fontSize: 16,
                           height: 1.5,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -114,11 +124,18 @@ class OnboardingScreen2 extends StatelessWidget {
                         child: Container(
                           width: double.infinity,
                           constraints: const BoxConstraints(
-                            maxHeight: 250,
-                          ), // Heavily tightened constraint so it matches screen 1's vertical consumption
+                            maxHeight: 280,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E1A29),
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 30,
+                                offset: const Offset(0, 20),
+                              ),
+                            ],
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Stack(
@@ -129,13 +146,11 @@ class OnboardingScreen2 extends StatelessWidget {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    color: const Color(0xFF231E30),
+                                    color: const Color(0xFFE5E7EB),
                                     child: Center(
                                       child: Icon(
                                         Icons.image_outlined,
-                                        color: Colors.white.withValues(
-                                          alpha: 0.1,
-                                        ),
+                                        color: Colors.black.withValues(alpha: 0.1),
                                         size: 48,
                                       ),
                                     ),
@@ -143,19 +158,19 @@ class OnboardingScreen2 extends StatelessWidget {
                                 },
                               ),
 
-                              // Bottom Gradient Overlay for Text Readability
+                              // Bottom Gradient Overlay
                               Positioned(
                                 bottom: 0,
                                 left: 0,
                                 right: 0,
-                                height: 140,
+                                height: 160,
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.bottomCenter,
                                       end: Alignment.topCenter,
                                       colors: [
-                                        Colors.black.withValues(alpha: 0.9),
+                                        Colors.black.withValues(alpha: 0.6),
                                         Colors.transparent,
                                       ],
                                     ),
@@ -191,7 +206,7 @@ class OnboardingScreen2 extends StatelessWidget {
                                     Expanded(
                                       child: _buildInnerStatCard(
                                         Icons.emoji_events,
-                                        const Color(0xFFF87171),
+                                        const Color(0xFFEF4444),
                                         '#12',
                                         'RANK',
                                       ),
@@ -207,16 +222,13 @@ class OnboardingScreen2 extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Analytics Pill
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 10,
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF8B5CF6,
-                                        ).withValues(alpha: 0.9),
+                                        color: const Color(0xFF2DD4BF).withValues(alpha: 0.8), // Tealish pill
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: const Text(
@@ -239,13 +251,12 @@ class OnboardingScreen2 extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
+                                    const Text(
                                       'Measure what matters most',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.7,
-                                        ),
+                                        color: Colors.white,
                                         fontSize: 13,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
@@ -257,49 +268,33 @@ class OnboardingScreen2 extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Interactive Charts Header
-                      Row(
-                        children: [
-                          const Text(
-                            'Interactive Charts',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Divider(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              thickness: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Action Cards Row
+                      // Metric Cards Row
                       Row(
                         children: [
                           Expanded(
-                            child: _buildActionCard(
+                            child: _buildMetricCard(
                               Icons.show_chart,
-                              'HABIT TRENDS',
+                              const Color(0xFF3B82F6),
+                              '15+',
+                              'CHART\nTYPES',
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildActionCard(
-                              Icons.pie_chart_outline,
-                              'CATEGORY\nSPLIT',
+                            child: _buildMetricCard(
+                              Icons.visibility,
+                              const Color(0xFFF59E0B),
+                              '100%',
+                              'VISUAL',
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildActionCard(
-                              Icons.bar_chart,
-                              'WEEKLY STATS',
+                            child: _buildMetricCard(
+                              Icons.refresh,
+                              const Color(0xFF6366F1),
+                              'Daily',
+                              'UPDATES',
                             ),
                           ),
                         ],
@@ -307,9 +302,24 @@ class OnboardingScreen2 extends StatelessWidget {
                       const SizedBox(height: 32),
 
                       // Continue Button
-                      SizedBox(
+                      Container(
                         width: double.infinity,
                         height: 56,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8B5CF6), Color(0xFF5095FC), Color(0xFF13C6DF)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF5095FC).withValues(alpha: 0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.push(
@@ -319,27 +329,18 @@ class OnboardingScreen2 extends StatelessWidget {
                                     (context, animation, secondaryAnimation) =>
                                         const OnboardingScreen3(),
                                 transitionsBuilder:
-                                    (
-                                      context,
-                                      animation,
-                                      secondaryAnimation,
-                                      child,
-                                    ) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: child,
-                                      );
-                                    },
+                                    (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(opacity: animation, child: child);
+                                },
                               ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            elevation: 0,
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -347,16 +348,13 @@ class OnboardingScreen2 extends StatelessWidget {
                               Text(
                                 'Continue',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w800,
+                                  color: Colors.white,
                                 ),
                               ),
                               SizedBox(width: 8),
-                              Icon(
-                                Icons.arrow_forward,
-                                size: 20,
-                                color: Colors.black,
-                              ),
+                              Icon(Icons.arrow_forward, size: 20, color: Colors.white),
                             ],
                           ),
                         ),
@@ -382,10 +380,15 @@ class OnboardingScreen2 extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(
-          0xFF2A2A2A,
-        ).withValues(alpha: 0.8), // Dark translucent
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -394,7 +397,7 @@ class OnboardingScreen2 extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFF1F2937),
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -402,8 +405,8 @@ class OnboardingScreen2 extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+            style: const TextStyle(
+              color: Color(0xFF6B7280),
               fontSize: 9,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.5,
@@ -414,35 +417,46 @@ class OnboardingScreen2 extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(IconData icon, String label) {
-    return SizedBox(
-      height:
-          90, // Unify the height exactly so none of them grow taller than each other
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4), // Tighter padding
-        decoration: BoxDecoration(
-          color: const Color(0xFF16131A), // Very dark background
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Center contents inside the fixed box
-          children: [
-            Icon(icon, color: Colors.white, size: 26),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                height: 1.2,
-                letterSpacing: 0.5,
-              ),
+  Widget _buildMetricCard(IconData icon, Color iconColor, String value, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: iconColor, size: 24),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(
+              color: iconColor,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF6B7280),
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -80,19 +80,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Clean, flat gradient matching Landing & Onboarding
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1B113D), // Deep dark purple glow
-              Color(0xFF050505), // Near absolute black center
-              Color(0xFF140A05), // Faint warm tone at bottom right
+              Color(0xFFEAF5F3), // mint
+              Color(0xFFF6F8FB), // white
+              Color(0xFFF3EAF2), // lavender
             ],
             stops: [0.0, 0.5, 1.0],
           ),
@@ -130,18 +129,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       ),
                       const SizedBox(height: 40),
-                      Text(
-                        widget.isNewUser
-                            ? 'Welcome to\nLifeProgreX'
-                            : 'Welcome back to\nLifeProgreX',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          height: 1.2,
+                        Text(
+                          widget.isNewUser
+                              ? 'Welcome to\nLifeProgreX'
+                              : 'Welcome back to\nLifeProgreX',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF111827),
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            height: 1.2,
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 16),
                       Text(
                         widget.userName,

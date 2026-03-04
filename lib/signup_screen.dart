@@ -102,7 +102,6 @@ class _SignupScreenState extends State<SignupScreen> {
         password,
       );
       if (user != null && mounted) {
-        // Successfully registered! Route them to the welcome screen
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -132,16 +131,19 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Consistent flat gradient matching Onboarding
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1B113D), Color(0xFF050505), Color(0xFF140A05)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFEAF5F3), // mint
+              Color(0xFFF6F8FB), // white
+              Color(0xFFF3EAF2), // lavender
+            ],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
@@ -159,43 +161,28 @@ class _SignupScreenState extends State<SignupScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(
-                            height: 40,
-                          ), // Pushed down for back button
-                          // Top Join Badge
+                          const SizedBox(height: 60),
+                          
+                          // Join Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF643DF2,
-                              ).withValues(alpha: 0.15),
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(
-                                  0xFF643DF2,
-                                ).withValues(alpha: 0.3),
-                              ),
+                              border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.2)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  Icons.auto_awesome,
-                                  color: const Color(
-                                    0xFF8B5CF6,
-                                  ), // Bright Purple
-                                  size: 14,
-                                ),
+                                const Icon(Icons.auto_awesome, color: Color(0xFF6366F1), size: 14),
                                 const SizedBox(width: 6),
                                 const Text(
-                                  'Join LifeProgreX',
+                                  'JOIN LIFEPROGREX',
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF6366F1),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.0,
                                   ),
                                 ),
                               ],
@@ -206,73 +193,61 @@ class _SignupScreenState extends State<SignupScreen> {
                           // Headers
                           const Text(
                             'Create Account',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF111827),
                               fontSize: 28,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.5,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          const Text(
                             'Start your personal growth journey today',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 24),
 
                           // Features Checklist Box
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF16131A), // Dark surface
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.05),
-                              ),
+                              color: Colors.white.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Column(
                               children: [
                                 Row(
                                   children: [
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Track unlimited habits',
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Get AI-powered insights',
-                                      ),
-                                    ),
+                                    Expanded(child: _buildCheckItem('Track unlimited habits')),
+                                    Expanded(child: _buildCheckItem('Get AI-powered insights')),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 12),
                                 Row(
                                   children: [
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Unlock achievements',
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: _buildCheckItem(
-                                        'Access detailed analytics',
-                                      ),
-                                    ),
+                                    Expanded(child: _buildCheckItem('Unlock achievements')),
+                                    Expanded(child: _buildCheckItem('Access detailed analytics')),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 12),
                                 Row(
                                   children: [
-                                    Expanded(
-                                      child: _buildCheckItem('Join 50k+ users'),
-                                    ),
-                                    Expanded(
-                                      child: const SizedBox(),
-                                    ), // Empty space for alignment
+                                    Expanded(child: _buildCheckItem('Join 50k+ users')),
+                                    const Expanded(child: SizedBox()),
                                   ],
                                 ),
                               ],
@@ -286,12 +261,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             icon: Icons.mail_outline,
                             controller: _emailController,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 12),
                           _buildTextField(
                             hint: 'Mobile number (optional)',
                             icon: Icons.phone_outlined,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 12),
                           Row(
                             children: [
                               Expanded(
@@ -300,7 +275,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   icon: Icons.person_outline,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: _buildTextField(
                                   hint: 'Last Name',
@@ -309,14 +284,14 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 12),
                           _buildTextField(
                             hint: 'Create Password',
                             icon: Icons.lock_outline,
                             isPassword: true,
                             controller: _passwordController,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 12),
                           _buildTextField(
                             hint: 'Confirm Password',
                             icon: Icons.lock_outline,
@@ -330,53 +305,50 @@ class _SignupScreenState extends State<SignupScreen> {
                             width: double.infinity,
                             height: 56,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              gradient: LinearGradient(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF8B5CF6), Color(0xFF5095FC), Color(0xFF13C6DF)],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
-                                colors: (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty && _confirmPasswordController.text.isNotEmpty)
-                                    ? [const Color(0xFF643DF2), const Color(0xFF3A1F73)]
-                                    : [const Color(0xFF333333), const Color(0xFF222222)],
                               ),
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: (_isLoading || _isGoogleLoading || _emailController.text.isEmpty || _passwordController.text.isEmpty || _confirmPasswordController.text.isEmpty)
-                                    ? null
-                                    : _handleSignUp,
-                                borderRadius: BorderRadius.circular(12),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (_isLoading)
-                                      const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    else ...[
-                                      const Text(
-                                        'CREATE ACCOUNT',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(
-                                        Icons.arrow_forward,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
-                                    ],
-                                  ],
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF5095FC).withValues(alpha: 0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 6),
                                 ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: (_isLoading || _isGoogleLoading) ? null : _handleSignUp,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (_isLoading)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  else ...[
+                                    const Text(
+                                      'CREATE ACCOUNT',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                                  ],
+                                ],
                               ),
                             ),
                           ),
@@ -385,79 +357,62 @@ class _SignupScreenState extends State<SignupScreen> {
                           // Divider OR
                           Row(
                             children: [
-                              Expanded(
-                                child: Divider(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                  thickness: 1,
-                                ),
-                              ),
+                              Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
                                 child: Text(
                                   'OR',
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.4),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                child: Divider(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                  thickness: 1,
-                                ),
-                              ),
+                              Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
                             ],
                           ),
                           const SizedBox(height: 24),
 
-                          // Continue with Google Button
+                          // Google Button
                           Container(
                             width: double.infinity,
                             height: 56,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF232029), // Dark Grey
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.05),
-                              ),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: (_isLoading || _isGoogleLoading)
-                                    ? null
-                                    : _handleGoogleSignIn,
-                                borderRadius: BorderRadius.circular(12),
+                                onTap: (_isLoading || _isGoogleLoading) ? null : _handleGoogleSignIn,
+                                borderRadius: BorderRadius.circular(16),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     if (_isGoogleLoading)
                                       const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(color: Color(0xFF6366F1), strokeWidth: 2),
                                       )
                                     else ...[
-                                      // Native Google Logo built with CustomPaint
-                                      const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: GoogleLogoPainterWidget(),
-                                      ),
+                                      const SizedBox(width: 20, height: 20, child: GoogleLogoPainterWidget()),
                                       const SizedBox(width: 12),
                                       const Text(
                                         'Continue with Google',
                                         style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF374151),
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ],
@@ -473,70 +428,48 @@ class _SignupScreenState extends State<SignupScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'Already have an account? ',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                  fontSize: 12,
-                                ),
+                              const Text(
+                                "Already have an account? ",
+                                style: TextStyle(color: Color(0xFF6B7280), fontSize: 13, fontWeight: FontWeight.w500),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.pushReplacement(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const LoginScreen(),
-                                    ),
+                                    MaterialPageRoute(builder: (context) => const LoginScreen()),
                                   );
                                 },
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: const Size(0, 0),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
                                 child: const Text(
                                   'Login',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: TextStyle(color: Color(0xFF6366F1), fontSize: 13, fontWeight: FontWeight.w800),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
 
-                          // Terms & Conditions Text
+                          // Terms
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const TermsAndConditionsScreen(),
-                                ),
+                                MaterialPageRoute(builder: (context) => const TermsAndConditionsScreen()),
                               );
                             },
                             child: RichText(
+                              textAlign: TextAlign.center,
                               text: TextSpan(
                                 text: 'By continuing, you agree to our ',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                  fontSize: 10,
-                                ),
+                                style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 11),
                                 children: [
-                                  const TextSpan(
+                                  TextSpan(
                                     text: 'terms and conditions',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TextStyle(color: const Color(0xFF6B7280), fontWeight: FontWeight.w800),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                         ],
                       ),
                     ),
@@ -544,30 +477,32 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
 
-              // Universal Custom Circular Back Button
+              // Back Button
               Positioned(
                 top: 16.0,
                 left: 20.0,
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Navigator.pop(context),
                     borderRadius: BorderRadius.circular(22),
                     child: Container(
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
                       ),
                       child: const Center(
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+                        child: Icon(Icons.arrow_back_ios_new, color: Color(0xFF1F2937), size: 18),
                       ),
                     ),
                   ),
@@ -580,35 +515,23 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Helper widget to construct the orange check list items
   Widget _buildCheckItem(String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment:
-          CrossAxisAlignment.start, // Align to top of text if it wraps
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.check_circle_outline,
-          color: const Color(0xFFF97316), // Orange Theme
-          size: 16,
-        ),
+        const Icon(Icons.check_circle_outline, color: Color(0xFFF97316), size: 16),
         const SizedBox(width: 8),
         Expanded(
-          // So long text wraps safely in columns
           child: Text(
             text,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(color: Color(0xFF374151), fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
       ],
     );
   }
 
-  // Helper widget to generate consistent dark form fields
   Widget _buildTextField({
     required String hint,
     required IconData icon,
@@ -617,35 +540,33 @@ class _SignupScreenState extends State<SignupScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0C13), // Very dark field background
+        color: Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TextField(
         controller: controller,
-        onChanged: (value) => setState(() {}),
         obscureText: isPassword,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: Color(0xFF111827), fontSize: 14, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.3),
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: Colors.white.withValues(alpha: 0.3),
-            size: 20,
-          ),
+          hintStyle: TextStyle(color: const Color(0xFF9CA3AF), fontSize: 14, fontWeight: FontWeight.w500),
+          prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF), size: 20),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
     );
   }
 }
 
-// Custom Native Google Logo Drawing
 class GoogleLogoPainterWidget extends StatelessWidget {
   const GoogleLogoPainterWidget({super.key});
 
@@ -660,8 +581,6 @@ class _GoogleLogoPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double width = size.width;
     final double height = size.height;
-
-    // Scale standard path data to fit the custom widget size
     final double scaleX = width / 24.0;
     final double scaleY = height / 24.0;
 
@@ -670,7 +589,7 @@ class _GoogleLogoPainter extends CustomPainter {
 
     final Paint paint = Paint()..style = PaintingStyle.fill;
 
-    // Red Path
+    // Red
     paint.color = const Color(0xFFEA4335);
     final Path redPath = Path()
       ..moveTo(23.64, 12.2)
@@ -685,7 +604,7 @@ class _GoogleLogoPainter extends CustomPainter {
       ..close();
     canvas.drawPath(redPath, paint);
 
-    // Green Path
+    // Green
     paint.color = const Color(0xFF34A853);
     final Path greenPath = Path()
       ..moveTo(12, 24)
@@ -699,7 +618,7 @@ class _GoogleLogoPainter extends CustomPainter {
       ..close();
     canvas.drawPath(greenPath, paint);
 
-    // Yellow Path
+    // Yellow
     paint.color = const Color(0xFFFBBC05);
     final Path yellowPath = Path()
       ..moveTo(5.09, 14.16)
@@ -713,7 +632,7 @@ class _GoogleLogoPainter extends CustomPainter {
       ..close();
     canvas.drawPath(yellowPath, paint);
 
-    // Blue Path
+    // Blue
     paint.color = const Color(0xFF4285F4);
     final Path bluePath = Path()
       ..moveTo(12, 4.84)
@@ -730,7 +649,5 @@ class _GoogleLogoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
