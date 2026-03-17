@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
-import '../utils/premium_background.dart';
+import '../services/activity_service.dart';
+import '../models/activity_model.dart';
+import '../auth_service.dart';
+import '../widgets/glass_card.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/quick_log_base_layout.dart';
 
 class WaterScreen extends StatefulWidget {
   const WaterScreen({super.key});
@@ -11,79 +16,95 @@ class WaterScreen extends StatefulWidget {
 
 class _WaterScreenState extends State<WaterScreen> {
   int _glasses = 0;
+  final TextEditingController _noteController = TextEditingController();
   bool _isSaving = false;
+  final ThemeManager _themeManager = ThemeManager();
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return PremiumBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 40),
-                      _buildWaterDisplay(),
-                      const SizedBox(height: 60),
-                      _buildStepper(),
-                      const SizedBox(height: 80),
-                      _buildSaveButton(),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF16102B);
+    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+
+    return QuickLogScaffold(
+      title: 'Water Intake',
+      subtitle: 'Stay hydrated, stay healthy',
+      topImage: Image.asset(
+        'Assets/onboarding_image_3.png',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: isDark ? const Color(0xFF1A1A2E) : const Color(0xFFE5E7EB),
+          child: Icon(Icons.water_drop_outlined, color: isDark ? Colors.white24 : Colors.black26, size: 48),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
+      saveButton: QuickLogSaveButton(
+        label: 'Save Water Log',
+        isReady: _glasses > 0,
+        isSaving: _isSaving,
+        onPressed: _handleSave,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Text('Water Intake', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          SectionHeader(title: 'Hydration', subtitle: 'How many glasses did you have?', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildWaterStepper(isDark, textColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Notes (Optional)', subtitle: 'How are you feeling?', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildNoteField(isDark, textColor, subTextColor),
         ],
       ),
     );
   }
 
-  Widget _buildWaterDisplay() {
-    return Column(
-      children: [
-        const Icon(Icons.water_drop, color: Colors.blueAccent, size: 100),
-        const SizedBox(height: 20),
-        Text('$_glasses', style: const TextStyle(color: Colors.white, fontSize: 64, fontWeight: FontWeight.bold)),
-        const Text('Glasses today', style: TextStyle(color: Colors.white54, fontSize: 18)),
-      ],
-    );
-  }
-
-  Widget _buildStepper() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildStepButton(Icons.remove, () => setState(() => _glasses = (_glasses > 0) ? _glasses - 1 : 0)),
-        const SizedBox(width: 40),
-        _buildStepButton(Icons.add, () => setState(() => _glasses++)),
-      ],
+  Widget _buildWaterStepper(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildStepButton(Icons.remove, () {
+            if (_glasses > 0) setState(() => _glasses--);
+          }),
+          Column(
+            children: [
+              Icon(Icons.water_drop_rounded, color: const Color(0xFF67B2FF), size: 32),
+              const SizedBox(height: 8),
+              Text(
+                '$_glasses',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 48,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+              Text(
+                'glasses',
+                style: TextStyle(
+                  color: textColor.withOpacity(0.5),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          _buildStepButton(Icons.add, () {
+            setState(() => _glasses++);
+          }),
+        ],
+      ),
     );
   }
 
@@ -91,43 +112,93 @@ class _WaterScreenState extends State<WaterScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(color: const Color(0xFF1E1A29), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
-        child: Icon(icon, color: Colors.white, size: 32),
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(icon, color: const Color(0xFF8B5CF6), size: 28),
       ),
     );
   }
 
-  Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: _isSaving ? null : _handleSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFF98E2F),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  Widget _buildNoteField(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(4),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: TextField(
+        controller: _noteController,
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: "Track any specific details...",
+          hintStyle: TextStyle(color: subTextColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(20),
         ),
-        child: _isSaving
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Text('Save Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
     );
   }
 
   Future<void> _handleSave() async {
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() => _isSaving = false);
+    final user = AuthService().currentUser;
+    if (user == null) {
       CustomPopup.show(
         context: context,
-        title: 'Success',
-        message: 'Water log updated!',
-        primaryColor: const Color(0xFF00D12E),
-        onConfirm: () => Navigator.pop(context),
+        title: 'Authentication Required',
+        message: 'Please log in to save activities',
+        primaryColor: Colors.redAccent,
       );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final log = ActivityLog(
+        id: '',
+        userId: user.uid,
+        type: 'water',
+        value: '$_glasses',
+        notes: _noteController.text,
+        createdAt: DateTime.now(),
+      );
+
+      await ActivityService.saveActivity(log);
+
+      // Add a small delay to ensure the loading state is visible
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Success',
+          message: 'Water log updated successfully!',
+          primaryColor: const Color(0xFF00D12E),
+          onConfirm: () => Navigator.pop(context),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Error',
+          message: 'Failed to save water log: $e',
+          primaryColor: Colors.redAccent,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 }

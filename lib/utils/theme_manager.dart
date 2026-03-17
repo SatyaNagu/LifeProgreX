@@ -5,7 +5,7 @@ class ThemeManager extends ChangeNotifier {
   factory ThemeManager() => _instance;
   ThemeManager._internal();
 
-  bool _isDarkMode = true; // Defaulting to dark mode as per current app state
+  bool _isDarkMode = false; // Defaulting to light mode as per user request
   bool get isDarkMode => _isDarkMode;
 
   void toggleTheme(bool isOn) {

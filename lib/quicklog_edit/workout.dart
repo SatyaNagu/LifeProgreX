@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
-import '../utils/premium_background.dart';
+import '../services/activity_service.dart';
+import '../models/activity_model.dart';
+import '../auth_service.dart';
+import '../widgets/glass_card.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/quick_log_base_layout.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -15,6 +20,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   double _intensity = 5;
   final TextEditingController _noteController = TextEditingController();
   bool _isSaving = false;
+  final ThemeManager _themeManager = ThemeManager();
 
   final List<Map<String, dynamic>> _workoutTypes = [
     {'label': 'Cardio', 'icon': Icons.bolt_outlined},
@@ -26,219 +32,126 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return PremiumBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 16),
-                      _buildImagePlaceholder(),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Workout Type'),
-                      const SizedBox(height: 16),
-                      _buildTypeGrid(),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Duration'),
-                      const SizedBox(height: 16),
-                      _buildDurationStepper(),
-                      const SizedBox(height: 24),
-                      _buildSectionIntensity(),
-                      const SizedBox(height: 16),
-                      _buildIntensitySlider(),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Notes (Optional)'),
-                      const SizedBox(height: 16),
-                      _buildNoteField(),
-                      const SizedBox(height: 32),
-                      _buildSaveButton(),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
+  @override
+  Widget build(BuildContext context) {
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF16102B);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
+
+    return QuickLogScaffold(
+      title: 'Log Workout',
+      subtitle: 'Track your exercise session',
+      topImage: Image.asset(
+        'Assets/onboarding_image_2.png',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: isDark ? const Color(0xFF1A1A2E) : const Color(0xFFE5E7EB),
+          child: Icon(Icons.fitness_center, color: isDark ? Colors.white24 : Colors.black26, size: 48),
+        ),
+      ),
+      saveButton: QuickLogSaveButton(
+        label: 'Save Workout Log',
+        isReady: _selectedType != null || _noteController.text.isNotEmpty,
+        isSaving: _isSaving,
+        onPressed: _handleSave,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Log Workout',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'Track your exercise session',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
+          SectionHeader(title: 'Workout Type', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildTypeGrid(isDark, textColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Duration', subtitle: 'How long was your session?', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildDurationStepper(isDark, textColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Intensity Level', subtitle: 'How hard did you work? (1-10)', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildIntensitySlider(isDark, textColor, subTextColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Notes (Optional)', subtitle: 'e.g., 5K run, felt great!', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildNoteField(isDark, textColor, subTextColor),
         ],
       ),
     );
   }
 
-  Widget _buildImagePlaceholder() {
-    return Container(
-      width: double.infinity,
-      height: 180,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1A29),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              'Assets/onboarding_image_2.png',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Center(
-                child: Icon(
-                  Icons.fitness_center,
-                  color: Colors.white.withValues(alpha: 0.1),
-                  size: 64,
+  Widget _buildTypeGrid(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.95,
+        ),
+        itemCount: _workoutTypes.length,
+        itemBuilder: (context, index) {
+          final type = _workoutTypes[index];
+          final isSelected = _selectedType == type['label'];
+          const accentColor = Color(0xFF8B5CF6);
+
+          return GestureDetector(
+            onTap: () => setState(() => _selectedType = type['label']),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? accentColor.withOpacity(isDark ? 0.2 : 0.1)
+                    : isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? accentColor : Colors.transparent,
+                  width: 2,
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildSectionIntensity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Intensity Level',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'How hard did you work? (1-10)',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTypeGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.0,
-      ),
-      itemCount: _workoutTypes.length,
-      itemBuilder: (context, index) {
-        final type = _workoutTypes[index];
-        final isSelected = _selectedType == type['label'];
-        return GestureDetector(
-          onTap: () => setState(() => _selectedType = type['label']),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected 
-                  ? const Color(0xFF8B5CF6).withValues(alpha: 0.2)
-                  : const Color(0xFF16131A),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected ? const Color(0xFF8B5CF6) : Colors.transparent,
-                width: 2,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  type['icon'],
-                  color: isSelected ? const Color(0xFF8B5CF6) : Colors.white54,
-                  size: 28,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  type['label'],
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: isSelected ? 1.0 : 0.6),
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    type['icon'],
+                    color: isSelected ? accentColor : textColor.withOpacity(0.4),
+                    size: 28,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    type['label'],
+                    style: TextStyle(
+                      color: isSelected ? (isDark ? accentColor.withOpacity(0.8) : textColor) : textColor.withOpacity(0.6),
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildDurationStepper() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF16131A),
-        borderRadius: BorderRadius.circular(16),
-      ),
+  Widget _buildDurationStepper(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -249,17 +162,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             children: [
               Text(
                 '$_duration',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
                 ),
               ),
               Text(
                 'minutes',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: 12,
+                  color: textColor.withOpacity(0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -276,130 +191,117 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFF8B5CF6),
-          borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Icon(icon, color: Colors.white, size: 24),
+        child: Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
       ),
     );
   }
 
-  Widget _buildIntensitySlider() {
-    return Container(
+  Widget _buildIntensitySlider(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF16131A),
-        borderRadius: BorderRadius.circular(16),
-      ),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(10, (index) {
               final active = index < _intensity;
-              Color color = Colors.white.withValues(alpha: 0.05);
+              Color blockColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05);
+              
               if (active) {
-                if (index < 3) {
-                  color = const Color(0xFF00D12E); // Green
-                } else if (index < 6) {
-                  color = const Color(0xFFF98E2F); // Orange
-                } else {
-                  color = Colors.redAccent; // Red
-                }
+                if (index < 3) blockColor = const Color(0xFF00D12E);
+                else if (index < 7) blockColor = const Color(0xFFF98E2F);
+                else blockColor = const Color(0xFFFF4B4B);
               }
+
               return Expanded(
                 child: Container(
-                  height: 30,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  height: 32,
+                  margin: const EdgeInsets.symmetric(horizontal: 2.5),
                   decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(4),
+                    color: blockColor,
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ),
               );
             }),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 '${_intensity.toInt()}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
               Text(
                 ' / 10',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: subTextColor,
                   fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          Slider(
-            value: _intensity,
-            min: 1,
-            max: 10,
-            divisions: 9,
-            activeColor: const Color(0xFF8B5CF6),
-            onChanged: (val) => setState(() => _intensity = val),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+              activeTrackColor: const Color(0xFF8B5CF6),
+              inactiveTrackColor: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+              thumbColor: const Color(0xFF8B5CF6),
+            ),
+            child: Slider(
+              value: _intensity,
+              min: 1,
+              max: 10,
+              divisions: 9,
+              onChanged: (val) => setState(() => _intensity = val),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNoteField() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF16131A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
+  Widget _buildNoteField(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(4),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
       child: TextField(
         controller: _noteController,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          hintText: "e.g., 5K run, felt great!",
-          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
-          border: InputBorder.none,
-          isDense: true,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSaveButton() {
-    final bool isReady = _selectedType != null || _noteController.text.isNotEmpty;
-
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: (_isSaving || !isReady) ? null : _handleSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isReady ? const Color(0xFFF98E2F) : const Color(0xFF555555),
-          disabledBackgroundColor: const Color(0xFF333333),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+          hintText: "Add specific details about your workout",
+          hintStyle: TextStyle(color: subTextColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
           ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(20),
         ),
-        child: _isSaving
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-              )
-            : const Text('Save Workout', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -415,24 +317,58 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       return;
     }
 
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isSaving = false);
+    final user = AuthService().currentUser;
+    if (user == null) {
       CustomPopup.show(
         context: context,
-        title: 'Success',
-        message: 'Workout Saved Successfully!',
-        primaryColor: const Color(0xFF00D12E),
-        onConfirm: () => Navigator.pop(context),
+        title: 'Authentication Required',
+        message: 'Please log in to save activities',
+        primaryColor: Colors.redAccent,
       );
+      return;
     }
-  }
 
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
+    setState(() => _isSaving = true);
+
+    try {
+      final log = ActivityLog(
+        id: '',
+        userId: user.uid,
+        type: 'workout',
+        value: _selectedType,
+        duration: _duration,
+        notes: _noteController.text,
+        data: {'intensity': _intensity.toInt()},
+        createdAt: DateTime.now(),
+      );
+
+      await ActivityService.saveActivity(log);
+
+      // Add a small delay to ensure the loading state is visible
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Success',
+          message: 'Workout Log Saved Successfully!',
+          primaryColor: const Color(0xFF00D12E),
+          onConfirm: () => Navigator.pop(context),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Error',
+          message: 'Failed to save workout: $e',
+          primaryColor: Colors.redAccent,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
   }
 }

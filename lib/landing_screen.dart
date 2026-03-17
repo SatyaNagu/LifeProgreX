@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 import 'profile.dart'; // For navigating to ProfileScreen
-import 'quicklog_edit/mood.dart';
-import 'quicklog_edit/workout.dart';
-import 'quicklog_edit/reading.dart';
-import 'quicklog_edit/skills.dart';
+import 'settings.dart';
 import 'quicklog_edit/edit_quick_log.dart';
 import 'utils/quick_log_manager.dart';
 import 'utils/theme_manager.dart';
 import 'utils/premium_background.dart';
-import 'dart:math' as math;
+import 'screens/all_categories_screen.dart';
+import 'screens/analytics_screen.dart';
 import 'dart:ui' as ui;
 
 class LandingScreen extends StatefulWidget {
@@ -119,7 +116,15 @@ class _LandingScreenState extends State<LandingScreen> {
               isDark: isDark,
             ),
             const SizedBox(height: 32),
-            _buildSectionHeader('Daily Activity', textColor, trailingText: 'SEE ALL >'),
+            _buildSectionHeader(
+              'Daily Activity', 
+              textColor, 
+              trailingText: 'SEE ALL >',
+              onTrailingTap: () => Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const AllCategoriesScreen()),
+              ),
+            ),
             const SizedBox(height: 16),
             _buildDailyActivityGrid(),
           ],
@@ -128,7 +133,7 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, Color textColor, {String? trailingText}) {
+  Widget _buildSectionHeader(String title, Color textColor, {String? trailingText, VoidCallback? onTrailingTap}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -141,13 +146,16 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
         ),
         if (trailingText != null)
-          Text(
-            trailingText,
-            style: const TextStyle(
-              color: Color(0xFF8B5CF6),
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+          GestureDetector(
+            onTap: onTrailingTap,
+            child: Text(
+              trailingText,
+              style: const TextStyle(
+                color: Color(0xFF8B5CF6),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
       ],
@@ -191,8 +199,48 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ],
         ),
-        _buildNotificationIcon(),
+        Row(
+          children: [
+            _buildNotificationIcon(),
+            const SizedBox(width: 12),
+            _buildProfileIcon(context),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildProfileIcon(BuildContext context) {
+    final isDark = _themeManager.isDarkMode;
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        );
+      },
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: const Color(0xFFF98E2F), // Orange border
+            width: 2,
+          ),
+          image: const DecorationImage(
+            image: AssetImage('Assets/onboarding_image_3.png'), 
+            fit: BoxFit.cover,
+          ),
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -639,23 +687,29 @@ class _LandingScreenState extends State<LandingScreen> {
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
       builder: (context, currentIds, child) {
-        return SizedBox(
-          height: 48,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: currentIds.length,
-            itemBuilder: (context, index) {
-              final id = currentIds[index];
-              final action = QuickLogManager.allActions[id]!;
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: _buildQuickLogSmallCard(action.icon, action.name, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
-                }),
-              );
-            },
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.8, // Adjust as needed to fit the content
           ),
+          itemCount: currentIds.length,
+          itemBuilder: (context, index) {
+            final id = currentIds[index];
+            final action = QuickLogManager.allActions[id]!;
+            // Convert name to sentence case if it's all caps
+            String label = action.name;
+            if (label == label.toUpperCase()) {
+              label = label[0] + label.substring(1).toLowerCase();
+            }
+            
+            return _buildQuickLogSmallCard(action.icon, label, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
+            });
+          },
         );
       },
     );
@@ -663,33 +717,60 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildQuickLogSmallCard(IconData icon, String label, VoidCallback onTap) {
     final isDark = _themeManager.isDarkMode;
-    // Dynamic color based on name to match the images
-    Color cardColor;
-    if (label == 'Mood') cardColor = const Color(0xFFFFC0CB).withValues(alpha: isDark ? 0.2 : 0.4);
-    else if (label == 'Workout') cardColor = const Color(0xFFFFD1A4).withValues(alpha: isDark ? 0.2 : 0.4);
-    else cardColor = const Color(0xFFB3E5FC).withValues(alpha: isDark ? 0.2 : 0.4);
+    
+    // Exact colors from images
+    Color baseColor;
+    if (label == 'Mood') baseColor = const Color(0xFFFF2D95);
+    else if (label == 'Workout') baseColor = const Color(0xFFFF6B35);
+    else if (label == 'Reading') baseColor = const Color(0xFF13C6DF);
+    else if (label == 'Skill') baseColor = const Color(0xFF9FE82E);
+    else baseColor = const Color(0xFF8B5CF6);
+
+    final List<Color> cardGradient = isDark 
+      ? [baseColor.withValues(alpha: 0.15), baseColor.withValues(alpha: 0.05)]
+      : [baseColor.withValues(alpha: 0.2), baseColor.withValues(alpha: 0.1)];
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4)),
+          gradient: LinearGradient(
+            colors: cardGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: baseColor.withValues(alpha: isDark ? 0.3 : 0.2),
+            width: 1.5,
+          ),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isDark ? Colors.white : Colors.black87, size: 18),
-            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: baseColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon, 
+                color: isDark ? baseColor.withValues(alpha: 0.9) : baseColor, 
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
             Text(
               label,
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                fontWeight: FontWeight.w900, // Matching the bold look
               ),
             ),
+            const SizedBox(width: 4),
           ],
         ),
       ),
@@ -823,7 +904,7 @@ class _LandingScreenState extends State<LandingScreen> {
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
-      childAspectRatio: 0.82,
+      childAspectRatio: 0.85,
       children: [
         _buildActivityCard(
           iconSource: Icons.local_fire_department,
@@ -890,7 +971,7 @@ class _LandingScreenState extends State<LandingScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: cardGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4), width: 1.5),
+        border: Border.all(color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.05 : 0.05), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -924,11 +1005,11 @@ class _LandingScreenState extends State<LandingScreen> {
                   alignment: Alignment.center,
                   children: [
                     SizedBox(
-                      width: 60,
-                      height: 60,
+                      width: 50,
+                      height: 50,
                       child: CircularProgressIndicator(
                         value: progress,
-                        strokeWidth: 6,
+                        strokeWidth: 5,
                         backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
                         valueColor: AlwaysStoppedAnimation<Color>(iconColor),
                         strokeCap: StrokeCap.round,
@@ -938,7 +1019,7 @@ class _LandingScreenState extends State<LandingScreen> {
                       '${(progress * 100).toInt()}%',
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -991,13 +1072,22 @@ class _LandingScreenState extends State<LandingScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(Icons.home_outlined, const Color(0xFFF98E2F), true, null),
-          _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, null),
-          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
-          _buildNavItem(Icons.person_outline, Colors.white54, false, () {
+          _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, () {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const ProfileScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+              ),
+            );
+          }),
+          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
+          _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) => const SettingsScreen(),
                 transitionDuration: Duration.zero,
                 reverseTransitionDuration: Duration.zero,
               ),

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
-import '../utils/premium_background.dart';
+import '../services/activity_service.dart';
+import '../models/activity_model.dart';
+import '../auth_service.dart';
+import '../widgets/glass_card.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/quick_log_base_layout.dart';
 
 class NutritionScreen extends StatefulWidget {
   const NutritionScreen({super.key});
@@ -12,144 +17,261 @@ class NutritionScreen extends StatefulWidget {
 class _NutritionScreenState extends State<NutritionScreen> {
   int _calories = 500;
   String _mealType = 'Lunch';
+  final TextEditingController _noteController = TextEditingController();
   bool _isSaving = false;
+  final ThemeManager _themeManager = ThemeManager();
 
-  final List<String> _mealOptions = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  final List<Map<String, dynamic>> _mealTypes = [
+    {'label': 'Breakfast', 'icon': Icons.wb_sunny_outlined, 'color': Color(0xFFFFB267)},
+    {'label': 'Lunch', 'icon': Icons.restaurant_outlined, 'color': Color(0xFF67B2FF)},
+    {'label': 'Dinner', 'icon': Icons.nightlight_round_outlined, 'color': Color(0xFFB267FF)},
+    {'label': 'Snack', 'icon': Icons.cookie_outlined, 'color': Color(0xFFFF67B2)},
+  ];
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return PremiumBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 40),
-                      Center(
-                        child: Text('$_calories', style: const TextStyle(color: Colors.white, fontSize: 64, fontWeight: FontWeight.bold)),
-                      ),
-                      const Center(child: Text('Calories', style: TextStyle(color: Colors.white54, fontSize: 18))),
-                      const SizedBox(height: 40),
-                      _buildCalorieButtons(),
-                      const SizedBox(height: 40),
-                      const Text('Meal Type', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                      const SizedBox(height: 16),
-                      _buildMealChips(),
-                      const SizedBox(height: 60),
-                      _buildSaveButton(),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 60),
-            ],
-          ),
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF16102B);
+    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+
+    return QuickLogScaffold(
+      title: 'Log Nutrition',
+      subtitle: 'Track your daily intake',
+      topImage: Image.asset(
+        'Assets/onboarding_image_2.png',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: isDark ? const Color(0xFF1A1A2E) : const Color(0xFFE5E7EB),
+          child: Icon(Icons.restaurant_outlined, color: isDark ? Colors.white24 : Colors.black26, size: 48),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
+      saveButton: QuickLogSaveButton(
+        label: 'Save Nutrition Log',
+        isReady: _mealType.isNotEmpty,
+        isSaving: _isSaving,
+        onPressed: _handleSave,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Text('Nutrition', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          SectionHeader(title: 'Meal Type', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildMealGrid(isDark, textColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Calories', subtitle: 'Approximate intake', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildCalorieStepper(isDark, textColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Notes (Optional)', subtitle: 'e.g., Healthy salad, high protein', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildNoteField(isDark, textColor, subTextColor),
         ],
       ),
     );
   }
 
-  Widget _buildCalorieButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildCalBtn('-100', () => setState(() => _calories = (_calories >= 100) ? _calories - 100 : 0)),
-        _buildCalBtn('+100', () => setState(() => _calories += 100)),
-        _buildCalBtn('+500', () => setState(() => _calories += 500)),
-      ],
-    );
-  }
+  Widget _buildMealGrid(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.5,
+        ),
+        itemCount: _mealTypes.length,
+        itemBuilder: (context, index) {
+          final meal = _mealTypes[index];
+          final isSelected = _mealType == meal['label'];
+          final Color accentColor = meal['color'];
 
-  Widget _buildCalBtn(String text, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(color: const Color(0xFF1E1A29), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
-        child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          return GestureDetector(
+            onTap: () => setState(() => _mealType = meal['label']),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? accentColor.withOpacity(isDark ? 0.2 : 0.1)
+                    : isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? accentColor : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    meal['icon'],
+                    color: isSelected ? accentColor : textColor.withOpacity(0.4),
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    meal['label'],
+                    style: TextStyle(
+                      color: isSelected ? (isDark ? accentColor.withOpacity(0.8) : textColor) : textColor.withOpacity(0.6),
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildMealChips() {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: _mealOptions.map((opt) {
-        final isSelected = _mealType == opt;
-        return GestureDetector(
-          onTap: () => setState(() => _mealType = opt),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF8B5CF6).withValues(alpha: 0.2) : const Color(0xFF16131A),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isSelected ? const Color(0xFF8B5CF6) : Colors.white10),
-            ),
-            child: Text(opt, style: TextStyle(color: isSelected ? Colors.white : Colors.white60, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+  Widget _buildCalorieStepper(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildStepButton(Icons.remove, () {
+            if (_calories >= 50) setState(() => _calories -= 50);
+          }),
+          Column(
+            children: [
+              Text(
+                '$_calories',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+              Text(
+                'kcal',
+                style: TextStyle(
+                  color: textColor.withOpacity(0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-        );
-      }).toList(),
+          _buildStepButton(Icons.add, () {
+            setState(() => _calories += 50);
+          }),
+        ],
+      ),
     );
   }
 
-  Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: _isSaving ? null : _handleSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFF98E2F),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  Widget _buildStepButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: _isSaving
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Text('Log Meal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        child: Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
+      ),
+    );
+  }
+
+  Widget _buildNoteField(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(4),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: TextField(
+        controller: _noteController,
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: "Add specific details about your meal",
+          hintStyle: TextStyle(color: subTextColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(20),
+        ),
       ),
     );
   }
 
   Future<void> _handleSave() async {
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() => _isSaving = false);
+    final user = AuthService().currentUser;
+    if (user == null) {
       CustomPopup.show(
         context: context,
-        title: 'Logged',
-        message: 'Your nutrition intake is tracked.',
-        primaryColor: const Color(0xFF00D12E),
-        onConfirm: () => Navigator.pop(context),
+        title: 'Authentication Required',
+        message: 'Please log in to save activities',
+        primaryColor: Colors.redAccent,
       );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final log = ActivityLog(
+        id: '',
+        userId: user.uid,
+        type: 'nutrition',
+        value: _mealType,
+        notes: _noteController.text,
+        data: {'calories': _calories},
+        createdAt: DateTime.now(),
+      );
+
+      await ActivityService.saveActivity(log);
+
+      // Add a small delay to ensure the loading state is visible
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Success',
+          message: 'Nutrition Log Saved Successfully!',
+          primaryColor: const Color(0xFF00D12E),
+          onConfirm: () => Navigator.pop(context),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Error',
+          message: 'Failed to save nutrition log: $e',
+          primaryColor: Colors.redAccent,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 }
