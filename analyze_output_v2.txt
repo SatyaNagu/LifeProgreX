@@ -1,0 +1,26 @@
+Analyzing LifeProgreX...                                        
+
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/appearance.dart:365:13 • deprecated_member_use
+   info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/appearance.dart:366:13 • deprecated_member_use
+   info • The prefix 'gAuth' isn't a lower_case_with_underscores identifier • lib/auth_service.dart:2:56 • library_prefixes
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/email_preferences.dart:394:13 • deprecated_member_use
+   info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/email_preferences.dart:395:13 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/email_verification.dart:356:33 • use_build_context_synchronously
+warning • Unused import: 'quicklog_edit/mood.dart' • lib/landing_screen.dart:4:8 • unused_import
+warning • Unused import: 'quicklog_edit/workout.dart' • lib/landing_screen.dart:5:8 • unused_import
+warning • Unused import: 'quicklog_edit/reading.dart' • lib/landing_screen.dart:6:8 • unused_import
+warning • Unused import: 'quicklog_edit/skills.dart' • lib/landing_screen.dart:7:8 • unused_import
+warning • Unused import: 'dart:math' • lib/landing_screen.dart:12:8 • unused_import
+warning • Duplicate import • lib/landing_screen.dart:13:8 • duplicate_import
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:668:26 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:669:34 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:670:10 • curly_braces_in_flow_control_structures
+warning • Unused import: 'terms_and_conditions.dart' • lib/login_screen.dart:9:8 • unused_import
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/privacy_and_security.dart:510:13 • deprecated_member_use
+   info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/privacy_and_security.dart:511:13 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/profile.dart:537:13 • deprecated_member_use
+   info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/profile.dart:538:13 • deprecated_member_use
+warning • Unused import: 'terms_and_conditions.dart' • lib/signup_screen.dart:8:8 • unused_import
+warning • The declaration '_handleGoogleSignIn' isn't referenced • lib/signup_screen.dart:41:16 • unused_element
+
+22 issues found. (ran in 1.2s)

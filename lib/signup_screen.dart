@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'login_screen.dart';
@@ -18,6 +19,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final AuthService _authService = AuthService();
 
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -28,6 +31,8 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void dispose() {
     _emailController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -150,52 +155,74 @@ class _SignupScreenState extends State<SignupScreen> {
         child: SafeArea(
           child: Stack(
             children: [
+              // Background Blobs
+              Positioned(
+                top: -100,
+                right: -50,
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF00D9FF).withValues(alpha: 0.05),
+                  ),
+                ),
+              ),
+
               CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 60),
+                          const SizedBox(height: 10),
                           
                           // Join Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.2)),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF00D9FF), Color(0xFFA855F7)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFA855F7).withValues(alpha: 0.2),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.auto_awesome, color: Color(0xFF6366F1), size: 14),
-                                const SizedBox(width: 6),
+                                const Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+                                const SizedBox(width: 8),
                                 const Text(
-                                  'JOIN LIFEPROGREX',
+                                  'Join LifeProgreX',
                                   style: TextStyle(
-                                    color: Color(0xFF6366F1),
-                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.0,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 20),
 
                           // Headers
                           const Text(
-                            'Create Account',
+                            'Create Your Account',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xFF111827),
+                              color: Color(0xFF1F2937),
                               fontSize: 28,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.5,
@@ -211,218 +238,155 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 30),
 
-                          // Features Checklist Box
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                          // Form Card
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(child: _buildCheckItem('Track unlimited habits')),
-                                    Expanded(child: _buildCheckItem('Get AI-powered insights')),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(child: _buildCheckItem('Unlock achievements')),
-                                    Expanded(child: _buildCheckItem('Access detailed analytics')),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(child: _buildCheckItem('Join 50k+ users')),
-                                    const Expanded(child: SizedBox()),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Form Fields
-                          _buildTextField(
-                            hint: 'Email address',
-                            icon: Icons.mail_outline,
-                            controller: _emailController,
-                          ),
-                          const SizedBox(height: 12),
-                          _buildTextField(
-                            hint: 'Mobile number (optional)',
-                            icon: Icons.phone_outlined,
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildTextField(
-                                  hint: 'First Name',
-                                  icon: Icons.person_outline,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildTextField(
-                                  hint: 'Last Name',
-                                  icon: Icons.person_outline,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          _buildTextField(
-                            hint: 'Create Password',
-                            icon: Icons.lock_outline,
-                            isPassword: true,
-                            controller: _passwordController,
-                          ),
-                          const SizedBox(height: 12),
-                          _buildTextField(
-                            hint: 'Confirm Password',
-                            icon: Icons.lock_outline,
-                            isPassword: true,
-                            controller: _confirmPasswordController,
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Create Account Button
-                          Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF8B5CF6), Color(0xFF5095FC), Color(0xFF13C6DF)],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF5095FC).withValues(alpha: 0.3),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: (_isLoading || _isGoogleLoading) ? null : _handleSignUp,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (_isLoading)
-                                    const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                    )
-                                  else ...[
-                                    const Text(
-                                      'CREATE ACCOUNT',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              _buildFieldLabel('First Name'),
+                                              _buildTextField(hint: 'John', icon: Icons.person_outline, controller: _firstNameController),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              _buildFieldLabel('Last Name'),
+                                              _buildTextField(hint: 'Doe', icon: Icons.person_outline, controller: _lastNameController),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 8),
-                                    const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
+                                    const SizedBox(height: 16),
+                                    _buildFieldLabel('Email Address'),
+                                    _buildTextField(hint: 'john@example.com', icon: Icons.mail_outline, controller: _emailController),
+                                    const SizedBox(height: 16),
+                                    _buildFieldLabel('Mobile Number (Optional)'),
+                                    _buildTextField(hint: '+1 (555) 000-0000', icon: Icons.phone_outlined),
+                                    const SizedBox(height: 16),
+                                    _buildFieldLabel('Password'),
+                                    _buildTextField(hint: 'Create a strong password', icon: Icons.lock_outline, isPassword: true, controller: _passwordController),
+                                    const SizedBox(height: 16),
+                                    _buildFieldLabel('Confirm Password'),
+                                    _buildTextField(hint: 'Re-enter your password', icon: Icons.lock_outline, isPassword: true, controller: _confirmPasswordController),
+                                    const SizedBox(height: 24),
 
-                          // Divider OR
-                          Row(
-                            children: [
-                              Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  'OR',
-                                  style: TextStyle(
-                                    color: Color(0xFF9CA3AF),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Google Button
-                          Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: (_isLoading || _isGoogleLoading) ? null : _handleGoogleSignIn,
-                                borderRadius: BorderRadius.circular(16),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (_isGoogleLoading)
-                                      const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(color: Color(0xFF6366F1), strokeWidth: 2),
-                                      )
-                                    else ...[
-                                      const SizedBox(width: 20, height: 20, child: GoogleLogoPainterWidget()),
-                                      const SizedBox(width: 12),
-                                      const Text(
-                                        'Continue with Google',
-                                        style: TextStyle(
-                                          color: Color(0xFF374151),
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
+                                    // Create Account Button
+                                    Container(
+                                      width: double.infinity,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFF00D9FF), Color(0xFFA855F7)],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFFA855F7).withValues(alpha: 0.3),
+                                            blurRadius: 15,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: (_isLoading || _isGoogleLoading) ? null : _handleSignUp,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            if (_isLoading)
+                                              const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                              )
+                                            else ...[
+                                              const Text(
+                                                'CREATE ACCOUNT',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                                            ],
+                                          ],
                                         ),
                                       ),
-                                    ],
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
+                          const SizedBox(height: 24),
 
-                          const Spacer(),
+                          // Features Card
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'What you\'ll get:',
+                                      style: TextStyle(color: Color(0xFF1F2937), fontSize: 14, fontWeight: FontWeight.w800),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildCheckItem('Track unlimited habits'),
+                                    const SizedBox(height: 10),
+                                    _buildCheckItem('Get AI-powered insights'),
+                                    const SizedBox(height: 10),
+                                    _buildCheckItem('Unlock achievements'),
+                                    const SizedBox(height: 10),
+                                    _buildCheckItem('Access detailed analytics'),
+                                    const SizedBox(height: 10),
+                                    _buildCheckItem('Join 50k+ users'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
 
                           // Login Link
                           Row(
@@ -432,8 +396,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 "Already have an account? ",
                                 style: TextStyle(color: Color(0xFF6B7280), fontSize: 13, fontWeight: FontWeight.w500),
                               ),
-                              TextButton(
-                                onPressed: () {
+                              GestureDetector(
+                                onTap: () {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -441,35 +405,12 @@ class _SignupScreenState extends State<SignupScreen> {
                                 },
                                 child: const Text(
                                   'Login',
-                                  style: TextStyle(color: Color(0xFF6366F1), fontSize: 13, fontWeight: FontWeight.w800),
+                                  style: TextStyle(color: Color(0xFF00D9FF), fontSize: 13, fontWeight: FontWeight.w800, decoration: TextDecoration.underline),
                                 ),
                               ),
                             ],
                           ),
-
-                          // Terms
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const TermsAndConditionsScreen()),
-                              );
-                            },
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: 'By continuing, you agree to our ',
-                                style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 11),
-                                children: [
-                                  TextSpan(
-                                    text: 'terms and conditions',
-                                    style: TextStyle(color: const Color(0xFF6B7280), fontWeight: FontWeight.w800),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
@@ -478,31 +419,27 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
 
               // Back Button
-              Positioned(
-                top: 16.0,
-                left: 20.0,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(22),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.arrow_back_ios_new, color: Color(0xFF1F2937), size: 18),
+              Visibility(
+                visible: Navigator.canPop(context),
+                child: Positioned(
+                  top: 16.0,
+                  left: 20.0,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(22),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.8),
+                          border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.chevron_left, color: Color(0xFF1F2937), size: 24),
+                        ),
                       ),
                     ),
                   ),
@@ -515,18 +452,35 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  Widget _buildFieldLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0, left: 4),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF374151),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
   Widget _buildCheckItem(String text) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.check_circle_outline, color: Color(0xFFF97316), size: 16),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(color: Color(0xFF374151), fontSize: 12, fontWeight: FontWeight.w600),
+        Container(
+          padding: const EdgeInsets.all(2),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFFE0F2FE),
           ),
+          child: const Icon(Icons.check, color: Color(0xFF3B82F6), size: 12),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          text,
+          style: const TextStyle(color: Color(0xFF4B5563), fontSize: 13, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -540,16 +494,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: TextField(
         controller: controller,
@@ -557,10 +504,10 @@ class _SignupScreenState extends State<SignupScreen> {
         style: const TextStyle(color: Color(0xFF111827), fontSize: 14, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: const Color(0xFF9CA3AF), fontSize: 14, fontWeight: FontWeight.w500),
-          prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF), size: 20),
+          hintStyle: TextStyle(color: const Color(0xFF9CA3AF).withValues(alpha: 0.6), fontSize: 14, fontWeight: FontWeight.w500),
+          prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF), size: 18),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         ),
       ),
     );

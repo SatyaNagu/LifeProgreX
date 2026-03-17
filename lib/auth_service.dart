@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final gAuth.GoogleSignIn _googleSignIn = gAuth.GoogleSignIn.instance;
-  bool _isGoogleSignInInitialized = false;
+  final gAuth.GoogleSignIn _googleSignIn = gAuth.GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
 
   // Stream to listen to authentication state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -66,33 +67,18 @@ class AuthService {
   // 3. Google Sign-In
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      if (!_isGoogleSignInInitialized) {
-        await _googleSignIn.initialize();
-        _isGoogleSignInInitialized = true;
-      }
-
       // Trigger the authentication flow
-      final gAuth.GoogleSignInAccount googleUser = await _googleSignIn
-          .authenticate(scopeHint: ['email', 'profile']);
+      final gAuth.GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      
+      if (googleUser == null) return null;
 
       // Obtain the ID token details from the request
       final gAuth.GoogleSignInAuthentication googleAuth =
-          googleUser.authentication;
-
-      // Obtain the authorization details to get the access token
-      final gAuth.GoogleSignInClientAuthorization authz =
-          await googleUser.authorizationClient.authorizationForScopes([
-            'email',
-            'profile',
-          ]) ??
-          await googleUser.authorizationClient.authorizeScopes([
-            'email',
-            'profile',
-          ]);
+          await googleUser.authentication;
 
       // Create a new credential
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: authz.accessToken,
+        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 

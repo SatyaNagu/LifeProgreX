@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
 import '../utils/quick_log_manager.dart';
-import '../utils/premium_background.dart';
+import '../widgets/glass_card.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/quick_log_base_layout.dart';
 
 class EditQuickLogScreen extends StatefulWidget {
   const EditQuickLogScreen({super.key});
@@ -11,131 +13,120 @@ class EditQuickLogScreen extends StatefulWidget {
 }
 
 class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
+  final ThemeManager _themeManager = ThemeManager();
+
   @override
   Widget build(BuildContext context) {
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF16102B);
+    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
       builder: (context, currentIds, child) {
-        return PremiumBackground(
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTipBox(),
-                        const SizedBox(height: 32),
-                        _buildSectionTitle('CURRENT ACTIONS (${currentIds.length})'),
-                        const SizedBox(height: 16),
-                        _buildCurrentActionsGrid(currentIds),
-                        const SizedBox(height: 32),
-                        _buildSectionTitle('QUICK ADD TEMPLATES'),
-                        const SizedBox(height: 16),
-                        _buildTemplatesGrid(currentIds),
-                        const SizedBox(height: 40),
-                        _buildSaveButton(),
-                        const SizedBox(height: 20),
-                        _buildNoteBox(),
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+        return QuickLogScaffold(
+          title: 'Edit Quick Log',
+          subtitle: 'Customize your shortcuts',
+          saveButton: QuickLogSaveButton(
+            label: 'Save & Return to Dashboard',
+            isReady: true,
+            isSaving: false,
+            onPressed: () {
+              CustomPopup.show(
+                context: context,
+                title: 'Dashboard Updated',
+                message: 'Your quick log shortcuts have been saved.',
+                primaryColor: const Color(0xFF8B5CF6),
+                onConfirm: () => Navigator.pop(context),
+              );
+            },
           ),
-        ),
-      ),
-    );
-  },
-);
-}
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Column(
+          body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Edit Quick Log', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-              Text('Customize your shortcuts', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14)),
+              _buildTipBox(isDark, textColor, subTextColor),
+              const SizedBox(height: 32),
+              SectionHeader(
+                title: 'CURRENT ACTIONS (${currentIds.length})',
+                subtitle: 'Tap to remove from dashboard',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 16),
+              _buildCurrentActionsGrid(currentIds, isDark, textColor),
+              const SizedBox(height: 32),
+              SectionHeader(
+                title: 'QUICK ADD TEMPLATES',
+                subtitle: 'Tap to add to your dashboard',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 16),
+              _buildTemplatesGrid(currentIds, isDark, textColor),
+              const SizedBox(height: 40),
+              _buildNoteBox(isDark),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTipBox() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1B1437),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.lightbulb_outline, color: Colors.amber, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Tip: Tap current actions to remove, or tap templates below to add them to your dashboard',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13, height: 1.4),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-    );
-  }
-
-  Widget _buildCurrentActionsGrid(List<String> currentIds) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: currentIds.length + 1,
-      itemBuilder: (context, index) {
-        if (index == currentIds.length) {
-          return _buildAddNewCard();
-        }
-        final id = currentIds[index];
-        final action = QuickLogManager.allActions[id]!;
-        return _buildActionCard(action, true);
+        );
       },
     );
   }
 
-  Widget _buildActionCard(QuickLogAction action, bool isCurrent) {
+  Widget _buildTipBox(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(20),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.lightbulb_outline, color: Colors.amber, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Customize your dashboard for faster logging. Add what matters most to your daily routine.',
+              style: TextStyle(
+                color: textColor.withOpacity(0.7),
+                fontSize: 13,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrentActionsGrid(List<String> currentIds, bool isDark, Color textColor) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.95,
+      ),
+      itemCount: currentIds.length + 1,
+      itemBuilder: (context, index) {
+        if (index == currentIds.length) {
+          return _buildAddNewCard(isDark, textColor);
+        }
+        final id = currentIds[index];
+        final action = QuickLogManager.allActions[id]!;
+        return _buildActionCard(action, true, isDark, textColor);
+      },
+    );
+  }
+
+  Widget _buildActionCard(QuickLogAction action, bool isCurrent, bool isDark, Color textColor) {
     return GestureDetector(
       onTap: () {
         if (isCurrent) {
@@ -144,11 +135,14 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
           QuickLogManager.addAction(action.id);
         }
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isCurrent ? action.color : const Color(0xFF16131A),
-          borderRadius: BorderRadius.circular(20),
-          border: isCurrent ? null : Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      child: GlassCard(
+        padding: const EdgeInsets.all(12),
+        opacity: isCurrent ? (isDark ? 0.15 : 0.8) : (isDark ? 0.04 : 0.3),
+        color: isCurrent ? action.color.withOpacity(isDark ? 0.2 : 0.1) : (isDark ? null : Colors.white.withOpacity(0.4)),
+        borderRadius: 20,
+        border: Border.all(
+          color: isCurrent ? action.color : (isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2)),
+          width: 2,
         ),
         child: Stack(
           children: [
@@ -156,19 +150,30 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(action.icon, color: isCurrent ? Colors.white : Colors.white54, size: 28),
+                  Icon(
+                    action.icon,
+                    color: isCurrent ? action.color : textColor.withOpacity(0.4),
+                    size: 28,
+                  ),
                   const SizedBox(height: 8),
-                  Text(action.name, style: TextStyle(color: isCurrent ? Colors.white : Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
+                  Text(
+                    action.name,
+                    style: TextStyle(
+                      color: isCurrent ? textColor : textColor.withOpacity(0.6),
+                      fontSize: 11,
+                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
             Positioned(
-              top: 8,
-              right: 8,
+              top: 0,
+              right: 0,
               child: Icon(
-                isCurrent ? Icons.remove_circle : Icons.add_circle,
-                color: isCurrent ? Colors.white60 : const Color(0xFF8B5CF6),
-                size: 16,
+                isCurrent ? Icons.remove_circle_rounded : Icons.add_circle_rounded,
+                color: isCurrent ? Colors.redAccent.withOpacity(0.6) : const Color(0xFF8B5CF6),
+                size: 18,
               ),
             ),
           ],
@@ -177,25 +182,32 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
     );
   }
 
-  Widget _buildAddNewCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF141121),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2D264D), width: 1),
-      ),
+  Widget _buildAddNewCard(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(12),
+      opacity: isDark ? 0.02 : 0.1,
+      borderRadius: 20,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withValues(alpha: 0.1), width: 1.5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.add, color: Color(0xFF8B5CF6), size: 28),
-          const SizedBox(height: 8),
-          Text('ADD NEW', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10, fontWeight: FontWeight.bold)),
+          Icon(Icons.add_rounded, color: textColor.withOpacity(0.2), size: 32),
+          const SizedBox(height: 4),
+          Text(
+            'ADD NEW',
+            style: TextStyle(
+              color: textColor.withOpacity(0.2),
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTemplatesGrid(List<String> currentIds) {
+  Widget _buildTemplatesGrid(List<String> currentIds, bool isDark, Color textColor) {
     final availableTemplates = QuickLogManager.allActions.values
         .where((action) => !currentIds.contains(action.id))
         .toList();
@@ -204,63 +216,28 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
+        crossAxisCount: 3,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.95,
       ),
       itemCount: availableTemplates.length,
       itemBuilder: (context, index) {
         final action = availableTemplates[index];
-        return _buildActionCard(action, false);
+        return _buildActionCard(action, false, isDark, textColor);
       },
     );
   }
 
-  Widget _buildSaveButton() {
-    return Container(
-      width: double.infinity,
-      height: 64,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
-        boxShadow: [
-          BoxShadow(color: const Color(0xFF8B5CF6).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8)),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () {
-          CustomPopup.show(
-            context: context,
-            title: 'Dashboard Updated',
-            message: 'Your quick log shortcuts have been saved.',
-            primaryColor: const Color(0xFF8B5CF6),
-            onConfirm: () => Navigator.pop(context),
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        ),
-        child: const Text('Save & Return to Dashboard', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
-
-  Widget _buildNoteBox() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1410),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Text(
-          'Note: Changes will be reflected on your dashboard immediately',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.orange.withValues(alpha: 0.7), fontSize: 12),
+  Widget _buildNoteBox(bool isDark) {
+    return Center(
+      child: Text(
+        'Changes are applied to your dashboard immediately',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: isDark ? Colors.white.withOpacity(0.3) : const Color(0xFF16102B).withOpacity(0.4),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

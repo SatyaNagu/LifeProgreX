@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_popup.dart';
-import '../utils/premium_background.dart';
+import '../services/activity_service.dart';
+import '../models/activity_model.dart';
+import '../auth_service.dart';
+import '../widgets/glass_card.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/quick_log_base_layout.dart';
 
 class MusicScreen extends StatefulWidget {
   const MusicScreen({super.key});
@@ -11,137 +16,232 @@ class MusicScreen extends StatefulWidget {
 
 class _MusicScreenState extends State<MusicScreen> {
   final TextEditingController _musicController = TextEditingController();
-  String _impact = 'Energy';
+  final TextEditingController _noteController = TextEditingController();
+  String? _selectedImpact;
   bool _isSaving = false;
+  final ThemeManager _themeManager = ThemeManager();
 
-  final List<String> _impacts = ['Energy', 'Relax', 'Mood Boost', 'Focus'];
+  final List<Map<String, dynamic>> _impacts = [
+    {'label': 'Energy', 'icon': Icons.bolt_outlined, 'color': Color(0xFFFFB267)},
+    {'label': 'Relax', 'icon': Icons.spa_outlined, 'color': Color(0xFF67B2FF)},
+    {'label': 'Mood Boost', 'icon': Icons.mood_outlined, 'color': Color(0xFFFF67B2)},
+    {'label': 'Focus', 'icon': Icons.center_focus_strong_outlined, 'color': Color(0xFF67FFB2)},
+  ];
+
+  @override
+  void dispose() {
+    _musicController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return PremiumBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 24),
-                      const Text('What are you listening to?', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                      const SizedBox(height: 12),
-                      _buildTextField(),
-                      const SizedBox(height: 32),
-                      const Text('How does it affect you?', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                      const SizedBox(height: 16),
-                      _buildImpactChips(),
-                      const SizedBox(height: 60),
-                      _buildSaveButton(),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final isDark = _themeManager.isDarkMode;
+    final textColor = isDark ? Colors.white : const Color(0xFF16102B);
+    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+
+    return QuickLogScaffold(
+      title: 'Music Log',
+      subtitle: 'What are you vibing to?',
+      topImage: Image.asset(
+        'Assets/onboarding_image_2.png',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: isDark ? const Color(0xFF1A1A2E) : const Color(0xFFE5E7EB),
+          child: Icon(Icons.music_note_outlined, color: isDark ? Colors.white24 : Colors.black26, size: 48),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
+      saveButton: QuickLogSaveButton(
+        label: 'Save Music Log',
+        isReady: _musicController.text.isNotEmpty || _selectedImpact != null,
+        isSaving: _isSaving,
+        onPressed: _handleSave,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Text('Music', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          SectionHeader(title: 'What are you listening to?', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildMusicField(isDark, textColor, subTextColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Impact', subtitle: 'How does it affect your mood?', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildImpactGrid(isDark, textColor),
+          const SizedBox(height: 32),
+          SectionHeader(title: 'Notes (Optional)', subtitle: 'Add more details', isDark: isDark),
+          const SizedBox(height: 16),
+          _buildNoteField(isDark, textColor, subTextColor),
         ],
       ),
     );
   }
 
-  Widget _buildTextField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: const Color(0xFF16131A), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
+  Widget _buildMusicField(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(4),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
       child: TextField(
         controller: _musicController,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(hintText: 'Song / Album / Genre', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)), border: InputBorder.none),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: "Song, Album or Artist...",
+          hintStyle: TextStyle(color: subTextColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(20),
+        ),
+        onChanged: (_) => setState(() {}),
       ),
     );
   }
 
-  Widget _buildImpactChips() {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: _impacts.map((opt) {
-        final isSelected = _impact == opt;
-        return GestureDetector(
-          onTap: () => setState(() => _impact = opt),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF8B5CF6).withValues(alpha: 0.2) : const Color(0xFF16131A),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isSelected ? const Color(0xFF8B5CF6) : Colors.white10),
+  Widget _buildImpactGrid(bool isDark, Color textColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.8,
+        ),
+        itemCount: _impacts.length,
+        itemBuilder: (context, index) {
+          final impact = _impacts[index];
+          final isSelected = _selectedImpact == impact['label'];
+          final Color accentColor = impact['color'];
+
+          return GestureDetector(
+            onTap: () => setState(() => _selectedImpact = impact['label']),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? accentColor.withOpacity(isDark ? 0.2 : 0.1)
+                    : isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? accentColor : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    impact['icon'],
+                    color: isSelected ? accentColor : textColor.withOpacity(0.4),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    impact['label'],
+                    style: TextStyle(
+                      color: isSelected ? (isDark ? accentColor.withOpacity(0.8) : textColor) : textColor.withOpacity(0.6),
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Text(opt, style: TextStyle(color: isSelected ? Colors.white : Colors.white60, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-          ),
-        );
-      }).toList(),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: _isSaving ? null : _handleSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFF98E2F),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  Widget _buildNoteField(bool isDark, Color textColor, Color subTextColor) {
+    return GlassCard(
+      padding: const EdgeInsets.all(4),
+      opacity: isDark ? 0.08 : 0.6,
+      color: isDark ? null : Colors.white.withOpacity(0.8),
+      borderRadius: 24,
+      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      child: TextField(
+        controller: _noteController,
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: "How did this music make you feel?",
+          hintStyle: TextStyle(color: subTextColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(20),
         ),
-        child: _isSaving
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Text('Log Music', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
     );
   }
 
   Future<void> _handleSave() async {
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() => _isSaving = false);
+    final user = AuthService().currentUser;
+    if (user == null) {
       CustomPopup.show(
         context: context,
-        title: 'Vibrating',
-        message: 'Music session logged.',
-        primaryColor: const Color(0xFF00D12E),
-        onConfirm: () => Navigator.pop(context),
+        title: 'Authentication Required',
+        message: 'Please log in to save activities',
+        primaryColor: Colors.redAccent,
       );
+      return;
     }
-  }
 
-  @override
-  void dispose() {
-    _musicController.dispose();
-    super.dispose();
+    setState(() => _isSaving = true);
+
+    try {
+      final log = ActivityLog(
+        id: '',
+        userId: user.uid,
+        type: 'music',
+        value: _musicController.text.isNotEmpty ? _musicController.text : _selectedImpact,
+        notes: _noteController.text,
+        data: {'impact': _selectedImpact},
+        createdAt: DateTime.now(),
+      );
+
+      await ActivityService.saveActivity(log);
+
+      // Add a small delay to ensure the loading state is visible
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Success',
+          message: 'Music session logged successfully!',
+          primaryColor: const Color(0xFF00D12E),
+          onConfirm: () => Navigator.pop(context),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Error',
+          message: 'Failed to save music log: $e',
+          primaryColor: Colors.redAccent,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
   }
 }

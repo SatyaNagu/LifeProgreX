@@ -1,18 +1,3 @@
-Resolving dependencies...
-Downloading packages...
-  _flutterfire_internals 1.3.66 (1.3.67 available)
-  firebase_auth 6.1.4 (6.2.0 available)
-  firebase_auth_platform_interface 8.1.6 (8.1.7 available)
-  firebase_auth_web 6.1.2 (6.1.3 available)
-  firebase_core 4.4.0 (4.5.0 available)
-  firebase_core_web 3.4.0 (3.5.0 available)
-  flutter_launcher_icons 0.13.1 (0.14.4 available)
-  matcher 0.12.18 (0.12.19 available)
-  meta 1.17.0 (1.18.1 available)
-  test_api 0.7.9 (0.7.10 available)
-Got dependencies!
-10 packages have newer versions incompatible with dependency constraints.
-Try `flutter pub outdated` for more information.
 Analyzing LifeProgreX...                                        
 
    info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/appearance.dart:365:13 • deprecated_member_use
@@ -21,18 +6,40 @@ Analyzing LifeProgreX...
    info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/email_preferences.dart:394:13 • deprecated_member_use
    info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/email_preferences.dart:395:13 • deprecated_member_use
    info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/email_verification.dart:356:33 • use_build_context_synchronously
-warning • Unused import: 'quicklog_edit/mood.dart' • lib/landing_screen.dart:4:8 • unused_import
-warning • Unused import: 'quicklog_edit/workout.dart' • lib/landing_screen.dart:5:8 • unused_import
-warning • Unused import: 'quicklog_edit/reading.dart' • lib/landing_screen.dart:6:8 • unused_import
-warning • Unused import: 'quicklog_edit/skills.dart' • lib/landing_screen.dart:7:8 • unused_import
-warning • Unused import: 'dart:math' • lib/landing_screen.dart:12:8 • unused_import
-warning • Duplicate import • lib/landing_screen.dart:13:8 • duplicate_import
-   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:668:26 • curly_braces_in_flow_control_structures
-   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:669:34 • curly_braces_in_flow_control_structures
-   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:670:10 • curly_braces_in_flow_control_structures
+warning • Duplicate import • lib/landing_screen.dart:9:8 • duplicate_import
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:675:26 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:676:34 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:677:10 • curly_braces_in_flow_control_structures
+warning • Unused import: 'terms_and_conditions.dart' • lib/login_screen.dart:9:8 • unused_import
    info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/privacy_and_security.dart:510:13 • deprecated_member_use
    info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/privacy_and_security.dart:511:13 • deprecated_member_use
    info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/profile.dart:537:13 • deprecated_member_use
    info • 'trackColor' is deprecated and shouldn't be used. Use inactiveTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/profile.dart:538:13 • deprecated_member_use
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/quicklog_edit/mood.dart:8:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:224:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:225:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:228:78 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:243:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:287:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:288:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:291:78 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:300:80 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/mood.dart:307:43 • deprecated_member_use
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/quicklog_edit/workout.dart:8:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/workout.dart:210:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/workout.dart:211:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/workout.dart:214:78 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/workout.dart:223:80 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/workout.dart:230:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/quicklog_edit/workout.dart:267:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/activity_timeline.dart:151:30 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/activity_timeline.dart:185:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/activity_timeline.dart:201:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/activity_timeline.dart:272:51 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/services/activity_service.dart:15:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/activity_service.dart:35:7 • avoid_print
+warning • Unused import: 'terms_and_conditions.dart' • lib/signup_screen.dart:8:8 • unused_import
+warning • The declaration '_handleGoogleSignIn' isn't referenced • lib/signup_screen.dart:41:16 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/glass_card.dart:33:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/glass_card.dart:36:35 • deprecated_member_use
 
-19 issues found. (ran in 2.0s)

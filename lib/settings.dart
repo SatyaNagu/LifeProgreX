@@ -4,22 +4,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
 import 'login_screen.dart';
 import 'landing_screen.dart';
+import 'screens/analytics_screen.dart';
 
-import 'personal_information.dart';
-import 'email_preferences.dart';
-import 'privacy_and_security.dart';
-
+import 'appearance.dart';
+import 'help_and_support.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _SettingsScreenState extends State<SettingsScreen> {
   final AuthService _authService = AuthService();
   final ThemeManager _themeManager = ThemeManager();
   
@@ -68,8 +67,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return PremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
           // Main Scrollable Content
           SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -89,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Profile',
+                            'Settings',
                             style: TextStyle(
                               color: textColor,
                               fontSize: 24,
@@ -97,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           Text(
-                            'Manage your account',
+                            'App preferences',
                             style: TextStyle(
                               color: subTextColor,
                               fontSize: 14,
@@ -109,51 +110,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Profile Card
-                  _buildProfileCard(userName, userEmail, isDark),
-                  const SizedBox(height: 24),
+                  // Profile card removed here
 
-                  // Removed Settings Section
-                  const SizedBox(height: 24),
-
-                  // Account Section
-                  _buildSectionHeader('ACCOUNT', subTextColor),
+                  // Settings Section
+                  _buildSectionHeader('SETTINGS', subTextColor),
                   _buildSectionCard(
                     color: cardBgColor,
                     child: Column(
                       children: [
-                        _buildNavigationTile(
-                          icon: Icons.person_outline,
-                          title: 'Personal Information',
-                          subtitle: 'Update your profile details',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const PersonalInformationScreen()),
-                          ),
+                        _buildSwitchTile(
+                          title: 'Push Notifications',
+                          subtitle: 'Get daily reminders',
+                          value: _pushNotifications,
+                          onChanged: (val) => setState(() => _pushNotifications = val),
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
                         _buildDivider(isDark),
-                        _buildNavigationTile(
-                          icon: Icons.mail_outline,
-                          title: 'Email Preferences',
-                          subtitle: 'Manage email notifications',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const EmailPreferencesScreen()),
-                          ),
+                        _buildSwitchTile(
+                          title: 'Weekly Reports',
+                          subtitle: 'Progress summaries',
+                          value: _weeklyReports,
+                          onChanged: (val) => setState(() => _weeklyReports = val),
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
                         _buildDivider(isDark),
-                        _buildNavigationTile(
-                          icon: Icons.lock_outline,
-                          title: 'Privacy & Security',
-                          subtitle: 'Password and security settings',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const PrivacyAndSecurityScreen()),
-                          ),
+                        _buildSwitchTile(
+                          title: 'Dark Mode',
+                          subtitle: 'Toggle app theme',
+                          value: isDark,
+                          onChanged: (val) => _themeManager.toggleTheme(val),
+                          activeColor: const Color(0xFF8B5CF6),
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
@@ -162,7 +150,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Removed App Section
+                  // Account Section moved to Profile Screen
+
+                  // App Section
+                  _buildSectionHeader('APP', subTextColor),
+                  _buildSectionCard(
+                    color: cardBgColor,
+                    child: Column(
+                      children: [
+                        _buildNavigationTile(
+                          icon: Icons.palette_outlined,
+                          title: 'Appearance',
+                          subtitle: 'Customize your experience',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AppearanceScreen()),
+                          ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                        _buildDivider(isDark),
+                        _buildNavigationTile(
+                          icon: Icons.help_outline,
+                          title: 'Help & Support',
+                          subtitle: 'Get help and send feedback',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HelpAndSupportScreen()),
+                          ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 30),
 
                   // Sign Out Button
@@ -218,11 +239,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
+          
+          // Fixed Bottom Navigation Bar
+          Positioned(
+            bottom: 30, // Distance from bottom
+            left: 20, // Distance from left edge
+            right: 20, // Distance from right edge
+            child: _buildBottomNavigationBar(isDark),
+          ),
         ],
-        // No Bottom Navigation Bar in Profile Modal
-      ),
-    ),
-   );
+        ), // Stack
+      ),    // SafeArea
+     ),
+    );
   }
 
   // --- Widgets ---
@@ -230,18 +259,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildBackButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () {
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        } else {
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (_, __, ___) => const LandingScreen(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
       },
       borderRadius: BorderRadius.circular(22),
       child: Container(
@@ -269,140 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileCard(String name, String email, bool isDark) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF221A3D) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: isDark ? null : Border.all(color: Colors.white, width: 2),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              // Avatar
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFF98E2F), // Orange border
-                    width: 2,
-                  ),
-                  image: const DecorationImage(
-                    // Default image for now, ideally user photo
-                    image: AssetImage('Assets/onboarding_image_3.png'), 
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Name & Badge
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : const Color(0xFF111827),
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: TextStyle(
-                        color: isDark ? Colors.white54 : const Color(0xFF6B7280),
-                        fontSize: 14,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF3B2A42) : const Color(0xFFFEF3C7),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'PREMIUM',
-                        style: TextStyle(
-                          color: const Color(0xFFF98E2F), // Orange text
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Stats Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatBox('7', 'STREAK', const Color(0xFFF98E2F), isDark),
-              _buildStatBox('140', 'HABITS', const Color(0xFF8B5CF6), isDark), // Purple
-              _buildStatBox('4', 'CATS', isDark ? Colors.white : const Color(0xFF111827), isDark),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildStatBox(String value, String label, Color valueColor, bool isDark) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                color: valueColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isDark ? Colors.white54 : const Color(0xFF6B7280),
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.0,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSectionHeader(String title, Color subColor) {
     return Padding(
@@ -555,6 +447,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  // --- Bottom Navigation Bar ---
+  Widget _buildBottomNavigationBar(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2B2B2B),
+        borderRadius: BorderRadius.circular(40),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 15,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(Icons.home_outlined, Colors.white54, false, () {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+              ),
+            );
+          }),
+          _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, () {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+              ),
+            );
+          }),
+          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
+          _buildNavItem(Icons.settings_outlined, const Color(0xFFF98E2F), true, null), // Active Tab
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        child: Icon(icon, color: color, size: 28),
+      ),
+    );
+  }
 }
-
-

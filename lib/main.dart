@@ -4,11 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'onboarding_screen.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
+import 'landing_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'utils/theme_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'loading_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -50,7 +53,7 @@ class _MyAppState extends State<MyApp> {
         ),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      home: const AuthWrapper(),
     );
   }
 }
@@ -433,6 +436,75 @@ class _MyHomePageState extends State<MyHomePage> {
         fontWeight: FontWeight.bold,
         letterSpacing: 1.0,
       ),
+    );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool? _onboardingCompleted;
+  bool _firebaseInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    // Run initializations in parallel
+    await Future.wait([
+      Firebase.initializeApp(),
+      _loadOnboardingStatus(),
+    ]);
+    if (mounted) {
+      setState(() {
+        _firebaseInitialized = true;
+      });
+    }
+  }
+
+  Future<void> _loadOnboardingStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    _onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_firebaseInitialized || _onboardingCompleted == null) {
+      return const LoadingScreen();
+    }
+
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        
+        if (snapshot.hasData && snapshot.data != null) {
+          return LandingScreen(
+            userName: snapshot.data!.displayName ?? 'User',
+          );
+        }
+        
+        // If not logged in, decide whether to show welcome (MyHomePage) or LoginScreen
+        if (!_onboardingCompleted!) {
+          return const MyHomePage();
+        } else {
+          return const LoginScreen();
+        }
+      },
     );
   }
 }
