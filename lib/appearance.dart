@@ -362,8 +362,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: const Color(0xFF7C3AED), // Purple
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: const Color(0xFF7C3AED), // Purple
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],

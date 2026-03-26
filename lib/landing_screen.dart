@@ -344,34 +344,39 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                           const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFBF00), size: 24),
-                           const SizedBox(width: 12),
-                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Today's Goals",
-                                style: TextStyle(
-                                  color: isDark ? Colors.white : const Color(0xFF111827),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              Text(
-                                "Keep the momentum going! 🚀",
-                                style: TextStyle(
-                                  color: isDark ? Colors.grey[300] : const Color(0xFF6B7280),
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      Expanded(
+                        child: Row(
+                          children: [
+                             const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFBF00), size: 24),
+                             const SizedBox(width: 12),
+                             Expanded(
+                               child: Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+                                   Text(
+                                     "Today's Goals",
+                                     style: TextStyle(
+                                       color: isDark ? Colors.white : const Color(0xFF111827),
+                                       fontSize: 20,
+                                       fontWeight: FontWeight.w900,
+                                     ),
+                                   ),
+                                   Text(
+                                     "Keep the momentum going! 🚀",
+                                     style: TextStyle(
+                                       color: isDark ? Colors.grey[300] : const Color(0xFF6B7280),
+                                       fontSize: 13,
+                                     ),
+                                     overflow: TextOverflow.ellipsis,
+                                   ),
+                                 ],
+                               ),
+                             ),
+                          ],
+                        ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -720,8 +725,9 @@ class _LandingScreenState extends State<LandingScreen> {
     
     // Exact colors from images
     Color baseColor;
-    if (label == 'Mood') baseColor = const Color(0xFFFF2D95);
-    else if (label == 'Workout') baseColor = const Color(0xFFFF6B35);
+    if (label == 'Mood') {
+      baseColor = const Color(0xFFFF2D95);
+    } else if (label == 'Workout') baseColor = const Color(0xFFFF6B35);
     else if (label == 'Reading') baseColor = const Color(0xFF13C6DF);
     else if (label == 'Skill') baseColor = const Color(0xFF9FE82E);
     else baseColor = const Color(0xFF8B5CF6);
@@ -762,12 +768,16 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontSize: 15,
-                fontWeight: FontWeight.w900, // Matching the bold look
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900, // Matching the bold look
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 4),
@@ -1077,8 +1087,10 @@ class _LandingScreenState extends State<LandingScreen> {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
               ),
             );
           }),
@@ -1088,8 +1100,10 @@ class _LandingScreenState extends State<LandingScreen> {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) => const SettingsScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
               ),
             );
           }),

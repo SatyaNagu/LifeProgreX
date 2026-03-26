@@ -100,9 +100,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return BackgroundWrapper(
       child: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
 
             // Logo in circular white container
             Center(
@@ -176,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
 
-            const Spacer(),
+            const Expanded(child: SizedBox(height: 16)),
 
             // Card with Emojis & Info
             Container(
@@ -351,7 +358,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-          ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

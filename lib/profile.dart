@@ -23,9 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final ThemeManager _themeManager = ThemeManager();
   
-  // Mock state for switches
-  bool _pushNotifications = true;
-  bool _weeklyReports = true;
+  // Profile state
 
   @override
   void initState() {
@@ -236,9 +234,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(
-              pageBuilder: (_, __, ___) => const LandingScreen(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
+              pageBuilder: (_, _, _) => const LandingScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
             ),
           );
         }
@@ -436,52 +436,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSwitchTile({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required Function(bool) onChanged,
-    required Color textColor,
-    required Color subTextColor,
-    Color activeColor = const Color(0xFF8B5CF6), 
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CupertinoSwitch(
-            value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildNavigationTile({
     required IconData icon,

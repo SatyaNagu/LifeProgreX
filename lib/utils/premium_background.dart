@@ -121,17 +121,19 @@ class PremiumBackground extends StatelessWidget {
   }
 
   Widget _buildBlob({required double size, required Color color, required double blur}) {
+    // Optimization: Replaced an astronomically expensive BackdropFilter(180px sigma) 
+    // with a zero-cost hardware-accelerated RadialGradient rendering pipeline.
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color,
         shape: BoxShape.circle,
-      ),
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(color: Colors.transparent),
+        gradient: RadialGradient(
+          colors: [
+            color,
+            color.withValues(alpha: 0.0), // Fades smoothly to transparent
+          ],
+          stops: const [0.2, 1.0], // Starts solid at the core, then diffuses outward
         ),
       ),
     );

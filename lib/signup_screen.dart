@@ -5,7 +5,6 @@ import 'login_screen.dart';
 import 'welcome.dart';
 import 'email_verification.dart';
 import 'auth_service.dart';
-import 'terms_and_conditions.dart';
 import 'utils/custom_popup.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -175,15 +174,21 @@ class _SignupScreenState extends State<SignupScreen> {
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 20,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 10),
-                          
+
                           // Join Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF00D9FF), Color(0xFFA855F7)],
@@ -193,7 +198,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               borderRadius: BorderRadius.circular(30),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFA855F7).withValues(alpha: 0.2),
+                                  color: const Color(
+                                    0xFFA855F7,
+                                  ).withValues(alpha: 0.2),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -202,7 +209,11 @@ class _SignupScreenState extends State<SignupScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+                                const Icon(
+                                  Icons.auto_awesome,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 8),
                                 const Text(
                                   'Join LifeProgreX',
@@ -244,13 +255,19 @@ class _SignupScreenState extends State<SignupScreen> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(24),
                             child: BackdropFilter(
-                              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              filter: ui.ImageFilter.blur(
+                                sigmaX: 10,
+                                sigmaY: 10,
+                              ),
                               child: Container(
                                 padding: const EdgeInsets.all(24),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.7),
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                    width: 1.5,
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,20 +276,31 @@ class _SignupScreenState extends State<SignupScreen> {
                                       children: [
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               _buildFieldLabel('First Name'),
-                                              _buildTextField(hint: 'John', icon: Icons.person_outline, controller: _firstNameController),
+                                              _buildTextField(
+                                                hint: 'John',
+                                                icon: Icons.person_outline,
+                                                controller:
+                                                    _firstNameController,
+                                              ),
                                             ],
                                           ),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               _buildFieldLabel('Last Name'),
-                                              _buildTextField(hint: 'Doe', icon: Icons.person_outline, controller: _lastNameController),
+                                              _buildTextField(
+                                                hint: 'Doe',
+                                                icon: Icons.person_outline,
+                                                controller: _lastNameController,
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -280,16 +308,35 @@ class _SignupScreenState extends State<SignupScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     _buildFieldLabel('Email Address'),
-                                    _buildTextField(hint: 'john@example.com', icon: Icons.mail_outline, controller: _emailController),
+                                    _buildTextField(
+                                      hint: 'john@example.com',
+                                      icon: Icons.mail_outline,
+                                      controller: _emailController,
+                                    ),
                                     const SizedBox(height: 16),
-                                    _buildFieldLabel('Mobile Number (Optional)'),
-                                    _buildTextField(hint: '+1 (555) 000-0000', icon: Icons.phone_outlined),
+                                    _buildFieldLabel(
+                                      'Mobile Number (Optional)',
+                                    ),
+                                    _buildTextField(
+                                      hint: '+1 (555) 000-0000',
+                                      icon: Icons.phone_outlined,
+                                    ),
                                     const SizedBox(height: 16),
                                     _buildFieldLabel('Password'),
-                                    _buildTextField(hint: 'Create a strong password', icon: Icons.lock_outline, isPassword: true, controller: _passwordController),
+                                    _buildTextField(
+                                      hint: 'Create a strong password',
+                                      icon: Icons.lock_outline,
+                                      isPassword: true,
+                                      controller: _passwordController,
+                                    ),
                                     const SizedBox(height: 16),
                                     _buildFieldLabel('Confirm Password'),
-                                    _buildTextField(hint: 'Re-enter your password', icon: Icons.lock_outline, isPassword: true, controller: _confirmPasswordController),
+                                    _buildTextField(
+                                      hint: 'Re-enter your password',
+                                      icon: Icons.lock_outline,
+                                      isPassword: true,
+                                      controller: _confirmPasswordController,
+                                    ),
                                     const SizedBox(height: 24),
 
                                     // Create Account Button
@@ -299,33 +346,50 @@ class _SignupScreenState extends State<SignupScreen> {
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(16),
                                         gradient: const LinearGradient(
-                                          colors: [Color(0xFF00D9FF), Color(0xFFA855F7)],
+                                          colors: [
+                                            Color(0xFF00D9FF),
+                                            Color(0xFFA855F7),
+                                          ],
                                           begin: Alignment.centerLeft,
                                           end: Alignment.centerRight,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFFA855F7).withValues(alpha: 0.3),
+                                            color: const Color(
+                                              0xFFA855F7,
+                                            ).withValues(alpha: 0.3),
                                             blurRadius: 15,
                                             offset: const Offset(0, 6),
                                           ),
                                         ],
                                       ),
                                       child: ElevatedButton(
-                                        onPressed: (_isLoading || _isGoogleLoading) ? null : _handleSignUp,
+                                        onPressed:
+                                            (_isLoading || _isGoogleLoading)
+                                            ? null
+                                            : _handleSignUp,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.transparent,
                                           shadowColor: Colors.transparent,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             if (_isLoading)
                                               const SizedBox(
                                                 width: 20,
                                                 height: 20,
-                                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                      strokeWidth: 2,
+                                                    ),
                                               )
                                             else ...[
                                               const Text(
@@ -338,7 +402,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
-                                              const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                                              const Icon(
+                                                Icons.arrow_forward,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
                                             ],
                                           ],
                                         ),
@@ -362,14 +430,20 @@ class _SignupScreenState extends State<SignupScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.3),
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
                                       'What you\'ll get:',
-                                      style: TextStyle(color: Color(0xFF1F2937), fontSize: 14, fontWeight: FontWeight.w800),
+                                      style: TextStyle(
+                                        color: Color(0xFF1F2937),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                                     const SizedBox(height: 16),
                                     _buildCheckItem('Track unlimited habits'),
@@ -378,7 +452,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                     const SizedBox(height: 10),
                                     _buildCheckItem('Unlock achievements'),
                                     const SizedBox(height: 10),
-                                    _buildCheckItem('Access detailed analytics'),
+                                    _buildCheckItem(
+                                      'Access detailed analytics',
+                                    ),
                                     const SizedBox(height: 10),
                                     _buildCheckItem('Join 50k+ users'),
                                   ],
@@ -394,18 +470,29 @@ class _SignupScreenState extends State<SignupScreen> {
                             children: [
                               const Text(
                                 "Already have an account? ",
-                                style: TextStyle(color: Color(0xFF6B7280), fontSize: 13, fontWeight: FontWeight.w500),
+                                style: TextStyle(
+                                  color: Color(0xFF6B7280),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               GestureDetector(
                                 onTap: () {
                                   Navigator.pushReplacement(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginScreen(),
+                                    ),
                                   );
                                 },
                                 child: const Text(
                                   'Login',
-                                  style: TextStyle(color: Color(0xFF00D9FF), fontSize: 13, fontWeight: FontWeight.w800, decoration: TextDecoration.underline),
+                                  style: TextStyle(
+                                    color: Color(0xFF00D9FF),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ],
@@ -435,10 +522,16 @@ class _SignupScreenState extends State<SignupScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withValues(alpha: 0.8),
-                          border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+                          border: Border.all(
+                            color: Colors.black.withValues(alpha: 0.05),
+                          ),
                         ),
                         child: const Center(
-                          child: Icon(Icons.chevron_left, color: Color(0xFF1F2937), size: 24),
+                          child: Icon(
+                            Icons.chevron_left,
+                            color: Color(0xFF1F2937),
+                            size: 24,
+                          ),
                         ),
                       ),
                     ),
@@ -480,7 +573,11 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(width: 10),
         Text(
           text,
-          style: const TextStyle(color: Color(0xFF4B5563), fontSize: 13, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: Color(0xFF4B5563),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -501,13 +598,24 @@ class _SignupScreenState extends State<SignupScreen> {
       child: TextField(
         controller: controller,
         obscureText: isPassword,
-        style: const TextStyle(color: Color(0xFF111827), fontSize: 14, fontWeight: FontWeight.w600),
+        style: const TextStyle(
+          color: Color(0xFF111827),
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: const Color(0xFF9CA3AF).withValues(alpha: 0.6), fontSize: 14, fontWeight: FontWeight.w500),
+          hintStyle: TextStyle(
+            color: const Color(0xFF9CA3AF).withValues(alpha: 0.6),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
           prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF), size: 18),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 16,
+          ),
         ),
       ),
     );

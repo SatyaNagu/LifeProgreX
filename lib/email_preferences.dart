@@ -391,8 +391,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: activeColor,
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],

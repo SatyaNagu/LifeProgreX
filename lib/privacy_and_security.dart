@@ -507,8 +507,8 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: activeColor,
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],

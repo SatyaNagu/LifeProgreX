@@ -218,8 +218,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               Color blockColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05);
               
               if (active) {
-                if (index < 3) blockColor = const Color(0xFF00D12E);
-                else if (index < 7) blockColor = const Color(0xFFF98E2F);
+                if (index < 3) {
+                  blockColor = const Color(0xFF00D12E);
+                } else if (index < 7) blockColor = const Color(0xFFF98E2F);
                 else blockColor = const Color(0xFFFF4B4B);
               }
 
