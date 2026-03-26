@@ -6,7 +6,6 @@ import 'welcome.dart';
 import 'email_verification.dart';
 import 'forget_password.dart';
 import 'auth_service.dart';
-import 'terms_and_conditions.dart';
 import 'utils/custom_popup.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -261,24 +260,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: Checkbox(
-                                                value: true,
-                                                onChanged: (v) {},
-                                                activeColor: const Color(0xFF8B5CF6),
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: Checkbox(
+                                                  value: true,
+                                                  onChanged: (v) {},
+                                                  activeColor: const Color(0xFF8B5CF6),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            const Text(
-                                              'Remember me',
-                                              style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
-                                            ),
-                                          ],
+                                              const SizedBox(width: 8),
+                                              const Expanded(
+                                                child: Text(
+                                                  'Remember me',
+                                                  style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         TextButton(
                                           onPressed: () {

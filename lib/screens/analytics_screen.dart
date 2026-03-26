@@ -4,6 +4,7 @@ import '../utils/premium_background.dart';
 import 'dart:math';
 import '../profile.dart';
 import '../landing_screen.dart';
+import '../settings.dart';
 
 // Note: This is an initial structure based on the provided design. 
 // It will need to be refined and integrated with actual data logic.
@@ -158,20 +159,24 @@ Widget _buildBottomNavigationBar(BuildContext context) {
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
             ),
           );
         }),
         _buildNavItem(Icons.bar_chart_outlined, const Color(0xFF13C6DF), true, null), // Active state for analytics
         _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
-        _buildNavItem(Icons.person_outline, Colors.white54, false, () {
+        _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => const ProfileScreen(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
+              pageBuilder: (context, animation, secondaryAnimation) => const SettingsScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
             ),
           );
         }),
@@ -394,17 +399,20 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
             ],
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMoodDay('Mon', '😐', false),
-              _buildMoodDay('Tue', '🙂', false),
-              _buildMoodDay('Wed', '😐', false),
-              _buildMoodDay('Thu', '🙂', false),
-              _buildMoodDay('Fri', '😃', true), // Highlighted
-              _buildMoodDay('Sat', '😐', false),
-              _buildMoodDay('Sun', '🙂', false),
-            ],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildMoodDay('Mon', '😐', false),
+                _buildMoodDay('Tue', '🙂', false),
+                _buildMoodDay('Wed', '😐', false),
+                _buildMoodDay('Thu', '🙂', false),
+                _buildMoodDay('Fri', '😃', true), // Highlighted
+                _buildMoodDay('Sat', '😐', false),
+                _buildMoodDay('Sun', '🙂', false),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
           Container(

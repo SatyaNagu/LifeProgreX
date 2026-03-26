@@ -263,8 +263,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
+            transitionDuration: const Duration(milliseconds: 200),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
           ),
         );
       },
@@ -366,8 +368,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: activeColor,
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],
@@ -471,8 +473,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
               ),
             );
           }),
@@ -481,8 +485,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
               ),
             );
           }),

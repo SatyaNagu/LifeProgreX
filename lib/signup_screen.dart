@@ -5,7 +5,6 @@ import 'login_screen.dart';
 import 'welcome.dart';
 import 'email_verification.dart';
 import 'auth_service.dart';
-import 'terms_and_conditions.dart';
 import 'utils/custom_popup.dart';
 
 class SignupScreen extends StatefulWidget {
