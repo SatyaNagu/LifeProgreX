@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'utils/custom_popup.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'utils/user_preferences.dart';
 
 class EmailPreferencesScreen extends StatefulWidget {
   const EmailPreferencesScreen({super.key});
@@ -15,23 +16,30 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
   final ThemeManager _themeManager = ThemeManager();
 
   // Habit & Progress Updates
-  bool _dailyReminders = true;
-  bool _weeklyReports = true;
-  bool _monthlyInsights = true;
-  bool _streakMilestones = true;
+  late bool _dailyReminders;
+  late bool _weeklyReports;
+  late bool _monthlyInsights;
+  late bool _streakMilestones;
 
   // AI Coach & Features
-  bool _aiCoachUpdates = false;
+  late bool _aiCoachUpdates;
 
   // Product & Marketing
-  bool _productUpdates = true;
-  bool _marketingEmails = false;
+  late bool _productUpdates;
+  late bool _marketingEmails;
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _dailyReminders = UserPreferences.getDailyReminders();
+    _weeklyReports = UserPreferences.getWeeklyReports();
+    _monthlyInsights = UserPreferences.getMonthlyInsights();
+    _streakMilestones = UserPreferences.getStreakMilestones();
+    _aiCoachUpdates = UserPreferences.getAiCoachUpdates();
+    _productUpdates = UserPreferences.getProductUpdates();
+    _marketingEmails = UserPreferences.getMarketingEmails();
   }
 
   @override
@@ -232,7 +240,16 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
 
   Future<void> _handleSave() async {
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
+    
+    await UserPreferences.setDailyReminders(_dailyReminders);
+    await UserPreferences.setWeeklyReports(_weeklyReports);
+    await UserPreferences.setMonthlyInsights(_monthlyInsights);
+    await UserPreferences.setStreakMilestones(_streakMilestones);
+    await UserPreferences.setAiCoachUpdates(_aiCoachUpdates);
+    await UserPreferences.setProductUpdates(_productUpdates);
+    await UserPreferences.setMarketingEmails(_marketingEmails);
+
+    await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
       setState(() => _isSaving = false);
       CustomPopup.show(
@@ -391,8 +408,8 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: activeColor,
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],

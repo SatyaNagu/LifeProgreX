@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'landing_screen.dart';
+import 'utils/user_preferences.dart';
 
 class WelcomeScreen extends StatefulWidget {
   final bool isNewUser;
@@ -143,7 +144,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       const SizedBox(height: 16),
                       Text(
-                        widget.userName,
+                        UserPreferences.getFirstName().isNotEmpty ? UserPreferences.getFirstName() : widget.userName,
                         style: TextStyle(
                           color: const Color(0xFF8B5CF6), // Purple highlight
                           fontSize: 24,

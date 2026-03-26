@@ -6,7 +6,6 @@ import 'welcome.dart';
 import 'email_verification.dart';
 import 'forget_password.dart';
 import 'auth_service.dart';
-import 'terms_and_conditions.dart';
 import 'utils/custom_popup.dart';
 
 class LoginScreen extends StatefulWidget {

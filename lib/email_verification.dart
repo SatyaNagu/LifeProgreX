@@ -351,7 +351,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                           TextButton(
                             onPressed: () async {
                               await _authService.signOut();
-                              if (!mounted) return;
+                              if (!context.mounted) return;
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(builder: (context) => const LoginScreen()),

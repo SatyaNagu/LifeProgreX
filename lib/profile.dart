@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
-import 'login_screen.dart';
 import 'landing_screen.dart';
+import 'main.dart';
 
 import 'personal_information.dart';
 import 'email_preferences.dart';
@@ -11,6 +10,7 @@ import 'privacy_and_security.dart';
 
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'utils/user_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,9 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final ThemeManager _themeManager = ThemeManager();
   
-  // Mock state for switches
-  bool _pushNotifications = true;
-  bool _weeklyReports = true;
+  // Mock state for switches (removed unused variables)
 
   @override
   void initState() {
@@ -48,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => const AuthWrapper()),
         (route) => false,
       );
     }
@@ -56,10 +54,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    // Extract name from email or set default
-    final userName = user?.email?.split('@')[0] ?? 'User';
-    final userEmail = user?.email ?? 'No email found';
+    final userName = '${UserPreferences.getFirstName()} ${UserPreferences.getLastName()}'.trim();
+    final userEmail = UserPreferences.getEmail().isNotEmpty 
+        ? UserPreferences.getEmail() 
+        : (FirebaseAuth.instance.currentUser?.email ?? 'No email found');
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
     final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
@@ -236,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(
-              pageBuilder: (_, __, ___) => const LandingScreen(),
+              pageBuilder: (_, _, _) => const LandingScreen(),
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
             ),
@@ -436,52 +434,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSwitchTile({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required Function(bool) onChanged,
-    required Color textColor,
-    required Color subTextColor,
-    Color activeColor = const Color(0xFF8B5CF6), 
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CupertinoSwitch(
-            value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildNavigationTile({
     required IconData icon,

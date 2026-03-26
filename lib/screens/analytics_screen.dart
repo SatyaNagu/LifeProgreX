@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../utils/theme_manager.dart';
 import '../utils/premium_background.dart';
 import 'dart:math';
-import '../profile.dart';
 import '../landing_screen.dart';
+import '../settings.dart';
 
 // Note: This is an initial structure based on the provided design. 
 // It will need to be refined and integrated with actual data logic.
@@ -78,24 +78,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
             ],
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
-                  child: const Icon(Icons.person, color: Color(0xFF8B5CF6), size: 20),
-                ),
-              ),
-            ),
-          ],
         ),
         body: Stack(
           children: [
@@ -165,14 +147,10 @@ Widget _buildBottomNavigationBar(BuildContext context) {
         }),
         _buildNavItem(Icons.bar_chart_outlined, const Color(0xFF13C6DF), true, null), // Active state for analytics
         _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
-        _buildNavItem(Icons.person_outline, Colors.white54, false, () {
-          Navigator.pushReplacement(
+        _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
+          Navigator.push(
             context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => const ProfileScreen(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
+            MaterialPageRoute(builder: (context) => const SettingsScreen()),
           );
         }),
       ],

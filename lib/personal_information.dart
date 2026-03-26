@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'utils/custom_popup.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'utils/user_preferences.dart';
 
 class PersonalInformationScreen extends StatefulWidget {
   const PersonalInformationScreen({super.key});
@@ -12,9 +13,9 @@ class PersonalInformationScreen extends StatefulWidget {
 
 class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   final ThemeManager _themeManager = ThemeManager();
-  final TextEditingController _firstNameController = TextEditingController(text: 'Demo');
-  final TextEditingController _lastNameController = TextEditingController(text: 'User');
-  final TextEditingController _emailController = TextEditingController(text: 'demo@example.com');
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
 
@@ -24,6 +25,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _firstNameController.text = UserPreferences.getFirstName();
+    _lastNameController.text = UserPreferences.getLastName();
+    _emailController.text = UserPreferences.getEmail();
+    _phoneController.text = UserPreferences.getPhone();
+    _bioController.text = UserPreferences.getBio();
   }
 
   @override
@@ -361,6 +367,13 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   Future<void> _handleSave() async {
     setState(() => _isSaving = true);
     await Future.delayed(const Duration(seconds: 1));
+    
+    await UserPreferences.setFirstName(_firstNameController.text.trim());
+    await UserPreferences.setLastName(_lastNameController.text.trim());
+    await UserPreferences.setEmail(_emailController.text.trim());
+    await UserPreferences.setPhone(_phoneController.text.trim());
+    await UserPreferences.setBio(_bioController.text.trim());
+
     if (mounted) {
       setState(() => _isSaving = false);
       CustomPopup.show(

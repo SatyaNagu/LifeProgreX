@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
-import 'login_screen.dart';
-import 'landing_screen.dart';
-import 'screens/analytics_screen.dart';
+import 'main.dart';
 
 import 'appearance.dart';
 import 'help_and_support.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'utils/user_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -23,13 +21,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final ThemeManager _themeManager = ThemeManager();
   
   // Mock state for switches
-  bool _pushNotifications = true;
-  bool _weeklyReports = true;
+  late bool _pushNotifications;
+  late bool _weeklyReports;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _pushNotifications = UserPreferences.getPushNotifications();
+    _weeklyReports = UserPreferences.getWeeklyReports();
   }
 
   @override
@@ -47,7 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => const AuthWrapper()),
         (route) => false,
       );
     }
@@ -55,10 +55,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    // Extract name from email or set default
-    final userName = user?.email?.split('@')[0] ?? 'User';
-    final userEmail = user?.email ?? 'No email found';
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
     final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
@@ -122,7 +118,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: 'Push Notifications',
                           subtitle: 'Get daily reminders',
                           value: _pushNotifications,
-                          onChanged: (val) => setState(() => _pushNotifications = val),
+                          onChanged: (val) {
+                            setState(() => _pushNotifications = val);
+                            UserPreferences.setPushNotifications(val);
+                          },
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
@@ -131,7 +130,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: 'Weekly Reports',
                           subtitle: 'Progress summaries',
                           value: _weeklyReports,
-                          onChanged: (val) => setState(() => _weeklyReports = val),
+                          onChanged: (val) {
+                            setState(() => _weeklyReports = val);
+                            UserPreferences.setWeeklyReports(val);
+                          },
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
@@ -240,13 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           
-          // Fixed Bottom Navigation Bar
-          Positioned(
-            bottom: 30, // Distance from bottom
-            left: 20, // Distance from left edge
-            right: 20, // Distance from right edge
-            child: _buildBottomNavigationBar(isDark),
-          ),
+          // Navigation bar removed
         ],
         ), // Stack
       ),    // SafeArea
@@ -259,14 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildBackButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
-          ),
-        );
+        Navigator.pop(context);
       },
       borderRadius: BorderRadius.circular(22),
       child: Container(
@@ -366,8 +355,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: activeColor,
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],
@@ -448,59 +437,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // --- Bottom Navigation Bar ---
-  Widget _buildBottomNavigationBar(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2B2B2B),
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            offset: const Offset(0, 5),
-            blurRadius: 15,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home_outlined, Colors.white54, false, () {
-            Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
-              ),
-            );
-          }),
-          _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, () {
-            Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
-              ),
-            );
-          }),
-          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
-          _buildNavItem(Icons.settings_outlined, const Color(0xFFF98E2F), true, null), // Active Tab
-        ],
-      ),
-    );
-  }
 
-  Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        child: Icon(icon, color: color, size: 28),
-      ),
-    );
-  }
 }

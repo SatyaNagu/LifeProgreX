@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'utils/theme_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'loading_screen.dart';
+import 'utils/user_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -462,6 +463,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     await Future.wait([
       Firebase.initializeApp(),
       _loadOnboardingStatus(),
+      UserPreferences.init(),
     ]);
     if (mounted) {
       setState(() {

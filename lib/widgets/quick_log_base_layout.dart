@@ -23,7 +23,7 @@ class QuickLogScaffold extends StatelessWidget {
     final themeManager = ThemeManager();
     final isDark = themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return PremiumBackground(
       child: Scaffold(
@@ -72,10 +72,10 @@ class QuickLogScaffold extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+                color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white,
                 boxShadow: isDark ? [] : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -120,7 +120,7 @@ class QuickLogScaffold extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
@@ -138,7 +138,7 @@ class QuickLogScaffold extends StatelessWidget {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Colors.black.withOpacity(0.4),
+                    Colors.black.withValues(alpha: 0.4),
                     Colors.transparent,
                   ],
                 ),
@@ -185,7 +185,7 @@ class SectionHeader extends StatelessWidget {
           Text(
             subtitle!,
             style: TextStyle(
-              color: textColor.withOpacity(0.5),
+              color: textColor.withValues(alpha: 0.5),
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -231,14 +231,14 @@ class QuickLogSaveButton extends StatelessWidget {
                 )
               : LinearGradient(
                   colors: [
-                    isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08),
-                    isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04),
+                    isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+                    isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.04),
                   ],
                 ),
           boxShadow: isReady && !isSaving
               ? [
                   BoxShadow(
-                    color: const Color(0xFF8B5CF6).withOpacity(0.3),
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   )
@@ -251,7 +251,7 @@ class QuickLogSaveButton extends StatelessWidget {
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             foregroundColor: Colors.white,
-            disabledForegroundColor: Colors.white.withOpacity(0.4),
+            disabledForegroundColor: Colors.white.withValues(alpha: 0.4),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),

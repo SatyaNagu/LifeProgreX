@@ -7,6 +7,8 @@ import 'utils/theme_manager.dart';
 import 'utils/premium_background.dart';
 import 'screens/all_categories_screen.dart';
 import 'screens/analytics_screen.dart';
+import 'screens/notifications_screen.dart';
+import 'utils/user_preferences.dart';
 import 'dart:ui' as ui;
 
 class LandingScreen extends StatefulWidget {
@@ -190,7 +192,7 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
             ),
             Text(
-              widget.userName,
+              UserPreferences.getFirstName().isNotEmpty ? UserPreferences.getFirstName() : widget.userName,
               style: TextStyle(
                 color: textColor,
                 fontSize: 24,
@@ -246,46 +248,54 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildNotificationIcon() {
     final isDark = _themeManager.isDarkMode;
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.2 : 0.05),
-          width: 1,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+        );
+      },
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.2 : 0.05),
+            width: 1,
+          ),
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            color: isDark ? Colors.grey[200] : const Color(0xFF6B7280),
-            size: 24,
-          ),
-          Positioned(
-            right: 12,
-            top: 12,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: const Color(0xFF9FE82E),
-                shape: BoxShape.circle,
-                border: Border.all(color: isDark ? const Color(0xFF1A0B2E) : Colors.white, width: 1.5),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              Icons.notifications_none_rounded,
+              color: isDark ? Colors.grey[200] : const Color(0xFF6B7280),
+              size: 24,
+            ),
+            Positioned(
+              right: 12,
+              top: 12,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF2D95), // Changed to pink Unread dot matching design
+                  shape: BoxShape.circle,
+                  border: Border.all(color: isDark ? const Color(0xFF1A0B2E) : Colors.white, width: 1.5),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -720,11 +730,17 @@ class _LandingScreenState extends State<LandingScreen> {
     
     // Exact colors from images
     Color baseColor;
-    if (label == 'Mood') baseColor = const Color(0xFFFF2D95);
-    else if (label == 'Workout') baseColor = const Color(0xFFFF6B35);
-    else if (label == 'Reading') baseColor = const Color(0xFF13C6DF);
-    else if (label == 'Skill') baseColor = const Color(0xFF9FE82E);
-    else baseColor = const Color(0xFF8B5CF6);
+    if (label == 'Mood') {
+      baseColor = const Color(0xFFFF2D95);
+    } else if (label == 'Workout') {
+      baseColor = const Color(0xFFFF6B35);
+    } else if (label == 'Reading') {
+      baseColor = const Color(0xFF13C6DF);
+    } else if (label == 'Skill') {
+      baseColor = const Color(0xFF9FE82E);
+    } else {
+      baseColor = const Color(0xFF8B5CF6);
+    }
 
     final List<Color> cardGradient = isDark 
       ? [baseColor.withValues(alpha: 0.15), baseColor.withValues(alpha: 0.05)]
@@ -1084,13 +1100,9 @@ class _LandingScreenState extends State<LandingScreen> {
           }),
           _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
           _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const SettingsScreen(),
-                transitionDuration: Duration.zero,
-                reverseTransitionDuration: Duration.zero,
-              ),
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
             );
           }),
         ],

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'utils/custom_popup.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'utils/user_preferences.dart';
 
 class AppearanceScreen extends StatefulWidget {
   const AppearanceScreen({super.key});
@@ -15,8 +16,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   final ThemeManager _themeManager = ThemeManager();
 
   // Appearance Settings
-  bool _reducedMotion = true;
-  bool _compactView = true;
+  late bool _reducedMotion;
+  late bool _compactView;
   
   // Theme Color Options
   String _selectedColor = 'Blue';
@@ -26,6 +27,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _reducedMotion = UserPreferences.getReducedMotion();
+    _compactView = UserPreferences.getCompactView();
   }
 
   @override
@@ -164,7 +167,10 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                             title: 'Reduced Motion',
                             subtitle: 'Minimize animations',
                             value: _reducedMotion,
-                            onChanged: (val) => setState(() => _reducedMotion = val),
+                            onChanged: (val) {
+                              setState(() => _reducedMotion = val);
+                              UserPreferences.setReducedMotion(val);
+                            },
                             iconColor: const Color(0xFFF98E2F),
                             iconBgColor: isDark ? const Color(0xFF2B1D16) : const Color(0xFFFEF3C7),
                             textColor: textColor,
@@ -176,7 +182,10 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                             title: 'Compact View',
                             subtitle: 'Show more content',
                             value: _compactView,
-                            onChanged: (val) => setState(() => _compactView = val),
+                            onChanged: (val) {
+                              setState(() => _compactView = val);
+                              UserPreferences.setCompactView(val);
+                            },
                             iconColor: isDark ? Colors.white70 : const Color(0xFF4B5563),
                             iconBgColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF1F5F9),
                             textColor: textColor,
@@ -362,8 +371,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: const Color(0xFF7C3AED), // Purple
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: const Color(0xFF7C3AED), // Purple
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],

@@ -5,8 +5,8 @@ import 'login_screen.dart';
 import 'welcome.dart';
 import 'email_verification.dart';
 import 'auth_service.dart';
-import 'terms_and_conditions.dart';
 import 'utils/custom_popup.dart';
+import 'utils/user_preferences.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -21,55 +21,25 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    HapticFeedback.lightImpact();
-    setState(() => _isGoogleLoading = true);
 
-    try {
-      final user = await _authService.signInWithGoogle();
-      if (user != null && mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => user.user?.emailVerified == true
-                ? const WelcomeScreen(isNewUser: true)
-                : const EmailVerificationScreen(isNewUser: true),
-          ),
-          (route) => false,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        CustomPopup.show(
-          context: context,
-          title: 'Google Sign-In Error',
-          message: e.toString(),
-          primaryColor: const Color(0xFFF98E2F), // Orange
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-      }
-    }
-  }
 
   Future<void> _handleSignUp() async {
     final email = _emailController.text.trim();
@@ -96,6 +66,17 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    final passwordRegExp = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~_\\-]).{8,}$');
+    if (!passwordRegExp.hasMatch(password)) {
+      CustomPopup.show(
+        context: context,
+        title: 'Weak Password',
+        message: 'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character.',
+        primaryColor: const Color(0xFFF98E2F), // Orange
+      );
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     HapticFeedback.lightImpact();
 
@@ -107,6 +88,16 @@ class _SignupScreenState extends State<SignupScreen> {
         password,
       );
       if (user != null && mounted) {
+        // Save profile data locally
+        await UserPreferences.setFirstName(
+            _firstNameController.text.trim().isEmpty ? email.split('@')[0] : _firstNameController.text.trim());
+        await UserPreferences.setLastName(_lastNameController.text.trim());
+        await UserPreferences.setEmail(email);
+        await UserPreferences.setPhone(_phoneController.text.trim());
+
+        // We check if the widget is still mounted after async calls
+        if (!mounted) return;
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -283,7 +274,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     _buildTextField(hint: 'john@example.com', icon: Icons.mail_outline, controller: _emailController),
                                     const SizedBox(height: 16),
                                     _buildFieldLabel('Mobile Number (Optional)'),
-                                    _buildTextField(hint: '+1 (555) 000-0000', icon: Icons.phone_outlined),
+                                    _buildTextField(hint: '+1 (555) 000-0000', icon: Icons.phone_outlined, controller: _phoneController),
                                     const SizedBox(height: 16),
                                     _buildFieldLabel('Password'),
                                     _buildTextField(hint: 'Create a strong password', icon: Icons.lock_outline, isPassword: true, controller: _passwordController),
@@ -312,7 +303,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                         ],
                                       ),
                                       child: ElevatedButton(
-                                        onPressed: (_isLoading || _isGoogleLoading) ? null : _handleSignUp,
+                                        onPressed: _isLoading ? null : _handleSignUp,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.transparent,
                                           shadowColor: Colors.transparent,

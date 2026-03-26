@@ -4,6 +4,7 @@ import 'auth_service.dart';
 import 'utils/custom_popup.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'utils/user_preferences.dart';
 
 class PrivacyAndSecurityScreen extends StatefulWidget {
   const PrivacyAndSecurityScreen({super.key});
@@ -23,14 +24,17 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
   bool _isLoading = false;
 
   // Security Settings
-  bool _twoFactorAuth = false;
-  bool _biometricAuth = true;
-  bool _autoSessionTimeout = true;
+  late bool _twoFactorAuth;
+  late bool _biometricAuth;
+  late bool _autoSessionTimeout;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _twoFactorAuth = UserPreferences.getTwoFactorAuth();
+    _biometricAuth = UserPreferences.getBiometricAuth();
+    _autoSessionTimeout = UserPreferences.getAutoSessionTimeout();
   }
 
   @override
@@ -265,7 +269,10 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                       title: 'Two-Factor Authentication',
                       subtitle: 'Add an extra layer of security',
                       value: _twoFactorAuth,
-                      onChanged: (val) => setState(() => _twoFactorAuth = val),
+                      onChanged: (val) {
+                        setState(() => _twoFactorAuth = val);
+                        UserPreferences.setTwoFactorAuth(val);
+                      },
                       textColor: textColor,
                       subTextColor: subTextColor,
                     ),
@@ -275,7 +282,10 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                       title: 'Biometric Authentication',
                       subtitle: 'Use fingerprint or face ID',
                       value: _biometricAuth,
-                      onChanged: (val) => setState(() => _biometricAuth = val),
+                      onChanged: (val) {
+                        setState(() => _biometricAuth = val);
+                        UserPreferences.setBiometricAuth(val);
+                      },
                       textColor: textColor,
                       subTextColor: subTextColor,
                     ),
@@ -285,7 +295,10 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                       title: 'Auto Session Timeout',
                       subtitle: 'Logout after 30 minutes of inactivity',
                       value: _autoSessionTimeout,
-                      onChanged: (val) => setState(() => _autoSessionTimeout = val),
+                      onChanged: (val) {
+                        setState(() => _autoSessionTimeout = val);
+                        UserPreferences.setAutoSessionTimeout(val);
+                      },
                       textColor: textColor,
                       subTextColor: subTextColor,
                     ),
@@ -507,8 +520,8 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
           ),
           CupertinoSwitch(
             value: value,
-            activeColor: activeColor,
-            trackColor: Colors.black.withValues(alpha: 0.1),
+            activeTrackColor: activeColor,
+            inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
             onChanged: onChanged,
           ),
         ],

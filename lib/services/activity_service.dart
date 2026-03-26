@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/activity_model.dart';
 
 class ActivityService {
@@ -17,9 +18,9 @@ class ActivityService {
     } on TimeoutException {
       // If server sync takes too long, we assume success because Firestore
       // will persist locally and sync in the background.
-      print('Activity save timed out, will sync in background');
+      debugPrint('Activity save timed out, will sync in background');
     } catch (e) {
-      print('Error saving activity: $e');
+      debugPrint('Error saving activity: $e');
       rethrow;
     }
   }
@@ -39,7 +40,7 @@ class ActivityService {
     try {
       await _getUserActivities(userId).doc(activityId).delete();
     } catch (e) {
-      print('Error deleting activity: $e');
+      debugPrint('Error deleting activity: $e');
       rethrow;
     }
   }
