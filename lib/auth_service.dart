@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart' as gAuth;
+import 'package:google_sign_in/google_sign_in.dart' as g_auth;
 import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final gAuth.GoogleSignIn _googleSignIn = gAuth.GoogleSignIn(
+  final g_auth.GoogleSignIn _googleSignIn = g_auth.GoogleSignIn(
     scopes: ['email', 'profile'],
   );
 
@@ -68,12 +68,12 @@ class AuthService {
   Future<UserCredential?> signInWithGoogle() async {
     try {
       // Trigger the authentication flow
-      final gAuth.GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final g_auth.GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) return null;
 
       // Obtain the ID token details from the request
-      final gAuth.GoogleSignInAuthentication googleAuth =
+      final g_auth.GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
       // Create a new credential

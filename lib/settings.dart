@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
 import 'login_screen.dart';
 import 'landing_screen.dart';
@@ -55,10 +54,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    // Extract name from email or set default
-    final userName = user?.email?.split('@')[0] ?? 'User';
-    final userEmail = user?.email ?? 'No email found';
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
     final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);

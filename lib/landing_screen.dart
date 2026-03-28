@@ -8,6 +8,10 @@ import 'utils/premium_background.dart';
 import 'screens/all_categories_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'dart:ui' as ui;
+import 'dart:math';
+import 'package:flutter/services.dart';
+import 'services/firestore_service.dart';
+import 'models/habit_model.dart';
 
 class LandingScreen extends StatefulWidget {
   final String userName;
@@ -83,51 +87,62 @@ class _LandingScreenState extends State<LandingScreen> {
           top: 20, 
           bottom: 120,
         ), 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(textColor),
-            const SizedBox(height: 24),
-            _buildGoalsCard(),
-            const SizedBox(height: 32),
-            _buildSectionHeader('Overview', textColor),
-            const SizedBox(height: 16),
-            _buildOverviewGrid(),
-            const SizedBox(height: 32),
-            _buildQuickLogHeader(context, textColor),
-            const SizedBox(height: 16),
-            _buildQuickLogList(context),
-            const SizedBox(height: 32),
-            _buildAiCoachCard(),
-            const SizedBox(height: 12),
-            _buildActionRowItem(
-              icon: Icons.track_changes, 
-              color: const Color(0xFF13C6DF), 
-              title: 'My Habits', 
-              subtitle: '5 Active Habits',
-              isDark: isDark,
-            ),
-            const SizedBox(height: 12),
-            _buildActionRowItem(
-              icon: Icons.bar_chart, 
-              color: const Color(0xFF8B5CF6), 
-              title: 'Analytics', 
-              subtitle: 'View Your Stats',
-              isDark: isDark,
-            ),
-            const SizedBox(height: 32),
-            _buildSectionHeader(
-              'Daily Activity', 
-              textColor, 
-              trailingText: 'SEE ALL >',
-              onTrailingTap: () => Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (context) => const AllCategoriesScreen()),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildDailyActivityGrid(),
-          ],
+        child: StreamBuilder<List<HabitModel>>(
+          stream: FirestoreService().getHabitsStream(),
+          builder: (context, snapshot) {
+            final habits = snapshot.data ?? [];
+            final totalHabits = habits.length;
+            final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
+            final activeHabits = habits.where((h) => h.currentStreak > 0).length;
+            final score = totalHabits > 0 ? ((activeHabits / totalHabits) * 100).toInt() : 0;
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(textColor),
+                const SizedBox(height: 24),
+                _buildGoalsCard(activeHabits: activeHabits, totalHabits: totalHabits, score: score),
+                const SizedBox(height: 32),
+                _buildSectionHeader('Overview', textColor),
+                const SizedBox(height: 16),
+                _buildOverviewGrid(maxStreak: maxStreak, score: score, totalHabits: totalHabits),
+                const SizedBox(height: 32),
+                _buildQuickLogHeader(context, textColor),
+                const SizedBox(height: 16),
+                _buildQuickLogList(context),
+                const SizedBox(height: 32),
+                _buildAiCoachCard(),
+                const SizedBox(height: 12),
+                _buildActionRowItem(
+                  icon: Icons.track_changes, 
+                  color: const Color(0xFF13C6DF), 
+                  title: 'My Habits', 
+                  subtitle: '$activeHabits Active Habits',
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 12),
+                _buildActionRowItem(
+                  icon: Icons.bar_chart, 
+                  color: const Color(0xFF8B5CF6), 
+                  title: 'Analytics', 
+                  subtitle: 'View Your Stats',
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 32),
+                _buildSectionHeader(
+                  'Daily Activity', 
+                  textColor, 
+                  trailingText: 'SEE ALL >',
+                  onTrailingTap: () => Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => const AllCategoriesScreen()),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildDailyActivityGrid(),
+              ],
+            );
+          }
         ),
       ),
     );
@@ -291,8 +306,11 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   // --- Today's Goals Card ---
-  Widget _buildGoalsCard() {
+  Widget _buildGoalsCard({int activeHabits = 0, int totalHabits = 0, int score = 0}) {
     final isDark = _themeManager.isDarkMode;
+    final displayTotal = totalHabits == 0 ? 5 : totalHabits;
+    final remaining = displayTotal - activeHabits;
+    final progress = (score / 100.0).clamp(0.0, 1.0);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -390,8 +408,8 @@ class _LandingScreenState extends State<LandingScreen> {
                             ),
                           ],
                         ),
-                        child: const Text(
-                          '3/5',
+                        child: Text(
+                          '$activeHabits/$displayTotal',
                           style: TextStyle(
                             color: Color(0xFF0A0E0A),
                             fontWeight: FontWeight.w900,
@@ -419,7 +437,7 @@ class _LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                           FractionallySizedBox(
-                            widthFactor: 0.6,
+                            widthFactor: progress,
                             child: Container(
                               height: 6,
                               decoration: BoxDecoration(
@@ -438,7 +456,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           ),
                           // Percentage Indicator
                           Positioned(
-                            left: (MediaQuery.of(context).size.width - 88) * 0.6 - 25,
+                            left: (MediaQuery.of(context).size.width - 88) * progress - 25,
                             top: -35,
                             child: Column(
                               children: [
@@ -454,9 +472,9 @@ class _LandingScreenState extends State<LandingScreen> {
                                        ),
                                      ],
                                   ),
-                                  child: const Text(
-                                    '60%',
-                                    style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900),
+                                  child: Text(
+                                    '$score%',
+                                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900),
                                   ),
                                 ),
                                 CustomPaint(
@@ -471,12 +489,12 @@ class _LandingScreenState extends State<LandingScreen> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          _buildStatusDot(const Color(0xFFFFBF00), 'Completed: 3', isDark),
+                          _buildStatusDot(const Color(0xFFFFBF00), 'Completed: $activeHabits', isDark),
                           const SizedBox(width: 20),
-                          _buildStatusDot(isDark ? Colors.grey[600]! : Colors.grey[400]!, 'Remaining: 2', isDark),
+                          _buildStatusDot(isDark ? Colors.grey[600]! : Colors.grey[400]!, 'Remaining: $remaining', isDark),
                         ],
                       ),
-                      if (0.6 >= 0.8) // Example logic, would normally use currentProgress variable
+                      if (progress >= 0.8)
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: Container(
@@ -538,7 +556,7 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   // --- Overview Grid ---
-  Widget _buildOverviewGrid() {
+  Widget _buildOverviewGrid({int maxStreak = 0, int score = 0, int totalHabits = 0}) {
     final isDark = _themeManager.isDarkMode;
     return GridView.count(
       shrinkWrap: true,
@@ -552,7 +570,7 @@ class _LandingScreenState extends State<LandingScreen> {
           icon: Icons.local_fire_department, 
           iconColor: const Color(0xFFFF5B5B), 
           title: 'STREAK', 
-          value: '7', 
+          value: '$maxStreak', 
           unit: 'days',
           cardGradient: isDark 
             ? [const Color(0xFF382370).withValues(alpha: 0.4), const Color(0xFF1B113D).withValues(alpha: 0.4)]
@@ -562,7 +580,7 @@ class _LandingScreenState extends State<LandingScreen> {
           icon: Icons.track_changes, 
           iconColor: const Color(0xFFFDB913), 
           title: 'SCORE', 
-          value: '60', 
+          value: '$score', 
           unit: '%',
           cardGradient: isDark 
             ? [const Color(0xFF3D2C1A).withValues(alpha: 0.4), const Color(0xFF1D140B).withValues(alpha: 0.4)]
@@ -572,7 +590,7 @@ class _LandingScreenState extends State<LandingScreen> {
           icon: Icons.trending_up, 
           iconColor: const Color(0xFF5AC8FA), 
           title: 'HABITS', 
-          value: '28', 
+          value: '$totalHabits', 
           unit: 'total',
           cardGradient: isDark 
             ? [const Color(0xFF1B264E).withValues(alpha: 0.4), const Color(0xFF0D1426).withValues(alpha: 0.4)]
@@ -692,28 +710,44 @@ class _LandingScreenState extends State<LandingScreen> {
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
       builder: (context, currentIds, child) {
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 2.8, // Adjust as needed to fit the content
-          ),
-          itemCount: currentIds.length,
-          itemBuilder: (context, index) {
-            final id = currentIds[index];
-            final action = QuickLogManager.allActions[id]!;
-            // Convert name to sentence case if it's all caps
-            String label = action.name;
-            if (label == label.toUpperCase()) {
-              label = label[0] + label.substring(1).toLowerCase();
-            }
+        return ValueListenableBuilder<Set<String>>(
+          valueListenable: QuickLogManager.completedTodayNotifier,
+          builder: (context, completedIds, child) {
+            final visibleIds = currentIds.where((id) => !completedIds.contains(id)).toList();
             
-            return _buildQuickLogSmallCard(action.icon, label, () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
-            });
+            if (visibleIds.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text('All daily logs completed! 🎉', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                ),
+              );
+            }
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 2.8,
+              ),
+              itemCount: visibleIds.length,
+              itemBuilder: (context, index) {
+                final id = visibleIds[index];
+                final action = QuickLogManager.allActions[id]!;
+                String label = action.name;
+                if (label == label.toUpperCase()) {
+                  label = label[0] + label.substring(1).toLowerCase();
+                }
+                
+                return _buildQuickLogSmallCard(action.icon, label, () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
+                });
+              },
+            );
           },
         );
       },
@@ -727,10 +761,15 @@ class _LandingScreenState extends State<LandingScreen> {
     Color baseColor;
     if (label == 'Mood') {
       baseColor = const Color(0xFFFF2D95);
-    } else if (label == 'Workout') baseColor = const Color(0xFFFF6B35);
-    else if (label == 'Reading') baseColor = const Color(0xFF13C6DF);
-    else if (label == 'Skill') baseColor = const Color(0xFF9FE82E);
-    else baseColor = const Color(0xFF8B5CF6);
+    } else if (label == 'Workout') {
+      baseColor = const Color(0xFFFF6B35);
+    } else if (label == 'Reading') {
+      baseColor = const Color(0xFF13C6DF);
+    } else if (label == 'Skill') {
+      baseColor = const Color(0xFF9FE82E);
+    } else {
+      baseColor = const Color(0xFF8B5CF6);
+    }
 
     final List<Color> cardGradient = isDark 
       ? [baseColor.withValues(alpha: 0.15), baseColor.withValues(alpha: 0.05)]

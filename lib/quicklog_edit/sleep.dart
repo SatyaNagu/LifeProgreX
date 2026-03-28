@@ -31,7 +31,7 @@ class _SleepScreenState extends State<SleepScreen> {
   Widget build(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return QuickLogScaffold(
       title: 'Log Sleep',
@@ -73,9 +73,9 @@ class _SleepScreenState extends State<SleepScreen> {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -96,7 +96,7 @@ class _SleepScreenState extends State<SleepScreen> {
               Text(
                 'hours',
                 style: TextStyle(
-                  color: textColor.withOpacity(0.5),
+                  color: textColor.withValues(alpha: 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -118,7 +118,7 @@ class _SleepScreenState extends State<SleepScreen> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
@@ -130,9 +130,9 @@ class _SleepScreenState extends State<SleepScreen> {
     return GlassCard(
       padding: const EdgeInsets.symmetric(vertical: 20),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(5, (index) {
@@ -144,7 +144,7 @@ class _SleepScreenState extends State<SleepScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Icon(
                 isSelected ? Icons.star_rounded : Icons.star_outline_rounded,
-                color: isSelected ? const Color(0xFFFFB267) : textColor.withOpacity(0.2),
+                color: isSelected ? const Color(0xFFFFB267) : textColor.withValues(alpha: 0.2),
                 size: 44,
               ),
             ),
@@ -158,9 +158,9 @@ class _SleepScreenState extends State<SleepScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(4),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: TextField(
         controller: _noteController,
         style: TextStyle(color: textColor, fontWeight: FontWeight.w500),

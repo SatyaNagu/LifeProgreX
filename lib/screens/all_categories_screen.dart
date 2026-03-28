@@ -18,7 +18,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
     final themeManager = ThemeManager();
     final isDark = themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return PremiumBackground(
       child: Scaffold(
@@ -97,7 +97,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: isSelected ? [
                     BoxShadow(
-                      color: const Color(0xFFA855F7).withOpacity(0.3),
+                      color: const Color(0xFFA855F7).withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -106,7 +106,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
                 child: Text(
                   date,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : textColor.withOpacity(0.4),
+                    color: isSelected ? Colors.white : textColor.withValues(alpha: 0.4),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     fontSize: 14,
                   ),
@@ -312,9 +312,9 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: iconColor.withOpacity(0.2), width: 1),
+                border: Border.all(color: iconColor.withValues(alpha: 0.2), width: 1),
               ),
               child: Icon(icon, color: iconColor, size: 20),
             ),
@@ -367,7 +367,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFA855F7).withOpacity(0.4),
+            color: const Color(0xFFA855F7).withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),

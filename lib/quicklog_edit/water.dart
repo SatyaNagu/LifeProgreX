@@ -30,7 +30,7 @@ class _WaterScreenState extends State<WaterScreen> {
   Widget build(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return QuickLogScaffold(
       title: 'Water Intake',
@@ -68,9 +68,9 @@ class _WaterScreenState extends State<WaterScreen> {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -93,7 +93,7 @@ class _WaterScreenState extends State<WaterScreen> {
               Text(
                 'glasses',
                 style: TextStyle(
-                  color: textColor.withOpacity(0.5),
+                  color: textColor.withValues(alpha: 0.5),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -115,7 +115,7 @@ class _WaterScreenState extends State<WaterScreen> {
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Icon(icon, color: const Color(0xFF8B5CF6), size: 28),
@@ -127,9 +127,9 @@ class _WaterScreenState extends State<WaterScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(4),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: TextField(
         controller: _noteController,
         style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
