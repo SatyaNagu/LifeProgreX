@@ -65,6 +65,47 @@ class FirestoreService {
     }
   }
 
+  // Locates the generic Title of a user's Habit array to retrieve its unique Document UUID, before running the transaction.
+  Future<void> logActivityByTitle(String title, {String? note}) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('User must be logged in to log activity.');
+
+      final snapshot = await _db
+          .collection('habits')
+          .where('userId', isEqualTo: user.uid)
+          .where('title', isEqualTo: title)
+          .limit(1)
+          .get();
+
+      String habitId;
+      if (snapshot.docs.isEmpty) {
+        // Auto-create the prerequisite Habit object to securely track the new Streak!
+        final newHabit = HabitModel(
+          id: '',
+          userId: user.uid,
+          title: title,
+          category: HabitCategory.health, // Default enum category
+          createdAt: DateTime.now(),
+          currentStreak: 0,
+        );
+        final habitData = newHabit.toJson();
+        habitData['userId'] = user.uid; // Security constraint
+        final docRef = await _db.collection('habits').add(habitData);
+        habitId = docRef.id;
+      } else {
+        habitId = snapshot.docs.first.id;
+      }
+
+      // Execute the native unified transaction
+      await logActivity(habitId, note: note);
+    } on FirebaseException catch (e) {
+      throw Exception('Database Error looking up "$title": ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected Lookup error: $e');
+    }
+  }
+
   // Creates a secure realtime WebSocket connection returning only this specific user's streams
   Stream<List<HabitModel>> getHabitsStream() {
     final user = _auth.currentUser;
@@ -76,11 +117,16 @@ class FirestoreService {
       return _db
           .collection('habits')
           .where('userId', isEqualTo: user.uid)
-          .orderBy('createdAt', descending: true)
           .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => HabitModel.fromJson(doc.data(), doc.id))
-              .toList());
+          .map((snapshot) {
+              final models = snapshot.docs
+                  .map((doc) => HabitModel.fromJson(doc.data(), doc.id))
+                  .toList();
+                  
+              // Sort locally to completely bypass Firebase Composite Index restrictions
+              models.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              return models;
+          });
     } on FirebaseException catch (e) {
       log('Firestore Stream Initialization Error: ${e.message}');
       throw Exception('Streaming Error: ${e.message}');

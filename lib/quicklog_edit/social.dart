@@ -40,7 +40,7 @@ class _SocialScreenState extends State<SocialScreen> {
   Widget build(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return QuickLogScaffold(
       title: 'Social Connection',
@@ -82,9 +82,9 @@ class _SocialScreenState extends State<SocialScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(16),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -106,8 +106,8 @@ class _SocialScreenState extends State<SocialScreen> {
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? accentColor.withOpacity(isDark ? 0.2 : 0.1)
-                    : isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.4),
+                    ? accentColor.withValues(alpha: isDark ? 0.2 : 0.1)
+                    : isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected ? accentColor : Colors.transparent,
@@ -119,14 +119,14 @@ class _SocialScreenState extends State<SocialScreen> {
                 children: [
                   Icon(
                     type['icon'],
-                    color: isSelected ? accentColor : textColor.withOpacity(0.4),
+                    color: isSelected ? accentColor : textColor.withValues(alpha: 0.4),
                     size: 28,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     type['label'],
                     style: TextStyle(
-                      color: isSelected ? (isDark ? accentColor.withOpacity(0.8) : textColor) : textColor.withOpacity(0.6),
+                      color: isSelected ? (isDark ? accentColor.withValues(alpha: 0.8) : textColor) : textColor.withValues(alpha: 0.6),
                       fontSize: 12,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                     ),
@@ -144,9 +144,9 @@ class _SocialScreenState extends State<SocialScreen> {
     return GlassCard(
       padding: const EdgeInsets.symmetric(vertical: 20),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(5, (index) {
@@ -158,7 +158,7 @@ class _SocialScreenState extends State<SocialScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Icon(
                 isSelected ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                color: isSelected ? const Color(0xFFFF67B2) : textColor.withOpacity(0.2),
+                color: isSelected ? const Color(0xFFFF67B2) : textColor.withValues(alpha: 0.2),
                 size: 44,
               ),
             ),
@@ -172,9 +172,9 @@ class _SocialScreenState extends State<SocialScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(4),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: TextField(
         controller: _noteController,
         style: TextStyle(color: textColor, fontWeight: FontWeight.w500),

@@ -54,179 +54,202 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
     return PremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                
-                // Header Loop
-                Row(
-                  children: [
-                    _buildBackButton(context, isDark),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Email Preferences',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+
+                  // Header Loop
+                  Row(
+                    children: [
+                      _buildBackButton(context, isDark),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Email Preferences',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Manage your email notifications',
-                          style: TextStyle(
-                            color: subTextColor,
-                            fontSize: 14,
+                          Text(
+                            'Manage your email notifications',
+                            style: TextStyle(color: subTextColor, fontSize: 14),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-
-                // Habit & Progress Updates Section
-                _buildSectionCard(
-                  icon: Icons.trending_up,
-                  iconBackgroundColor: isDark ? const Color(0xFF2B1D16) : const Color(0xFFFEF3C7),
-                  iconColor: const Color(0xFFF98E2F), // Orange
-                  title: 'Habit & Progress Updates',
-                  subtitle: 'Stay on track with your personal growth journey',
-                  color: cardBgColor,
-                  isDark: isDark,
-                  textColor: textColor,
-                  subTextColor: subTextColor,
-                  children: [
-                    _buildSwitchTile(
-                      title: 'Daily Habit Reminders',
-                      subtitle: 'Get notified to complete your daily habits',
-                      value: _dailyReminders,
-                      onChanged: (val) => setState(() => _dailyReminders = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    _buildDivider(isDark),
-                    _buildSwitchTile(
-                      title: 'Weekly Progress Reports',
-                      subtitle: 'Summary of your weekly achievements',
-                      value: _weeklyReports,
-                      onChanged: (val) => setState(() => _weeklyReports = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    _buildDivider(isDark),
-                    _buildSwitchTile(
-                      title: 'Monthly Insights',
-                      subtitle: 'Deep dive into your monthly trends',
-                      value: _monthlyInsights,
-                      onChanged: (val) => setState(() => _monthlyInsights = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    _buildDivider(isDark),
-                    _buildSwitchTile(
-                      title: 'Streak Milestones',
-                      subtitle: 'Celebrate when you hit streak goals',
-                      value: _streakMilestones,
-                      onChanged: (val) => setState(() => _streakMilestones = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // AI Coach & Features Section
-                _buildSectionCard(
-                  icon: Icons.auto_awesome,
-                  iconBackgroundColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF5F3FF),
-                  iconColor: const Color(0xFF8B5CF6), // Purple
-                  title: 'AI Coach & Features',
-                  subtitle: 'Personalized insights and recommendations',
-                  color: cardBgColor,
-                  isDark: isDark,
-                  textColor: textColor,
-                  subTextColor: subTextColor,
-                  children: [
-                    _buildSwitchTile(
-                      title: 'AI Coach Updates',
-                      subtitle: 'New insights and personalized tips',
-                      value: _aiCoachUpdates,
-                      onChanged: (val) => setState(() => _aiCoachUpdates = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Product & Marketing Section
-                _buildSectionCard(
-                  icon: Icons.mail_outline,
-                  iconBackgroundColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF1F5F9),
-                  iconColor: const Color(0xFF8B5CF6), // Purple
-                  title: 'Product & Marketing',
-                  subtitle: 'Updates about LifeProgreX',
-                  color: cardBgColor,
-                  isDark: isDark,
-                  textColor: textColor,
-                  subTextColor: subTextColor,
-                  children: [
-                    _buildSwitchTile(
-                      title: 'Product Updates',
-                      subtitle: 'New features and improvements',
-                      value: _productUpdates,
-                      onChanged: (val) => setState(() => _productUpdates = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    _buildDivider(isDark),
-                    _buildSwitchTile(
-                      title: 'Marketing Emails',
-                      subtitle: 'Tips, stories, and inspiration',
-                      value: _marketingEmails,
-                      onChanged: (val) => setState(() => _marketingEmails = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _isSaving ? null : _handleSave,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF98E2F), // Orange
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        ],
                       ),
-                      elevation: 0,
-                    ),
-                    child: _isSaving 
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Save Preferences', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 30),
+
+                  // Habit & Progress Updates Section
+                  _buildSectionCard(
+                    icon: Icons.trending_up,
+                    iconBackgroundColor: isDark
+                        ? const Color(0xFF2B1D16)
+                        : const Color(0xFFFEF3C7),
+                    iconColor: const Color(0xFFF98E2F), // Orange
+                    title: 'Habit & Progress Updates',
+                    subtitle: 'Stay on track with your personal growth journey',
+                    color: cardBgColor,
+                    isDark: isDark,
+                    textColor: textColor,
+                    subTextColor: subTextColor,
+                    children: [
+                      _buildSwitchTile(
+                        title: 'Daily Habit Reminders',
+                        subtitle: 'Get notified to complete your daily habits',
+                        value: _dailyReminders,
+                        onChanged: (val) =>
+                            setState(() => _dailyReminders = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSwitchTile(
+                        title: 'Weekly Progress Reports',
+                        subtitle: 'Summary of your weekly achievements',
+                        value: _weeklyReports,
+                        onChanged: (val) =>
+                            setState(() => _weeklyReports = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSwitchTile(
+                        title: 'Monthly Insights',
+                        subtitle: 'Deep dive into your monthly trends',
+                        value: _monthlyInsights,
+                        onChanged: (val) =>
+                            setState(() => _monthlyInsights = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSwitchTile(
+                        title: 'Streak Milestones',
+                        subtitle: 'Celebrate when you hit streak goals',
+                        value: _streakMilestones,
+                        onChanged: (val) =>
+                            setState(() => _streakMilestones = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // AI Coach & Features Section
+                  _buildSectionCard(
+                    icon: Icons.auto_awesome,
+                    iconBackgroundColor: isDark
+                        ? const Color(0xFF221A3D)
+                        : const Color(0xFFF5F3FF),
+                    iconColor: const Color(0xFF8B5CF6), // Purple
+                    title: 'AI Coach & Features',
+                    subtitle: 'Personalized insights and recommendations',
+                    color: cardBgColor,
+                    isDark: isDark,
+                    textColor: textColor,
+                    subTextColor: subTextColor,
+                    children: [
+                      _buildSwitchTile(
+                        title: 'AI Coach Updates',
+                        subtitle: 'New insights and personalized tips',
+                        value: _aiCoachUpdates,
+                        onChanged: (val) =>
+                            setState(() => _aiCoachUpdates = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Product & Marketing Section
+                  _buildSectionCard(
+                    icon: Icons.mail_outline,
+                    iconBackgroundColor: isDark
+                        ? const Color(0xFF221A3D)
+                        : const Color(0xFFF1F5F9),
+                    iconColor: const Color(0xFF8B5CF6), // Purple
+                    title: 'Product & Marketing',
+                    subtitle: 'Updates about LifeProgreX',
+                    color: cardBgColor,
+                    isDark: isDark,
+                    textColor: textColor,
+                    subTextColor: subTextColor,
+                    children: [
+                      _buildSwitchTile(
+                        title: 'Product Updates',
+                        subtitle: 'New features and improvements',
+                        value: _productUpdates,
+                        onChanged: (val) =>
+                            setState(() => _productUpdates = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSwitchTile(
+                        title: 'Marketing Emails',
+                        subtitle: 'Tips, stories, and inspiration',
+                        value: _marketingEmails,
+                        onChanged: (val) =>
+                            setState(() => _marketingEmails = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _isSaving ? null : _handleSave,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF98E2F), // Orange
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Save Preferences',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
       ),
-     ),
     );
   }
 
@@ -256,13 +279,15 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         child: Center(
           child: Icon(
@@ -291,19 +316,26 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 12),
+            padding: const EdgeInsets.only(
+              left: 20,
+              top: 20,
+              right: 20,
+              bottom: 12,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -313,11 +345,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                     color: iconBackgroundColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -335,14 +363,11 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(
-                          color: subTextColor,
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: subTextColor, fontSize: 13),
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -381,10 +406,7 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: subTextColor, fontSize: 13),
                 ),
               ],
             ),
@@ -406,7 +428,9 @@ class _EmailPreferencesScreenState extends State<EmailPreferencesScreen> {
       child: Divider(
         height: 1,
         thickness: 1,
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
       ),
     );
   }

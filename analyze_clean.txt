@@ -1,0 +1,12 @@
+Analyzing life_progex...                                        
+
+   info - Statements in an if should be enclosed in a block - lib\landing_screen.dart:764:36 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\landing_screen.dart:765:34 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\landing_screen.dart:766:32 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\landing_screen.dart:767:10 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\quicklog_edit\workout.dart:223:39 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\quicklog_edit\workout.dart:224:22 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\services\activity_service.dart:32:9 - avoid_print
+warning - Unused import: 'package:firebase_auth/firebase_auth.dart' - lib\settings.dart:3:8 - unused_import
+warning - The declaration '_handleGoogleSignIn' isn't referenced - lib\signup_screen.dart:40:16 - unused_element
+

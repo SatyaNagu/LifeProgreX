@@ -38,7 +38,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   Widget build(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return QuickLogScaffold(
       title: 'Log Nutrition',
@@ -80,9 +80,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(16),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -104,8 +104,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? accentColor.withOpacity(isDark ? 0.2 : 0.1)
-                    : isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.4),
+                    ? accentColor.withValues(alpha: isDark ? 0.2 : 0.1)
+                    : isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected ? accentColor : Colors.transparent,
@@ -117,14 +117,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 children: [
                   Icon(
                     meal['icon'],
-                    color: isSelected ? accentColor : textColor.withOpacity(0.4),
+                    color: isSelected ? accentColor : textColor.withValues(alpha: 0.4),
                     size: 24,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     meal['label'],
                     style: TextStyle(
-                      color: isSelected ? (isDark ? accentColor.withOpacity(0.8) : textColor) : textColor.withOpacity(0.6),
+                      color: isSelected ? (isDark ? accentColor.withValues(alpha: 0.8) : textColor) : textColor.withValues(alpha: 0.6),
                       fontSize: 14,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                     ),
@@ -142,9 +142,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -165,7 +165,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
               Text(
                 'kcal',
                 style: TextStyle(
-                  color: textColor.withOpacity(0.5),
+                  color: textColor.withValues(alpha: 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -187,7 +187,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
@@ -199,9 +199,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(4),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: TextField(
         controller: _noteController,
         style: TextStyle(color: textColor, fontWeight: FontWeight.w500),

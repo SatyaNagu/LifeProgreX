@@ -87,9 +87,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(16),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -111,8 +111,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? accentColor.withOpacity(isDark ? 0.2 : 0.1)
-                    : isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.4),
+                    ? accentColor.withValues(alpha: isDark ? 0.2 : 0.1)
+                    : isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected ? accentColor : Colors.transparent,
@@ -124,14 +124,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 children: [
                   Icon(
                     type['icon'],
-                    color: isSelected ? accentColor : textColor.withOpacity(0.4),
+                    color: isSelected ? accentColor : textColor.withValues(alpha: 0.4),
                     size: 28,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     type['label'],
                     style: TextStyle(
-                      color: isSelected ? (isDark ? accentColor.withOpacity(0.8) : textColor) : textColor.withOpacity(0.6),
+                      color: isSelected ? (isDark ? accentColor.withValues(alpha: 0.8) : textColor) : textColor.withValues(alpha: 0.6),
                       fontSize: 12,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                     ),
@@ -149,9 +149,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -172,7 +172,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               Text(
                 'minutes',
                 style: TextStyle(
-                  color: textColor.withOpacity(0.5),
+                  color: textColor.withValues(alpha: 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -194,7 +194,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFF8B5CF6).withOpacity(0.15),
+          color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
@@ -206,22 +206,25 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(20),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(10, (index) {
               final active = index < _intensity;
-              Color blockColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05);
+              Color blockColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05);
               
               if (active) {
                 if (index < 3) {
                   blockColor = const Color(0xFF00D12E);
-                } else if (index < 7) blockColor = const Color(0xFFF98E2F);
-                else blockColor = const Color(0xFFFF4B4B);
+                } else if (index < 7) {
+                  blockColor = const Color(0xFFF98E2F);
+                } else {
+                  blockColor = const Color(0xFFFF4B4B);
+                }
               }
 
               return Expanded(
@@ -266,7 +269,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
               activeTrackColor: const Color(0xFF8B5CF6),
-              inactiveTrackColor: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+              inactiveTrackColor: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
               thumbColor: const Color(0xFF8B5CF6),
             ),
             child: Slider(
@@ -286,9 +289,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(4),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: TextField(
         controller: _noteController,
         style: TextStyle(color: textColor, fontWeight: FontWeight.w500),

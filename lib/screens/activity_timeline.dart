@@ -159,7 +159,7 @@ class _ActivityTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(iconData, color: color, size: 24),
@@ -193,7 +193,7 @@ class _ActivityTile extends StatelessWidget {
                       child: Text(
                         log.notes!,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -209,7 +209,7 @@ class _ActivityTile extends StatelessWidget {
                 Text(
                   DateFormat('h:mm a').format(log.createdAt),
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 12,
                   ),
                 ),
@@ -280,7 +280,7 @@ class _EmptyTimeline extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, color: Colors.white.withOpacity(0.1), size: 100),
+          Icon(Icons.history, color: Colors.white.withValues(alpha: 0.1), size: 100),
           const SizedBox(height: 24),
           const Text(
             'No activities logged yet',

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum HabitCategory { Health, Knowledge, Career, Happiness }
+enum HabitCategory { health, knowledge, career, happiness }
 
 class HabitModel {
   final String id;
@@ -23,12 +23,12 @@ class HabitModel {
     final timestamp = json['createdAt'] as Timestamp?;
     
     // Parse category safely across the boundary
-    HabitCategory parsedCategory = HabitCategory.Health;
+    HabitCategory parsedCategory = HabitCategory.health;
     final categoryStr = json['category'] as String?;
     if (categoryStr != null) {
       parsedCategory = HabitCategory.values.firstWhere(
-        (e) => e.toString() == 'HabitCategory.$categoryStr',
-        orElse: () => HabitCategory.Health,
+        (e) => e.name.toLowerCase() == categoryStr.toLowerCase(),
+        orElse: () => HabitCategory.health,
       );
     }
 
@@ -46,7 +46,7 @@ class HabitModel {
     return {
       'userId': userId,
       'title': title,
-      'category': category.toString().split('.').last,
+      'category': category.name[0].toUpperCase() + category.name.substring(1),
       'createdAt': Timestamp.fromDate(createdAt),
       'currentStreak': currentStreak,
     };

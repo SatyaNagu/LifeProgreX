@@ -9,7 +9,8 @@ class PrivacyAndSecurityScreen extends StatefulWidget {
   const PrivacyAndSecurityScreen({super.key});
 
   @override
-  State<PrivacyAndSecurityScreen> createState() => _PrivacyAndSecurityScreenState();
+  State<PrivacyAndSecurityScreen> createState() =>
+      _PrivacyAndSecurityScreenState();
 }
 
 class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
@@ -51,7 +52,9 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+    if (currentPassword.isEmpty ||
+        newPassword.isEmpty ||
+        confirmPassword.isEmpty) {
       CustomPopup.show(
         context: context,
         title: 'Missing Fields',
@@ -134,170 +137,181 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10),
-                  
+
                   // Header Loop
                   Row(
-                  children: [
-                    _buildBackButton(context, isDark),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Privacy & Security',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Manage your account security',
-                          style: TextStyle(
-                            color: subTextColor,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-
-                // Change Password Section
-                _buildSectionCard(
-                  icon: Icons.key,
-                  iconBackgroundColor: isDark ? const Color(0xFF221A3D) : const Color(0xFFF5F3FF),
-                  iconColor: const Color(0xFF8B5CF6), // Purple
-                  title: 'Change Password',
-                  subtitle: 'Update your account password',
-                  color: cardBgColor,
-                  isDark: isDark,
-                  textColor: textColor,
-                  subTextColor: subTextColor,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      child: Column(
+                    children: [
+                      _buildBackButton(context, isDark),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildPasswordField(
-                            label: 'Current Password', 
-                            hintText: 'Enter current password',
-                            controller: _currentPasswordController,
-                            isDark: isDark,
-                            textColor: textColor,
-                            subTextColor: subTextColor,
-                          ),
-                          const SizedBox(height: 20),
-                          _buildPasswordField(
-                            label: 'New Password', 
-                            hintText: 'Enter new password',
-                            controller: _newPasswordController,
-                            isDark: isDark,
-                            textColor: textColor,
-                            subTextColor: subTextColor,
-                          ),
-                          const SizedBox(height: 20),
-                          _buildPasswordField(
-                            label: 'Confirm New Password', 
-                            hintText: 'Confirm new password',
-                            controller: _confirmPasswordController,
-                            isDark: isDark,
-                            textColor: textColor,
-                            subTextColor: subTextColor,
-                          ),
-                          const SizedBox(height: 24),
-                          
-                          // Update Password Button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleChangePassword,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF7C3AED), // Vibrant purple
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Update Password',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                          Text(
+                            'Privacy & Security',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          Text(
+                            'Manage your account security',
+                            style: TextStyle(color: subTextColor, fontSize: 14),
+                          ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
 
-                // Security Settings Section
-                _buildSectionCard(
-                  icon: Icons.shield_outlined,
-                  iconBackgroundColor: isDark ? const Color(0xFF2B1D16) : const Color(0xFFFEF3C7),
-                  iconColor: const Color(0xFFF98E2F), // Orange
-                  title: 'Security Settings',
-                  subtitle: 'Additional security features',
-                  color: cardBgColor,
-                  isDark: isDark,
-                  textColor: textColor,
-                  subTextColor: subTextColor,
-                  children: [
-                    _buildSwitchTile(
-                      icon: Icons.lock_outline,
-                      title: 'Two-Factor Authentication',
-                      subtitle: 'Add an extra layer of security',
-                      value: _twoFactorAuth,
-                      onChanged: (val) => setState(() => _twoFactorAuth = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    _buildDivider(isDark),
-                    _buildSwitchTile(
-                      icon: Icons.fingerprint,
-                      title: 'Biometric Authentication',
-                      subtitle: 'Use fingerprint or face ID',
-                      value: _biometricAuth,
-                      onChanged: (val) => setState(() => _biometricAuth = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    _buildDivider(isDark),
-                    _buildSwitchTile(
-                      icon: Icons.timer_outlined,
-                      title: 'Auto Session Timeout',
-                      subtitle: 'Logout after 30 minutes of inactivity',
-                      value: _autoSessionTimeout,
-                      onChanged: (val) => setState(() => _autoSessionTimeout = val),
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-              ],
+                  // Change Password Section
+                  _buildSectionCard(
+                    icon: Icons.key,
+                    iconBackgroundColor: isDark
+                        ? const Color(0xFF221A3D)
+                        : const Color(0xFFF5F3FF),
+                    iconColor: const Color(0xFF8B5CF6), // Purple
+                    title: 'Change Password',
+                    subtitle: 'Update your account password',
+                    color: cardBgColor,
+                    isDark: isDark,
+                    textColor: textColor,
+                    subTextColor: subTextColor,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        child: Column(
+                          children: [
+                            _buildPasswordField(
+                              label: 'Current Password',
+                              hintText: 'Enter current password',
+                              controller: _currentPasswordController,
+                              isDark: isDark,
+                              textColor: textColor,
+                              subTextColor: subTextColor,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildPasswordField(
+                              label: 'New Password',
+                              hintText: 'Enter new password',
+                              controller: _newPasswordController,
+                              isDark: isDark,
+                              textColor: textColor,
+                              subTextColor: subTextColor,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildPasswordField(
+                              label: 'Confirm New Password',
+                              hintText: 'Confirm new password',
+                              controller: _confirmPasswordController,
+                              isDark: isDark,
+                              textColor: textColor,
+                              subTextColor: subTextColor,
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Update Password Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton(
+                                onPressed: _isLoading
+                                    ? null
+                                    : _handleChangePassword,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(
+                                    0xFF7C3AED,
+                                  ), // Vibrant purple
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Update Password',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Security Settings Section
+                  _buildSectionCard(
+                    icon: Icons.shield_outlined,
+                    iconBackgroundColor: isDark
+                        ? const Color(0xFF2B1D16)
+                        : const Color(0xFFFEF3C7),
+                    iconColor: const Color(0xFFF98E2F), // Orange
+                    title: 'Security Settings',
+                    subtitle: 'Additional security features',
+                    color: cardBgColor,
+                    isDark: isDark,
+                    textColor: textColor,
+                    subTextColor: subTextColor,
+                    children: [
+                      _buildSwitchTile(
+                        icon: Icons.lock_outline,
+                        title: 'Two-Factor Authentication',
+                        subtitle: 'Add an extra layer of security',
+                        value: _twoFactorAuth,
+                        onChanged: (val) =>
+                            setState(() => _twoFactorAuth = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSwitchTile(
+                        icon: Icons.fingerprint,
+                        title: 'Biometric Authentication',
+                        subtitle: 'Use fingerprint or face ID',
+                        value: _biometricAuth,
+                        onChanged: (val) =>
+                            setState(() => _biometricAuth = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSwitchTile(
+                        icon: Icons.timer_outlined,
+                        title: 'Auto Session Timeout',
+                        subtitle: 'Logout after 30 minutes of inactivity',
+                        value: _autoSessionTimeout,
+                        onChanged: (val) =>
+                            setState(() => _autoSessionTimeout = val),
+                        textColor: textColor,
+                        subTextColor: subTextColor,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
       ),
-     ),
     );
   }
 
@@ -313,13 +327,15 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         child: Center(
           child: Icon(
@@ -348,19 +364,26 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 12),
+            padding: const EdgeInsets.only(
+              left: 20,
+              top: 20,
+              right: 20,
+              bottom: 12,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -370,11 +393,7 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                     color: iconBackgroundColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -392,14 +411,11 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(
-                          color: subTextColor,
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: subTextColor, fontSize: 13),
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -410,7 +426,7 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
   }
 
   Widget _buildPasswordField({
-    required String label, 
+    required String label,
     required String hintText,
     TextEditingController? controller,
     required bool isDark,
@@ -437,20 +453,39 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
             hintText: hintText,
             hintStyle: TextStyle(color: subTextColor.withValues(alpha: 0.5)),
             filled: true,
-            fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF1F5F9), 
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            suffixIcon: Icon(Icons.visibility_outlined, color: subTextColor.withValues(alpha: 0.5), size: 20),
+            fillColor: isDark
+                ? Colors.black.withValues(alpha: 0.2)
+                : const Color(0xFFF1F5F9),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            suffixIcon: Icon(
+              Icons.visibility_outlined,
+              color: subTextColor.withValues(alpha: 0.5),
+              size: 20,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent),
+              borderSide: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.transparent,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent),
+              borderSide: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.transparent,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFF98E2F)), // Orange focus
+              borderSide: const BorderSide(
+                color: Color(0xFFF98E2F),
+              ), // Orange focus
             ),
           ),
         ),
@@ -497,10 +532,7 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: subTextColor, fontSize: 13),
                 ),
               ],
             ),
@@ -518,11 +550,16 @@ class _PrivacyAndSecurityScreenState extends State<PrivacyAndSecurityScreen> {
 
   Widget _buildDivider(bool isDark) {
     return Padding(
-      padding: const EdgeInsets.only(left: 72.0, right: 20.0), // Indented past icon
+      padding: const EdgeInsets.only(
+        left: 72.0,
+        right: 20.0,
+      ), // Indented past icon
       child: Divider(
         height: 1,
         thickness: 1,
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
       ),
     );
   }

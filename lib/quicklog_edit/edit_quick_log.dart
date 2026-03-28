@@ -19,7 +19,7 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
   Widget build(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
-    final subTextColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF16102B).withOpacity(0.5);
+    final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
@@ -74,15 +74,15 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
     return GlassCard(
       padding: const EdgeInsets.all(20),
       opacity: isDark ? 0.08 : 0.6,
-      color: isDark ? null : Colors.white.withOpacity(0.8),
+      color: isDark ? null : Colors.white.withValues(alpha: 0.8),
       borderRadius: 24,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1.5),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.1),
+              color: Colors.amber.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.lightbulb_outline, color: Colors.amber, size: 24),
@@ -92,7 +92,7 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
             child: Text(
               'Customize your dashboard for faster logging. Add what matters most to your daily routine.',
               style: TextStyle(
-                color: textColor.withOpacity(0.7),
+                color: textColor.withValues(alpha: 0.7),
                 fontSize: 13,
                 height: 1.5,
                 fontWeight: FontWeight.w500,
@@ -138,10 +138,10 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
       child: GlassCard(
         padding: const EdgeInsets.all(12),
         opacity: isCurrent ? (isDark ? 0.15 : 0.8) : (isDark ? 0.04 : 0.3),
-        color: isCurrent ? action.color.withOpacity(isDark ? 0.2 : 0.1) : (isDark ? null : Colors.white.withOpacity(0.4)),
+        color: isCurrent ? action.color.withValues(alpha: isDark ? 0.2 : 0.1) : (isDark ? null : Colors.white.withValues(alpha: 0.4)),
         borderRadius: 20,
         border: Border.all(
-          color: isCurrent ? action.color : (isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2)),
+          color: isCurrent ? action.color : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.2)),
           width: 2,
         ),
         child: Stack(
@@ -152,14 +152,14 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
                 children: [
                   Icon(
                     action.icon,
-                    color: isCurrent ? action.color : textColor.withOpacity(0.4),
+                    color: isCurrent ? action.color : textColor.withValues(alpha: 0.4),
                     size: 28,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     action.name,
                     style: TextStyle(
-                      color: isCurrent ? textColor : textColor.withOpacity(0.6),
+                      color: isCurrent ? textColor : textColor.withValues(alpha: 0.6),
                       fontSize: 11,
                       fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
                     ),
@@ -172,7 +172,7 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
               right: 0,
               child: Icon(
                 isCurrent ? Icons.remove_circle_rounded : Icons.add_circle_rounded,
-                color: isCurrent ? Colors.redAccent.withOpacity(0.6) : const Color(0xFF8B5CF6),
+                color: isCurrent ? Colors.redAccent.withValues(alpha: 0.6) : const Color(0xFF8B5CF6),
                 size: 18,
               ),
             ),
@@ -187,16 +187,16 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
       padding: const EdgeInsets.all(12),
       opacity: isDark ? 0.02 : 0.1,
       borderRadius: 20,
-      border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withValues(alpha: 0.1), width: 1.5),
+      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.1), width: 1.5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_rounded, color: textColor.withOpacity(0.2), size: 32),
+          Icon(Icons.add_rounded, color: textColor.withValues(alpha: 0.2), size: 32),
           const SizedBox(height: 4),
           Text(
             'ADD NEW',
             style: TextStyle(
-              color: textColor.withOpacity(0.2),
+              color: textColor.withValues(alpha: 0.2),
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 1,
@@ -235,7 +235,7 @@ class _EditQuickLogScreenState extends State<EditQuickLogScreen> {
         'Changes are applied to your dashboard immediately',
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: isDark ? Colors.white.withOpacity(0.3) : const Color(0xFF16102B).withOpacity(0.4),
+          color: isDark ? Colors.white.withValues(alpha: 0.3) : const Color(0xFF16102B).withValues(alpha: 0.4),
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

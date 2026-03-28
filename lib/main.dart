@@ -10,8 +10,11 @@ import 'utils/theme_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'loading_screen.dart';
 
+import 'utils/quick_log_manager.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await QuickLogManager.loadPreferences();
   runApp(const MyApp());
 }
 
