@@ -56,8 +56,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
+                  transitionDuration: const Duration(milliseconds: 200),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
                 ),
               );
             },
