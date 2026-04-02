@@ -6,6 +6,8 @@ import 'welcome.dart';
 import 'email_verification.dart';
 import 'auth_service.dart';
 import 'utils/custom_popup.dart';
+import 'package:flutter/gestures.dart';
+import 'terms_and_conditions.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -412,6 +414,69 @@ class _SignupScreenState extends State<SignupScreen> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(height: 19),
+
+                                    // Divider
+                                    Row(
+                                      children: [
+                                        Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 16),
+                                          child: Text(
+                                            'OR CONTINUE WITH',
+                                            style: TextStyle(
+                                              color: Color(0xFF9CA3AF),
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 19),
+
+                                    // Google Button
+                                    Container(
+                                      width: double.infinity,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.5),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: (_isLoading || _isGoogleLoading) ? null : _handleGoogleSignIn,
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              if (_isGoogleLoading)
+                                                const SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(color: Color(0xFF8B5CF6), strokeWidth: 2),
+                                                )
+                                              else ...[
+                                                const SizedBox(width: 20, height: 20, child: GoogleLogoPainterWidget()),
+                                                const SizedBox(width: 12),
+                                                const Text(
+                                                  'Continue with Google',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF374151),
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -496,6 +561,34 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                          // Terms and Conditions
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  color: Color(0xFF9CA3AF),
+                                  fontSize: 11,
+                                  height: 1.5,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'By continuing, you agree to our\n'),
+                                  TextSpan(
+                                    text: 'Terms & Conditions and Privacy Policy',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const TermsAndConditionsScreen()),
+                                        );
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 20),
                         ],

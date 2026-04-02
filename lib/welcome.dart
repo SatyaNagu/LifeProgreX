@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'landing_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -129,28 +130,37 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       ),
                       const SizedBox(height: 40),
-                        Text(
-                          widget.isNewUser
-                              ? 'Welcome to\nLifeProgreX'
-                              : 'Welcome back to\nLifeProgreX',
+                        RichText(
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFF111827),
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            height: 1.2,
+                          text: TextSpan(
+                            style: const TextStyle(
+                              color: Color(0xFF111827),
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              height: 1.2,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: widget.isNewUser
+                                    ? 'Welcome to LifeProgreX\n'
+                                    : 'Welcome back to LifeProgreX\n',
+                              ),
+                              TextSpan(
+                                text: (() {
+                                  final name = FirebaseAuth.instance.currentUser?.displayName;
+                                  if (name != null && name.trim().isNotEmpty) {
+                                    return name.split(' ')[0];
+                                  }
+                                  return widget.userName.split(' ')[0];
+                                })(),
+                                style: const TextStyle(
+                                  color: Color(0xFF8B5CF6), // Purple highlight
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.userName,
-                        style: TextStyle(
-                          color: const Color(0xFF8B5CF6), // Purple highlight
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                      ],
                   ),
                 ),
               );

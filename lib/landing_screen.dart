@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flutter/services.dart';
 import 'services/firestore_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'models/habit_model.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -193,9 +194,10 @@ class _LandingScreenState extends State<LandingScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Text(
               greeting,
               style: TextStyle(
@@ -205,7 +207,15 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
             ),
             Text(
-              widget.userName,
+              (() {
+                final name = FirebaseAuth.instance.currentUser?.displayName;
+                if (name != null && name.trim().isNotEmpty) {
+                  return name.split(' ')[0];
+                }
+                return widget.userName.split(' ')[0];
+              })(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: textColor,
                 fontSize: 24,
@@ -214,7 +224,9 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ],
         ),
+      ),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _buildNotificationIcon(),
             const SizedBox(width: 12),
@@ -243,8 +255,10 @@ class _LandingScreenState extends State<LandingScreen> {
             color: const Color(0xFFF98E2F), // Orange border
             width: 2,
           ),
-          image: const DecorationImage(
-            image: AssetImage('Assets/onboarding_image_3.png'), 
+          image: DecorationImage(
+            image: (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ?? false)
+                ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!) 
+                : const AssetImage('Assets/onboarding_image_3.png') as ImageProvider,
             fit: BoxFit.cover,
           ),
           boxShadow: isDark ? null : [
@@ -710,19 +724,14 @@ class _LandingScreenState extends State<LandingScreen> {
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
       builder: (context, currentIds, child) {
-        return ValueListenableBuilder<Set<String>>(
-          valueListenable: QuickLogManager.completedTodayNotifier,
-          builder: (context, completedIds, child) {
-            final visibleIds = currentIds.where((id) => !completedIds.contains(id)).toList();
-            
-            if (visibleIds.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: Text('All daily logs completed! 🎉', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-                ),
-              );
-            }
+        if (currentIds.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: Text('All daily logs completed! 🎉', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+            ),
+          );
+        }
 
             return GridView.builder(
               shrinkWrap: true,
@@ -733,9 +742,9 @@ class _LandingScreenState extends State<LandingScreen> {
                 mainAxisSpacing: 12,
                 childAspectRatio: 2.8,
               ),
-              itemCount: visibleIds.length,
+              itemCount: currentIds.length,
               itemBuilder: (context, index) {
-                final id = visibleIds[index];
+                final id = currentIds[index];
                 final action = QuickLogManager.allActions[id]!;
                 String label = action.name;
                 if (label == label.toUpperCase()) {
@@ -748,8 +757,6 @@ class _LandingScreenState extends State<LandingScreen> {
                 });
               },
             );
-          },
-        );
       },
     );
   }

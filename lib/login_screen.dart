@@ -7,6 +7,8 @@ import 'email_verification.dart';
 import 'forget_password.dart';
 import 'auth_service.dart';
 import 'utils/custom_popup.dart';
+import 'package:flutter/gestures.dart';
+import 'terms_and_conditions.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -356,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 24),
+                                    const SizedBox(height: 19),
 
                                     // Divider
                                     Row(
@@ -377,7 +379,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.05), thickness: 1)),
                                       ],
                                     ),
-                                    const SizedBox(height: 24),
+                                    const SizedBox(height: 19),
 
                                     // Google Button
                                     Container(
@@ -449,6 +451,36 @@ class _LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
                           const Spacer(),
+
+                          // Terms and Conditions
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  color: Color(0xFF9CA3AF),
+                                  fontSize: 11,
+                                  height: 1.5,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'By continuing, you agree to our\n'),
+                                  TextSpan(
+                                    text: 'Terms & Conditions and Privacy Policy',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const TermsAndConditionsScreen()),
+                                        );
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
 
                           // Footer Info
                           Row(

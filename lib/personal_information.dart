@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'utils/custom_popup.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
@@ -12,9 +13,9 @@ class PersonalInformationScreen extends StatefulWidget {
 
 class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   final ThemeManager _themeManager = ThemeManager();
-  final TextEditingController _firstNameController = TextEditingController(text: 'Demo');
-  final TextEditingController _lastNameController = TextEditingController(text: 'User');
-  final TextEditingController _emailController = TextEditingController(text: 'demo@example.com');
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _emailController;
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
 
@@ -24,6 +25,15 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    
+    final user = FirebaseAuth.instance.currentUser;
+    final nameParts = user?.displayName?.split(' ') ?? ['Demo', 'User'];
+    final fName = nameParts.isNotEmpty ? nameParts.first : 'Demo';
+    final lName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'User';
+
+    _firstNameController = TextEditingController(text: fName);
+    _lastNameController = TextEditingController(text: lName);
+    _emailController = TextEditingController(text: user?.email ?? 'demo@example.com');
   }
 
   @override
@@ -119,8 +129,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                                 color: const Color(0xFFF98E2F), // Orange border
                                 width: 3,
                               ),
-                              image: const DecorationImage(
-                                image: AssetImage('Assets/onboarding_image_3.png'), 
+                              image: DecorationImage(
+                                image: (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ?? false)
+                                    ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!) 
+                                    : const AssetImage('Assets/onboarding_image_3.png') as ImageProvider,
                                 fit: BoxFit.cover,
                               ),
                             ),

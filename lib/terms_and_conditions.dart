@@ -14,11 +14,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1B113D),
-              Color(0xFF050505),
-              Color(0xFF140A05),
-            ],
+            colors: [Color(0xFF1B113D), Color(0xFF050505), Color(0xFF140A05)],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
@@ -80,26 +76,29 @@ class TermsAndConditionsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Scrollable Content
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   child: Column(
                     children: [
                       // Top Card
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 32,
+                          horizontal: 20,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(24),
                           gradient: const LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFF482B96),
-                              Color(0xFF9E5C5D),
-                            ],
+                            colors: [Color(0xFF482B96), Color(0xFF9E5C5D)],
                           ),
                         ),
                         child: Column(
@@ -140,32 +139,37 @@ class TermsAndConditionsScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
+
                       // List of points
                       _buildTermItem(
                         icon: Icons.check,
                         title: '1. Acceptance of Terms',
-                        description: 'By accessing and using LifeProgreX, you accept and agree to be bound by the terms and provision of this agreement.',
+                        description:
+                            'By accessing and using LifeProgreX, you accept and agree to be bound by the terms and provision of this agreement.',
                       ),
                       _buildTermItem(
                         icon: Icons.person_outline,
                         title: '2. User Account',
-                        description: 'You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account.',
+                        description:
+                            'You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account.',
                       ),
                       _buildTermItem(
                         icon: Icons.lock_outline,
                         title: '3. Privacy Policy',
-                        description: 'Your use of LifeProgreX is also governed by our Privacy Policy. We collect and use your personal information to provide and improve our services.',
+                        description:
+                            'Your use of LifeProgreX is also governed by our Privacy Policy. We collect and use your personal information to provide and improve our services.',
                       ),
                       _buildTermItem(
                         icon: Icons.balance,
                         title: '4. Data Usage',
-                        description: 'LifeProgreX uses your habit tracking data to provide personalized insights and AI-powered recommendations. Your data is stored securely and never shared with third parties without your consent.',
+                        description:
+                            'LifeProgreX uses your habit tracking data to provide personalized insights and AI-powered recommendations. Your data is stored securely and never shared with third parties without your consent.',
                       ),
                       _buildTermItem(
                         icon: Icons.error_outline,
                         title: '5. Modifications',
-                        description: 'We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.',
+                        description:
+                            'We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.',
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -190,9 +194,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF161224),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.03),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,11 +205,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
               color: const Color(0xFF281E4D),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFF8B75F5),
-              size: 20,
-            ),
+            child: Icon(icon, color: const Color(0xFF8B75F5), size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(

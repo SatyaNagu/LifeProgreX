@@ -273,7 +273,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
       final log = ActivityLog(
         id: '',
         userId: user.uid,
-        type: 'skills',
+        type: 'skill',
         value: _skillController.text,
         duration: _duration,
         notes: _reflectionController.text,

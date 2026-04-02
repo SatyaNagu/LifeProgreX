@@ -3,6 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
 import 'login_screen.dart';
 import 'landing_screen.dart';
+import 'dart:math';
+import 'services/firestore_service.dart';
+import 'models/habit_model.dart';
+import 'services/activity_service.dart';
+import 'models/activity_model.dart';
 
 import 'personal_information.dart';
 import 'email_preferences.dart';
@@ -54,8 +59,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    // Extract name from email or set default
-    final userName = user?.email?.split('@')[0] ?? 'User';
+    // Extract strictly parsed name capping at 12 characters
+    final userName = (() {
+      final name = user?.displayName;
+      if (name != null && name.trim().isNotEmpty) {
+        final words = name.trim().split(RegExp(r'\s+'));
+        final combined = words.take(2).join(' ');
+        return combined.length > 12 ? combined.substring(0, 12) : combined;
+      }
+      return user?.email?.split('@')[0] ?? 'User';
+    })();
     final userEmail = user?.email ?? 'No email found';
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
@@ -298,9 +311,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: const Color(0xFFF98E2F), // Orange border
                     width: 2,
                   ),
-                  image: const DecorationImage(
-                    // Default image for now, ideally user photo
-                    image: AssetImage('Assets/onboarding_image_3.png'), 
+                  image: DecorationImage(
+                    image: (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ?? false)
+                        ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!) 
+                        : const AssetImage('Assets/onboarding_image_3.png') as ImageProvider,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -355,13 +369,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 24),
           // Stats Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatBox('7', 'STREAK', const Color(0xFFF98E2F), isDark),
-              _buildStatBox('140', 'HABITS', const Color(0xFF8B5CF6), isDark), // Purple
-              _buildStatBox('4', 'CATS', isDark ? Colors.white : const Color(0xFF111827), isDark),
-            ],
+          // Stats Row
+          StreamBuilder<List<HabitModel>>(
+            stream: FirestoreService().getHabitsStream(),
+            builder: (context, snapshot) {
+              final habits = snapshot.data ?? [];
+              final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
+              
+              return StreamBuilder<List<ActivityLog>>(
+                stream: ActivityService.listenToActivities(FirebaseAuth.instance.currentUser?.uid ?? ''),
+                builder: (context, activitySnapshot) {
+                  final activities = activitySnapshot.data ?? [];
+                  final completedHabits = activities.length;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildStatBox('$maxStreak', 'STREAK', const Color(0xFFF98E2F), isDark),
+                      _buildStatBox('$completedHabits', 'HABITS', const Color(0xFF8B5CF6), isDark),
+                      _buildStatBox('4', 'CATS', isDark ? Colors.white : const Color(0xFF111827), isDark),
+                    ],
+                  );
+                }
+              );
+            }
           ),
         ],
       ),
