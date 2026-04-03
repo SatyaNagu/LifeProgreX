@@ -7,12 +7,15 @@ import 'utils/theme_manager.dart';
 import 'utils/premium_background.dart';
 import 'screens/all_categories_screen.dart';
 import 'screens/analytics_screen.dart';
+import 'screens/goals_screen.dart';
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flutter/services.dart';
 import 'services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'models/habit_model.dart';
+import 'models/goal_model.dart';
+import 'services/goal_service.dart';
 
 class LandingScreen extends StatefulWidget {
   final String userName;
@@ -90,29 +93,43 @@ class _LandingScreenState extends State<LandingScreen> {
         ), 
         child: StreamBuilder<List<HabitModel>>(
           stream: FirestoreService().getHabitsStream(),
-          builder: (context, snapshot) {
-            final habits = snapshot.data ?? [];
-            final totalHabits = habits.length;
-            final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
-            final activeHabits = habits.where((h) => h.currentStreak > 0).length;
-            final score = totalHabits > 0 ? ((activeHabits / totalHabits) * 100).toInt() : 0;
-            
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(textColor),
-                const SizedBox(height: 24),
-                _buildGoalsCard(activeHabits: activeHabits, totalHabits: totalHabits, score: score),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Overview', textColor),
-                const SizedBox(height: 16),
-                _buildOverviewGrid(maxStreak: maxStreak, score: score, totalHabits: totalHabits),
-                const SizedBox(height: 32),
-                _buildQuickLogHeader(context, textColor),
-                const SizedBox(height: 16),
-                _buildQuickLogList(context),
-                const SizedBox(height: 32),
+          builder: (context, habitSnapshot) {
+            return StreamBuilder<List<GoalModel>>(
+              stream: GoalService().getGoalsStream(),
+              builder: (context, goalSnapshot) {
+                final habits = habitSnapshot.data ?? [];
+                final goals = goalSnapshot.data ?? [];
+                
+                // Habit Stats
+                final totalHabits = habits.length;
+                final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
+                final activeHabits = habits.where((h) => h.currentStreak > 0).length;
+                final habitScore = totalHabits > 0 ? ((activeHabits / totalHabits) * 100).toInt() : 0;
+
+                // Goal Stats (Today)
+                final now = DateTime.now();
+                final todayGoals = goals.where((g) => g.targetDate.year == now.year && g.targetDate.month == now.month && g.targetDate.day == now.day).toList();
+                final totalTodayGoals = todayGoals.length;
+                final completedTodayGoals = todayGoals.where((g) => g.isCompleted).length;
+                final goalScore = totalTodayGoals > 0 ? ((completedTodayGoals / totalTodayGoals) * 100).toInt() : 0;
+                
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(textColor),
+                    const SizedBox(height: 24),
+                    _buildGoalsCard(completedGoals: completedTodayGoals, totalGoals: totalTodayGoals, score: goalScore),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('Overview', textColor),
+                    const SizedBox(height: 16),
+                    _buildOverviewGrid(maxStreak: maxStreak, score: habitScore, totalHabits: totalHabits),
+                    const SizedBox(height: 32),
+                    _buildQuickLogHeader(context, textColor),
+                    const SizedBox(height: 16),
+                    _buildQuickLogList(context),
+                    const SizedBox(height: 32),
                 _buildAiCoachCard(),
+                const SizedBox(height: 12),
                 const SizedBox(height: 12),
                 _buildActionRowItem(
                   icon: Icons.track_changes, 
@@ -120,6 +137,16 @@ class _LandingScreenState extends State<LandingScreen> {
                   title: 'My Habits', 
                   subtitle: '$activeHabits Active Habits',
                   isDark: isDark,
+                  onTap: () {}, // Optional routing later
+                ),
+                const SizedBox(height: 12),
+                _buildActionRowItem(
+                  icon: Icons.flag, 
+                  color: const Color(0xFFFFBF00), 
+                  title: 'My Goals', 
+                  subtitle: 'Track your personal goals',
+                  isDark: isDark,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GoalsScreen())),
                 ),
                 const SizedBox(height: 12),
                 _buildActionRowItem(
@@ -128,6 +155,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   title: 'Analytics', 
                   subtitle: 'View Your Stats',
                   isDark: isDark,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalyticsScreen())),
                 ),
                 const SizedBox(height: 32),
                 _buildSectionHeader(
@@ -144,6 +172,8 @@ class _LandingScreenState extends State<LandingScreen> {
               ],
             );
           }
+        );
+        }
         ),
       ),
     );
@@ -320,14 +350,21 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   // --- Today's Goals Card ---
-  Widget _buildGoalsCard({int activeHabits = 0, int totalHabits = 0, int score = 0}) {
+  Widget _buildGoalsCard({int completedGoals = 0, int totalGoals = 0, int score = 0}) {
     final isDark = _themeManager.isDarkMode;
-    final displayTotal = totalHabits == 0 ? 5 : totalHabits;
-    final remaining = displayTotal - activeHabits;
+    final displayTotal = totalGoals == 0 ? 5 : totalGoals; // Fallback so bar isn't just 0/0 visually
+    final remaining = displayTotal - completedGoals;
     final progress = (score / 100.0).clamp(0.0, 1.0);
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const GoalsScreen()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -423,7 +460,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           ],
                         ),
                         child: Text(
-                          '$activeHabits/$displayTotal',
+                          '$completedGoals/$displayTotal',
                           style: TextStyle(
                             color: Color(0xFF0A0E0A),
                             fontWeight: FontWeight.w900,
@@ -503,7 +540,7 @@ class _LandingScreenState extends State<LandingScreen> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          _buildStatusDot(const Color(0xFFFFBF00), 'Completed: $activeHabits', isDark),
+                          _buildStatusDot(const Color(0xFFFFBF00), 'Completed: $completedGoals', isDark),
                           const SizedBox(width: 20),
                           _buildStatusDot(isDark ? Colors.grey[600]! : Colors.grey[400]!, 'Remaining: $remaining', isDark),
                         ],
@@ -539,8 +576,9 @@ class _LandingScreenState extends State<LandingScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatusDot(Color color, String label, bool isDark) {
     return Row(
@@ -903,15 +941,18 @@ class _LandingScreenState extends State<LandingScreen> {
     required String title, 
     required String subtitle,
     required bool isDark,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.4) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4)),
-      ),
-      child: Row(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.4) : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4)),
+        ),
+        child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -948,6 +989,7 @@ class _LandingScreenState extends State<LandingScreen> {
           Icon(Icons.chevron_right, color: isDark ? Colors.white24 : Colors.grey.shade400),
         ],
       ),
+    ),
     );
   }
 

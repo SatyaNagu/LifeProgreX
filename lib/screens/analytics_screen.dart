@@ -5,6 +5,8 @@ import 'dart:math';
 import '../profile.dart';
 import '../landing_screen.dart';
 import '../settings.dart';
+import '../services/analytics_service.dart';
+import '../models/habit_model.dart';
 
 // Note: This is an initial structure based on the provided design. 
 // It will need to be refined and integrated with actual data logic.
@@ -18,6 +20,7 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   final ThemeManager _themeManager = ThemeManager();
+  final AnalyticsService _analyticsService = AnalyticsService();
   String _selectedTab = 'Week';
 
   @override
@@ -100,39 +103,51 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ],
         ),
-        body: Stack(
-          children: [
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 120),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTimeToggle(isDark),
-                  const SizedBox(height: 24),
-                  _buildOverallProgress(isDark, cardBgColor, borderColor),
-                  const SizedBox(height: 24),
-                  _buildMoodTracker(isDark, cardBgColor, borderColor),
-                  const SizedBox(height: 24),
-                  _buildCategoryProgress(isDark, cardBgColor, borderColor),
-              const SizedBox(height: 24),
-              _buildActivityTimeline(isDark, cardBgColor, borderColor),
-              const SizedBox(height: 24),
-              _buildStatsGrid(isDark, cardBgColor, borderColor),
-                  const SizedBox(height: 32),
-                  _buildBottomCTA(),
-                  const SizedBox(height: 100), // Space for bottom nav
-                ],
-              ),
-            ),
-            // Bottom Navigation Bar
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: 30,
-              child: _buildBottomNavigationBar(context),
-            ),
-          ],
+        body: StreamBuilder<AnalyticsData>(
+          stream: _analyticsService.getAnalyticsDataStream(_selectedTab),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator(color: Color(0xFF13C6DF)));
+            }
+            final data = snapshot.data;
+            if (data == null) {
+               return const Center(child: CircularProgressIndicator(color: Color(0xFF13C6DF)));
+            }
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTimeToggle(isDark),
+                      const SizedBox(height: 24),
+                      _buildOverallProgress(isDark, cardBgColor, borderColor, data),
+                      const SizedBox(height: 24),
+                      _buildMoodTracker(isDark, cardBgColor, borderColor, data),
+                      const SizedBox(height: 24),
+                      _buildCategoryProgress(isDark, cardBgColor, borderColor, data),
+                      const SizedBox(height: 24),
+                      _buildActivityTimeline(isDark, cardBgColor, borderColor, data),
+                      const SizedBox(height: 24),
+                      _buildStatsGrid(isDark, cardBgColor, borderColor, data),
+                      const SizedBox(height: 32),
+                      _buildBottomCTA(),
+                      const SizedBox(height: 100), // Space for bottom nav
+                    ],
+                  ),
+                ),
+                // Bottom Navigation Bar
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: 30,
+                  child: _buildBottomNavigationBar(context),
+                ),
+              ],
+            );
+          }
         ),
       ),
     );
@@ -247,7 +262,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
 
   // --- Overall Progress (Life Score) ---
 
-  Widget _buildOverallProgress(bool isDark, Color cardBg, Color borderColor) {
+  Widget _buildOverallProgress(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -307,7 +322,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '75%',
+                      '${(data.lifeScore * 100).toInt()}%',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -315,7 +330,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                       ),
                     ),
                     Text(
-                      'Health Score',
+                      'Score',
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark ? Colors.white54 : Colors.black54,
@@ -375,7 +390,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
 
   // --- Mood Tracker ---
 
-  Widget _buildMoodTracker(bool isDark, Color cardBg, Color borderColor) {
+  Widget _buildMoodTracker(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -428,7 +443,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Average mood: ', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 13)),
-                const Text('8.1/10 😐', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                Text('${data.averageMood.toStringAsFixed(1)}/10', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
               ],
             ),
           ),
@@ -459,7 +474,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
 
   // --- Category Progress ---
 
-  Widget _buildCategoryProgress(bool isDark, Color cardBg, Color borderColor) {
+  Widget _buildCategoryProgress(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -480,10 +495,10 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
             mainAxisSpacing: 16,
             childAspectRatio: 0.85,
             children: [
-              _buildCategoryCard('Meditation', '23/30 days', 0.77, const Color(0xFFB24BF3), isDark, Icons.self_improvement),
-              _buildCategoryCard('Fitness', '28/30 days', 0.93, const Color(0xFFFF6B35), isDark, Icons.fitness_center),
-              _buildCategoryCard('Reading', '18/30 days', 0.60, const Color(0xFF13C6DF), isDark, Icons.menu_book),
-              _buildCategoryCard('Sleep', '25/30 days', 0.83, const Color(0xFFFFBF00), isDark, Icons.nights_stay),
+              _buildCategoryCard('Happiness', '${data.categoryStats[HabitCategory.happiness]?['active'] ?? 0}/${data.categoryStats[HabitCategory.happiness]?['total'] ?? 0}', data.categoryStats[HabitCategory.happiness]?['progress']?.toDouble() ?? 0.0, const Color(0xFFB24BF3), isDark, Icons.sentiment_satisfied_alt),
+              _buildCategoryCard('Health', '${data.categoryStats[HabitCategory.health]?['active'] ?? 0}/${data.categoryStats[HabitCategory.health]?['total'] ?? 0}', data.categoryStats[HabitCategory.health]?['progress']?.toDouble() ?? 0.0, const Color(0xFFFF6B35), isDark, Icons.fitness_center),
+              _buildCategoryCard('Knowledge', '${data.categoryStats[HabitCategory.knowledge]?['active'] ?? 0}/${data.categoryStats[HabitCategory.knowledge]?['total'] ?? 0}', data.categoryStats[HabitCategory.knowledge]?['progress']?.toDouble() ?? 0.0, const Color(0xFF13C6DF), isDark, Icons.menu_book),
+              _buildCategoryCard('Career', '${data.categoryStats[HabitCategory.career]?['active'] ?? 0}/${data.categoryStats[HabitCategory.career]?['total'] ?? 0}', data.categoryStats[HabitCategory.career]?['progress']?.toDouble() ?? 0.0, const Color(0xFFFFBF00), isDark, Icons.work),
             ],
           ),
         ],
@@ -541,7 +556,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
 
   // --- Activity Timeline ---
 
-  Widget _buildActivityTimeline(bool isDark, Color cardBg, Color borderColor) {
+  Widget _buildActivityTimeline(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -599,7 +614,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
 
   // --- Stats Grid ---
 
-  Widget _buildStatsGrid(bool isDark, Color cardBg, Color borderColor) {
+  Widget _buildStatsGrid(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -609,16 +624,16 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
       childAspectRatio: 1.2,
       children: [
         // Active Calories style for Day Streak
-        _buildStatCard('Day Streak', '56', '+12%', const Color(0xFFFF6B35), Icons.local_fire_department, isDark,
+        _buildStatCard('Day Streak', data.maxStreak.toString(), 'Active', const Color(0xFFFF6B35), Icons.local_fire_department, isDark,
             isDark ? const [Color(0xFF3D1F1A), Color(0xFF221110)] : const [Color(0xFFFFEEEA), Color(0xFFFFEEEA)], borderColor),
         // Total Distance style for Total Goals
-        _buildStatCard('Total Goals', '142', 'Active', const Color(0xFF13C6DF), Icons.track_changes, isDark,
+        _buildStatCard('Total Goals', data.totalGoals.toString(), 'Active', const Color(0xFF13C6DF), Icons.track_changes, isDark,
             isDark ? const [Color(0xFF1E2F1A), Color(0xFF0F180D)] : const [Color(0xFFF1F8E9), Color(0xFFF1F8E9)], borderColor),
         // Reading style for Achievements
-        _buildStatCard('Achievements', '18', 'New!', const Color(0xFFB24BF3), Icons.emoji_events, isDark,
+        _buildStatCard('Achievements', data.achievements.toString(), 'Good', const Color(0xFFB24BF3), Icons.emoji_events, isDark,
             isDark ? const [Color(0xFF261A3D), Color(0xFF130D1F)] : const [Color(0xFFF3E5F5), Color(0xFFF3E5F5)], borderColor),
         // Wellness style for Wellness Score
-        _buildStatCard('Wellness Score', '8.7', '+5%', const Color(0xFFFF2D95), Icons.favorite, isDark,
+        _buildStatCard('Wellness Score', data.wellnessScore.toStringAsFixed(1), 'Avg', const Color(0xFFFF2D95), Icons.favorite, isDark,
             isDark ? const [Color(0xFF3D1A2F), Color(0xFF1F0D18)] : const [Color(0xFFFCE4EC), Color(0xFFFCE4EC)], borderColor),
       ],
     );
