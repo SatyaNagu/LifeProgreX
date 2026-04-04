@@ -3,9 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/activity_model.dart';
 import 'firestore_service.dart';
-import '../utils/quick_log_manager.dart';
+import 'achievement_service.dart';
 
 class ActivityService {
+  static final AchievementService _achievementService = AchievementService();
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static CollectionReference _getUserActivities(String userId) {
@@ -29,8 +30,8 @@ class ActivityService {
         debugPrint('Background streak sync bypassed: $e');
       }
 
-      // Remove the Quick Log from the user's dashboard so it goes back to templates
-      QuickLogManager.removeAction(activity.type);
+      // Notify achievements service
+      await _achievementService.notifyActivity('activity_logged', context: {'type': activity.type});
     } on TimeoutException {
       // If server sync takes too long, we assume success because Firestore
       // will persist locally and sync in the background.

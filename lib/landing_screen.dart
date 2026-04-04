@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'profile.dart'; // For navigating to ProfileScreen
 import 'settings.dart';
+import 'screens/ai_coach_screen.dart';
 import 'quicklog_edit/edit_quick_log.dart';
 import 'utils/quick_log_manager.dart';
 import 'utils/theme_manager.dart';
@@ -8,14 +9,20 @@ import 'utils/premium_background.dart';
 import 'screens/all_categories_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/goals_screen.dart';
-import 'dart:ui' as ui;
 import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
-import 'services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'services/firestore_service.dart';
 import 'models/habit_model.dart';
 import 'models/goal_model.dart';
 import 'services/goal_service.dart';
+import 'services/activity_service.dart';
+import 'models/activity_model.dart';
+import 'auth_service.dart';
+import 'models/notification_model.dart';
+import 'services/notification_service.dart';
+import 'screens/notifications_screen.dart';
 
 class LandingScreen extends StatefulWidget {
   final String userName;
@@ -63,7 +70,7 @@ class _LandingScreenState extends State<LandingScreen> {
               bottom: false,
               child: Stack(
                 children: [
-                  _buildMainContent(textColor, isDark),
+                  Positioned.fill(child: _buildMainContent(textColor, isDark)),
                   
                   // Bottom Navigation Bar
                   Positioned(
@@ -82,99 +89,116 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildMainContent(Color textColor, bool isDark) {
-    return Positioned.fill(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.only(
-          left: 20, 
-          right: 20, 
-          top: 20, 
-          bottom: 120,
-        ), 
-        child: StreamBuilder<List<HabitModel>>(
-          stream: FirestoreService().getHabitsStream(),
-          builder: (context, habitSnapshot) {
-            return StreamBuilder<List<GoalModel>>(
-              stream: GoalService().getGoalsStream(),
-              builder: (context, goalSnapshot) {
-                final habits = habitSnapshot.data ?? [];
-                final goals = goalSnapshot.data ?? [];
-                
-                // Habit Stats
-                final totalHabits = habits.length;
-                final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
-                final activeHabits = habits.where((h) => h.currentStreak > 0).length;
-                final habitScore = totalHabits > 0 ? ((activeHabits / totalHabits) * 100).toInt() : 0;
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(
+        left: 20, 
+        right: 20, 
+        top: 20, 
+        bottom: 120,
+      ), 
+      child: StreamBuilder<List<HabitModel>>(
+        stream: FirestoreService().getHabitsStream(),
+        builder: (context, habitSnapshot) {
+          return StreamBuilder<List<GoalModel>>(
+            stream: GoalService().getGoalsStream(),
+            builder: (context, goalSnapshot) {
+              final habits = habitSnapshot.data ?? [];
+              final goals = goalSnapshot.data ?? [];
+              
+              // Habit Stats
+              final totalHabits = habits.length;
+              final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
+              final activeHabits = habits.where((h) => h.currentStreak > 0).length;
+              final habitScore = totalHabits > 0 ? ((activeHabits / totalHabits) * 100).toInt() : 0;
 
-                // Goal Stats (Today)
-                final now = DateTime.now();
-                final todayGoals = goals.where((g) => g.targetDate.year == now.year && g.targetDate.month == now.month && g.targetDate.day == now.day).toList();
-                final totalTodayGoals = todayGoals.length;
-                final completedTodayGoals = todayGoals.where((g) => g.isCompleted).length;
-                final goalScore = totalTodayGoals > 0 ? ((completedTodayGoals / totalTodayGoals) * 100).toInt() : 0;
-                
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(textColor),
-                    const SizedBox(height: 24),
-                    _buildGoalsCard(completedGoals: completedTodayGoals, totalGoals: totalTodayGoals, score: goalScore),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader('Overview', textColor),
-                    const SizedBox(height: 16),
-                    _buildOverviewGrid(maxStreak: maxStreak, score: habitScore, totalHabits: totalHabits),
-                    const SizedBox(height: 32),
-                    _buildQuickLogHeader(context, textColor),
-                    const SizedBox(height: 16),
-                    _buildQuickLogList(context),
-                    const SizedBox(height: 32),
-                _buildAiCoachCard(),
-                const SizedBox(height: 12),
-                const SizedBox(height: 12),
-                _buildActionRowItem(
-                  icon: Icons.track_changes, 
-                  color: const Color(0xFF13C6DF), 
-                  title: 'My Habits', 
-                  subtitle: '$activeHabits Active Habits',
-                  isDark: isDark,
-                  onTap: () {}, // Optional routing later
-                ),
-                const SizedBox(height: 12),
-                _buildActionRowItem(
-                  icon: Icons.flag, 
-                  color: const Color(0xFFFFBF00), 
-                  title: 'My Goals', 
-                  subtitle: 'Track your personal goals',
-                  isDark: isDark,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GoalsScreen())),
-                ),
-                const SizedBox(height: 12),
-                _buildActionRowItem(
-                  icon: Icons.bar_chart, 
-                  color: const Color(0xFF8B5CF6), 
-                  title: 'Analytics', 
-                  subtitle: 'View Your Stats',
-                  isDark: isDark,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalyticsScreen())),
-                ),
-                const SizedBox(height: 32),
-                _buildSectionHeader(
-                  'Daily Activity', 
-                  textColor, 
-                  trailingText: 'SEE ALL >',
-                  onTrailingTap: () => Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => const AllCategoriesScreen()),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildDailyActivityGrid(),
-              ],
-            );
-          }
-        );
+              // Goal Stats (Today)
+              final now = DateTime.now();
+              final todayGoals = goals.where((g) => g.targetDate.year == now.year && g.targetDate.month == now.month && g.targetDate.day == now.day).toList();
+              final totalTodayGoals = todayGoals.length;
+              final completedTodayGoals = todayGoals.where((g) => g.isCompleted).length;
+              final goalScore = totalTodayGoals > 0 ? ((completedTodayGoals / totalTodayGoals) * 100).toInt() : 0;
+              
+              final user = AuthService().currentUser;
+
+              return StreamBuilder<List<ActivityLog>>(
+                stream: user != null ? ActivityService.listenToActivities(user.uid) : Stream.value([]),
+                builder: (context, activitySnapshot) {
+                  final activities = activitySnapshot.data ?? [];
+                  final todayLogs = activities.where((a) {
+                    final logDate = DateTime(a.createdAt.year, a.createdAt.month, a.createdAt.day);
+                    final today = DateTime(now.year, now.month, now.day);
+                    return logDate.isAtSameMomentAs(today);
+                  }).toList();
+
+                  final totalDuration = todayLogs.fold(0, (sum, log) => sum + (log.duration ?? 0));
+                  final totalTasks = todayLogs.length;
+                  final calories = totalDuration * 5;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(textColor),
+                      const SizedBox(height: 24),
+                      _buildGoalsCard(completedGoals: completedTodayGoals, totalGoals: totalTodayGoals, score: goalScore),
+                      const SizedBox(height: 32),
+                      _buildSectionHeader('Overview', textColor),
+                      const SizedBox(height: 16),
+                      _buildOverviewGrid(maxStreak: maxStreak, score: habitScore, totalHabits: totalHabits),
+                      const SizedBox(height: 32),
+                      _buildQuickLogHeader(context, textColor),
+                      const SizedBox(height: 16),
+                      _buildQuickLogList(context),
+                      const SizedBox(height: 32),
+                      _buildTodayGoalsSection(context, goals, textColor, isDark),
+                      const SizedBox(height: 32),
+                      _buildAiCoachCard(),
+                      const SizedBox(height: 12),
+                      _buildActionRowItem(
+                        icon: Icons.track_changes, 
+                        color: const Color(0xFF13C6DF), 
+                        title: 'My Habits', 
+                        subtitle: '$activeHabits Active Habits',
+                        isDark: isDark,
+                        onTap: () {}, 
+                      ),
+                      const SizedBox(height: 12),
+                      _buildActionRowItem(
+                        icon: Icons.flag, 
+                        color: const Color(0xFFFFBF00), 
+                        title: 'My Goals', 
+                        subtitle: 'Track your personal goals',
+                        isDark: isDark,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GoalsScreen())),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildActionRowItem(
+                        icon: Icons.bar_chart, 
+                        color: const Color(0xFF8B5CF6), 
+                        title: 'Analytics', 
+                        subtitle: 'View Your Stats',
+                        isDark: isDark,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalyticsScreen())),
+                      ),
+                      const SizedBox(height: 32),
+                      _buildSectionHeader(
+                        'Daily Activity', 
+                        textColor, 
+                        trailingText: 'SEE ALL >',
+                        onTrailingTap: () => Navigator.push(
+                          context, 
+                          MaterialPageRoute(builder: (context) => const AllCategoriesScreen()),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildDailyActivityGrid(calories, totalDuration, totalTasks),
+                    ],
+                  );
+                }
+              );
+            },
+          );
         }
-        ),
       ),
     );
   }
@@ -208,6 +232,123 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
+  // --- Today's Priorities (Vanishing Goals) ---
+  Widget _buildTodayGoalsSection(BuildContext context, List<GoalModel> goals, Color textColor, bool isDark) {
+    final now = DateTime.now();
+    final activeTodayGoals = goals.where((g) => 
+      !g.isCompleted && 
+      g.targetDate.year == now.year && 
+      g.targetDate.month == now.month && 
+      g.targetDate.day == now.day
+    ).toList();
+
+    if (activeTodayGoals.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionHeader('Today\'s Priorities', textColor),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFBF00).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${activeTodayGoals.length} Pending',
+                style: const TextStyle(
+                  color: Color(0xFFFFBF00),
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...activeTodayGoals.map((goal) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildGoalActionCard(goal, isDark, textColor),
+        )),
+      ],
+    );
+  }
+
+  Widget _buildGoalActionCard(GoalModel goal, bool isDark, Color textColor) {
+    final Map<GoalCategory, String> categoryEmoji = {
+      GoalCategory.fitness: '💪',
+      GoalCategory.learning: '📚',
+      GoalCategory.wellness: '❤️',
+      GoalCategory.career: '💼',
+      GoalCategory.habits: '⭐',
+      GoalCategory.personal: '🎯',
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.4) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              HapticFeedback.mediumImpact();
+              await GoalService().updateGoal(goal.copyWith(isCompleted: true));
+            },
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFFFBF00),
+                  width: 2,
+                ),
+              ),
+              child: const Icon(Icons.check, color: Colors.transparent, size: 16),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${categoryEmoji[goal.category] ?? '🎯'} ${goal.title}',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (goal.description.isNotEmpty)
+                  Text(
+                    goal.description,
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.grey.shade500,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: isDark ? Colors.white10 : Colors.black12, size: 20),
+        ],
+      ),
+    );
+  }
+
   // --- Header ---
   Widget _buildHeader(Color textColor) {
     final isDark = _themeManager.isDarkMode;
@@ -228,33 +369,33 @@ class _LandingScreenState extends State<LandingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Text(
-              greeting,
-              style: TextStyle(
-                color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+              Text(
+                greeting,
+                style: TextStyle(
+                  color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              (() {
-                final name = FirebaseAuth.instance.currentUser?.displayName;
-                if (name != null && name.trim().isNotEmpty) {
-                  return name.split(' ')[0];
-                }
-                return widget.userName.split(' ')[0];
-              })(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+              Text(
+                (() {
+                  final name = FirebaseAuth.instance.currentUser?.displayName;
+                  if (name != null && name.trim().isNotEmpty) {
+                    return name.split(' ')[0];
+                  }
+                  return widget.userName.split(' ')[0];
+                })(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -305,47 +446,63 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildNotificationIcon() {
     final isDark = _themeManager.isDarkMode;
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.2 : 0.05),
-          width: 1,
-        ),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    
+    return StreamBuilder<List<NotificationModel>>(
+      stream: NotificationService().getNotificationsStream(),
+      builder: (context, snapshot) {
+        final notifications = snapshot.data ?? [];
+        final hasUnread = notifications.any((n) => !n.isRead);
+
+        return GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationsScreen()),
           ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            color: isDark ? Colors.grey[200] : const Color(0xFF6B7280),
-            size: 24,
-          ),
-          Positioned(
-            right: 12,
-            top: 12,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: const Color(0xFF9FE82E),
-                shape: BoxShape.circle,
-                border: Border.all(color: isDark ? const Color(0xFF1A0B2E) : Colors.white, width: 1.5),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.2 : 0.05),
+                width: 1,
               ),
+              boxShadow: isDark ? null : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.notifications_none_rounded,
+                  color: isDark ? Colors.grey[200] : const Color(0xFF6B7280),
+                  size: 24,
+                ),
+                if (hasUnread)
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF2D95), // Vibrant pink dot
+                        shape: BoxShape.circle,
+                        border: Border.all(color: isDark ? const Color(0xFF1A0B2E) : Colors.white, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 
@@ -365,220 +522,220 @@ class _LandingScreenState extends State<LandingScreen> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark 
-              ? [
-                  const Color(0xFF1F1033).withValues(alpha: 0.8), 
-                  const Color(0xFF261547).withValues(alpha: 0.6),
-                  const Color(0xFF2D1B57).withValues(alpha: 0.4)
-                ]
-              : [
-                  Colors.white.withValues(alpha: 0.9), 
-                  const Color(0xFFF9FAFB).withValues(alpha: 0.6)
-                ],
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark 
+                ? [
+                    const Color(0xFF1F1033).withValues(alpha: 0.8), 
+                    const Color(0xFF261547).withValues(alpha: 0.6),
+                    const Color(0xFF2D1B57).withValues(alpha: 0.4)
+                  ]
+                : [
+                    Colors.white.withValues(alpha: 0.9), 
+                    const Color(0xFFF9FAFB).withValues(alpha: 0.6)
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(
+            color: isDark ? const Color(0xFFB24BF3).withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
         ),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: isDark ? const Color(0xFFB24BF3).withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.2),
-          width: 1.5,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: Stack(
-          children: [
-            // Decorative blobs inside card
-            Positioned(
-              top: -40,
-              right: -40,
-              child: _buildBlob(
-                size: 160, 
-                color: const Color(0xFFFFBF00).withValues(alpha: isDark ? 0.3 : 0.15), 
-                blur: 64, // blur-3xl
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: Stack(
+            children: [
+              // Decorative blobs inside card
+              Positioned(
+                top: -40,
+                right: -40,
+                child: _buildBlob(
+                  size: 160, 
+                  color: const Color(0xFFFFBF00).withValues(alpha: isDark ? 0.3 : 0.15), 
+                  blur: 64, // blur-3xl
+                ),
               ),
-            ),
-            Positioned(
-              bottom: -32,
-              left: -32,
-              child: _buildBlob(
-                size: 128, 
-                color: const Color(0xFFB24BF3).withValues(alpha: isDark ? 0.3 : 0.15), 
-                blur: 40, // blur-2xl
+              Positioned(
+                bottom: -32,
+                left: -32,
+                child: _buildBlob(
+                  size: 128, 
+                  color: const Color(0xFFB24BF3).withValues(alpha: isDark ? 0.3 : 0.15), 
+                  blur: 40, // blur-2xl
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                             const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFBF00), size: 24),
-                             const SizedBox(width: 12),
-                             Expanded(
-                               child: Column(
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                 children: [
-                                   Text(
-                                     "Today's Goals",
-                                     style: TextStyle(
-                                       color: isDark ? Colors.white : const Color(0xFF111827),
-                                       fontSize: 20,
-                                       fontWeight: FontWeight.w900,
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                               const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFBF00), size: 24),
+                               const SizedBox(width: 12),
+                               Expanded(
+                                 child: Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     Text(
+                                       "Today's Goals",
+                                       style: TextStyle(
+                                         color: isDark ? Colors.white : const Color(0xFF111827),
+                                         fontSize: 20,
+                                         fontWeight: FontWeight.w900,
+                                       ),
                                      ),
-                                   ),
-                                   Text(
-                                     "Keep the momentum going! 🚀",
-                                     style: TextStyle(
-                                       color: isDark ? Colors.grey[300] : const Color(0xFF6B7280),
-                                       fontSize: 13,
+                                     Text(
+                                       "Keep the momentum going! 🚀",
+                                       style: TextStyle(
+                                         color: isDark ? Colors.grey[300] : const Color(0xFF6B7280),
+                                         fontSize: 13,
+                                       ),
+                                       overflow: TextOverflow.ellipsis,
                                      ),
-                                     overflow: TextOverflow.ellipsis,
-                                   ),
-                                 ],
+                                   ],
+                                 ),
                                ),
-                             ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [Color(0xFFFFBF00), Color(0xFFF59E0B)]),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFFFBF00).withValues(alpha: 0.3),
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          '$completedGoals/$displayTotal',
-                          style: TextStyle(
-                            color: Color(0xFF0A0E0A),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
+                            ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Progress Bar
-                  Column(
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            height: 6,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.transparent),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFFFFBF00), Color(0xFFF59E0B)]),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFBF00).withValues(alpha: 0.3),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            '$completedGoals/$displayTotal',
+                            style: TextStyle(
+                              color: Color(0xFF0A0E0A),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
                             ),
                           ),
-                          FractionallySizedBox(
-                            widthFactor: progress,
-                            child: Container(
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Progress Bar
+                    Column(
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
                               height: 6,
+                              width: double.infinity,
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFFFF6B35), Color(0xFFFFBF00), Color(0xFF9FE82E)],
-                                ),
+                                color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0),
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFFFFBF00).withValues(alpha: 0.4),
-                                    blurRadius: 15,
+                                border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.transparent),
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: progress,
+                              child: Container(
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFFF6B35), Color(0xFFFFBF00), Color(0xFF9FE82E)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFFFBF00).withValues(alpha: 0.4),
+                                      blurRadius: 15,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Percentage Indicator
+                            Positioned(
+                              left: (MediaQuery.of(context).size.width - 88) * progress - 25,
+                              top: -35,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                       gradient: const LinearGradient(colors: [Color(0xFFFF2D95), Color(0xFFFF6B35)]),
+                                       borderRadius: BorderRadius.circular(10),
+                                       boxShadow: [
+                                         BoxShadow(
+                                           color: const Color(0xFFFF2D95).withValues(alpha: 0.3),
+                                           blurRadius: 10,
+                                         ),
+                                       ],
+                                    ),
+                                    child: Text(
+                                      '$score%',
+                                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900),
+                                    ),
+                                  ),
+                                  CustomPaint(
+                                    size: const Size(10, 5),
+                                    painter: TrianglePainter(color: const Color(0xFFFF6B35)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            _buildStatusDot(const Color(0xFFFFBF00), 'Completed: $completedGoals', isDark),
+                            const SizedBox(width: 20),
+                            _buildStatusDot(isDark ? Colors.grey[600]! : Colors.grey[400]!, 'Remaining: $remaining', isDark),
+                          ],
+                        ),
+                        if (progress >= 0.8)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF9FE82E).withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFF9FE82E).withValues(alpha: 0.4)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.auto_awesome, color: Color(0xFF9FE82E), size: 14),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Excellent!',
+                                    style: TextStyle(color: Color(0xFF9FE82E), fontSize: 12, fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          // Percentage Indicator
-                          Positioned(
-                            left: (MediaQuery.of(context).size.width - 88) * progress - 25,
-                            top: -35,
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                     gradient: const LinearGradient(colors: [Color(0xFFFF2D95), Color(0xFFFF6B35)]),
-                                     borderRadius: BorderRadius.circular(10),
-                                     boxShadow: [
-                                       BoxShadow(
-                                         color: const Color(0xFFFF2D95).withValues(alpha: 0.3),
-                                         blurRadius: 10,
-                                       ),
-                                     ],
-                                  ),
-                                  child: Text(
-                                    '$score%',
-                                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                                CustomPaint(
-                                  size: const Size(10, 5),
-                                  painter: TrianglePainter(color: const Color(0xFFFF6B35)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          _buildStatusDot(const Color(0xFFFFBF00), 'Completed: $completedGoals', isDark),
-                          const SizedBox(width: 20),
-                          _buildStatusDot(isDark ? Colors.grey[600]! : Colors.grey[400]!, 'Remaining: $remaining', isDark),
-                        ],
-                      ),
-                      if (progress >= 0.8)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF9FE82E).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF9FE82E).withValues(alpha: 0.4)),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.auto_awesome, color: Color(0xFF9FE82E), size: 14),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Excellent!',
-                                  style: TextStyle(color: Color(0xFF9FE82E), fontSize: 12, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildStatusDot(Color color, String label, bool isDark) {
     return Row(
@@ -771,30 +928,30 @@ class _LandingScreenState extends State<LandingScreen> {
           );
         }
 
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 2.8,
-              ),
-              itemCount: currentIds.length,
-              itemBuilder: (context, index) {
-                final id = currentIds[index];
-                final action = QuickLogManager.allActions[id]!;
-                String label = action.name;
-                if (label == label.toUpperCase()) {
-                  label = label[0] + label.substring(1).toLowerCase();
-                }
-                
-                return _buildQuickLogSmallCard(action.icon, label, () {
-                  HapticFeedback.lightImpact();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
-                });
-              },
-            );
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.8,
+          ),
+          itemCount: currentIds.length,
+          itemBuilder: (context, index) {
+            final id = currentIds[index];
+            final action = QuickLogManager.allActions[id]!;
+            String label = action.name;
+            if (label == label.toUpperCase()) {
+              label = label[0] + label.substring(1).toLowerCase();
+            }
+            
+            return _buildQuickLogSmallCard(action.icon, label, () {
+              HapticFeedback.lightImpact();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
+            });
+          },
+        );
       },
     );
   }
@@ -953,48 +1110,48 @@ class _LandingScreenState extends State<LandingScreen> {
           border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4)),
         ),
         child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: isDark ? Colors.white60 : Colors.grey.shade600,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.grey.shade600,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Icon(Icons.chevron_right, color: isDark ? Colors.white24 : Colors.grey.shade400),
-        ],
+            Icon(Icons.chevron_right, color: isDark ? Colors.white24 : Colors.grey.shade400),
+          ],
+        ),
       ),
-    ),
     );
   }
 
   // --- Daily Activity Grid ---
-  Widget _buildDailyActivityGrid() {
+  Widget _buildDailyActivityGrid(int calories, int focusTime, int tasks) {
     final isDark = _themeManager.isDarkMode;
     return GridView.count(
       shrinkWrap: true,
@@ -1007,21 +1164,21 @@ class _LandingScreenState extends State<LandingScreen> {
         _buildActivityCard(
           iconSource: Icons.local_fire_department,
           iconColor: const Color(0xFFFF5B5B),
-          title: 'Active Calories',
-          value: '2,390',
+          title: 'Active Burn',
+          value: '$calories',
           unit: 'kcal',
-          progress: 0.85,
+          progress: (calories / 500).clamp(0.0, 1.0),
           cardGradient: isDark 
             ? [const Color(0xFF3D1F1A).withValues(alpha: 0.4), const Color(0xFF221110).withValues(alpha: 0.4)]
             : [const Color(0xFFFFEEEA), const Color(0xFFFFEEEA).withValues(alpha: 0.4)],
         ),
         _buildActivityCard(
-          iconSource: Icons.show_chart,
+          iconSource: Icons.timer,
           iconColor: const Color(0xFF8CE063),
-          title: 'Total Distance',
-          value: '2000',
-          unit: 'km',
-          progress: 0.65,
+          title: 'Focus Time',
+          value: '$focusTime',
+          unit: 'min',
+          progress: (focusTime / 120).clamp(0.0, 1.0),
           cardGradient: isDark 
             ? [const Color(0xFF1E2F1A).withValues(alpha: 0.4), const Color(0xFF0F180D).withValues(alpha: 0.4)]
             : [const Color(0xFFF1F8E9), const Color(0xFFF1F8E9).withValues(alpha: 0.4)],
@@ -1031,20 +1188,20 @@ class _LandingScreenState extends State<LandingScreen> {
           iconSource: Icons.favorite,
           iconColor: const Color(0xFFFF5BAE),
           title: 'Wellness',
-          value: '15',
+          value: '$tasks',
           unit: 'tasks',
-          progress: 0.92,
+          progress: (tasks / 5).clamp(0.0, 1.0),
           cardGradient: isDark 
             ? [const Color(0xFF3D1A2F).withValues(alpha: 0.4), const Color(0xFF1F0D18).withValues(alpha: 0.4)]
             : [const Color(0xFFFCE4EC), const Color(0xFFFCE4EC).withValues(alpha: 0.4)],
         ),
         _buildActivityCard(
-          iconSource: Icons.book,
+          iconSource: Icons.auto_awesome,
           iconColor: const Color(0xFFAF52DE),
-          title: 'Reading',
-          value: '10',
-          unit: 'books',
-          progress: 0.75,
+          title: 'Consistency',
+          value: tasks > 0 ? 'Peak' : 'Start',
+          unit: 'today',
+          progress: tasks > 0 ? 1.0 : 0.0,
           cardGradient: isDark 
             ? [const Color(0xFF261A3D).withValues(alpha: 0.4), const Color(0xFF130D1F).withValues(alpha: 0.4)]
             : [const Color(0xFFF3E5F5), const Color(0xFFF3E5F5).withValues(alpha: 0.4)],
@@ -1182,7 +1339,18 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
             );
           }),
-          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
+          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, () {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) => const AiCoachScreen(),
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+              ),
+            );
+          }),
           _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
             Navigator.pushReplacement(
               context,
@@ -1210,6 +1378,7 @@ class _LandingScreenState extends State<LandingScreen> {
       ),
     );
   }
+
   Widget _buildBlob({required double size, required Color color, required double blur}) {
     return Container(
       width: size,
@@ -1229,7 +1398,6 @@ class _LandingScreenState extends State<LandingScreen> {
 }
 
 // --- Custom Painters ---
-
 
 class TrianglePainter extends CustomPainter {
   final Color color;

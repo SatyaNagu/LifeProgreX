@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/goal_model.dart';
+import '../models/notification_model.dart';
+import 'achievement_service.dart';
+import 'notification_service.dart';
 import 'dart:developer';
 
 class GoalService {
+  final AchievementService _achievementService = AchievementService();
+  final NotificationService _notificationService = NotificationService();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -16,6 +21,7 @@ class GoalService {
       goalData['userId'] = user.uid; // Hardware-level safety override
 
       await _db.collection('users').doc(user.uid).collection('goals').add(goalData);
+      await _achievementService.notifyActivity('goal_added');
     } on FirebaseException catch (e) {
       throw Exception('Database Error adding Goal: ${e.message}');
     } catch (e) {
@@ -30,6 +36,16 @@ class GoalService {
 
       final goalData = goal.toJson();
       await _db.collection('users').doc(user.uid).collection('goals').doc(goal.id).update(goalData);
+
+      // Notify achievements if goal is completed
+      if (goal.isCompleted) {
+        await _achievementService.notifyActivity('goal_complete');
+        await _notificationService.addNotification(
+          title: 'Goal Achieved! 🎯',
+          message: 'Congratulations! You\'ve successfully completed: ${goal.title}',
+          type: NotificationType.goalComplete,
+        );
+      }
     } on FirebaseException catch (e) {
       throw Exception('Database Error updating Goal: ${e.message}');
     } catch (e) {

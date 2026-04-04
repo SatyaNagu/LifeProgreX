@@ -419,7 +419,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          goal.category.name[0].toUpperCase() + goal.category.name.substring(1),
+                                          goal.category.toString().split('.').last[0].toUpperCase() + goal.category.toString().split('.').last.substring(1),
                                           style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
                                         ),
                                       ],
@@ -733,7 +733,7 @@ class _EditGoalModalState extends State<EditGoalModal> {
                           Text(data['icon'] as String, style: const TextStyle(fontSize: 14)),
                           const SizedBox(width: 6),
                           Text(
-                            cat.name[0].toUpperCase() + cat.name.substring(1),
+                            cat.toString().split('.').last[0].toUpperCase() + cat.toString().split('.').last.substring(1),
                             style: TextStyle(
                               color: isSelected ? color : (isDark ? Colors.white70 : Colors.black87),
                               fontSize: 12,

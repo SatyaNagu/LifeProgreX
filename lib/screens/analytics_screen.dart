@@ -4,12 +4,12 @@ import '../utils/premium_background.dart';
 import 'dart:math';
 import '../profile.dart';
 import '../landing_screen.dart';
-import '../settings.dart';
 import '../services/analytics_service.dart';
 import '../models/habit_model.dart';
-
-// Note: This is an initial structure based on the provided design. 
-// It will need to be refined and integrated with actual data logic.
+import 'my_achievements_screen.dart';
+import 'life_resume_screen.dart';
+import 'ai_coach_screen.dart';
+import '../settings.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -147,7 +147,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
@@ -184,7 +184,18 @@ Widget _buildBottomNavigationBar(BuildContext context) {
           );
         }),
         _buildNavItem(Icons.bar_chart_outlined, const Color(0xFF13C6DF), true, null), // Active state for analytics
-        _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, null),
+        _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, () {
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => const AiCoachScreen(),
+              transitionDuration: const Duration(milliseconds: 200),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+            ),
+          );
+        }),
         _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
           Navigator.pushReplacement(
             context,
@@ -460,8 +471,8 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: isHighlighted 
-                ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.05))
-                : Colors.transparent,
+            ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.05))
+            : Colors.transparent,
             shape: BoxShape.circle,
           ),
           child: Text(emoji, style: const TextStyle(fontSize: 20)),
@@ -612,6 +623,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
     );
   }
 
+
   // --- Stats Grid ---
 
   Widget _buildStatsGrid(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
@@ -630,8 +642,22 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
         _buildStatCard('Total Goals', data.totalGoals.toString(), 'Active', const Color(0xFF13C6DF), Icons.track_changes, isDark,
             isDark ? const [Color(0xFF1E2F1A), Color(0xFF0F180D)] : const [Color(0xFFF1F8E9), Color(0xFFF1F8E9)], borderColor),
         // Reading style for Achievements
-        _buildStatCard('Achievements', data.achievements.toString(), 'Good', const Color(0xFFB24BF3), Icons.emoji_events, isDark,
-            isDark ? const [Color(0xFF261A3D), Color(0xFF130D1F)] : const [Color(0xFFF3E5F5), Color(0xFFF3E5F5)], borderColor),
+        _buildStatCard(
+            'Achievements',
+            data.achievements.toString(),
+            'Good',
+            const Color(0xFFB24BF3),
+            Icons.emoji_events,
+            isDark,
+            isDark
+                ? const [Color(0xFF261A3D), Color(0xFF130D1F)]
+                : const [Color(0xFFF3E5F5), Color(0xFFF3E5F5)],
+            borderColor,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyAchievementsScreen()),
+            ),
+        ),
         // Wellness style for Wellness Score
         _buildStatCard('Wellness Score', data.wellnessScore.toStringAsFixed(1), 'Avg', const Color(0xFFFF2D95), Icons.favorite, isDark,
             isDark ? const [Color(0xFF3D1A2F), Color(0xFF1F0D18)] : const [Color(0xFFFCE4EC), Color(0xFFFCE4EC)], borderColor),
@@ -640,8 +666,10 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
   }
 
 
-  Widget _buildStatCard(String title, String value, String badgeText, Color badgeColor, IconData icon, bool isDark, List<Color> gradientColors, Color borderColor) {
-    return Container(
+  Widget _buildStatCard(String title, String value, String badgeText, Color badgeColor, IconData icon, bool isDark, List<Color> gradientColors, Color borderColor, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -679,6 +707,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
           )
         ],
       ),
+    ),
     );
   }
 
@@ -705,7 +734,12 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {}, // Action for detailed analytics
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LifeResumeScreen()),
+            );
+          },
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -791,107 +825,49 @@ class TimelineAreaPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final chartHeight = size.height - 20; // Reserve space for x-axis labels
-    final chartWidth = size.width - 20; // Reserve space for y-axis labels
     final xOffset = 20.0;
     
     // Draw grid lines
     final gridPaint = Paint()
       ..color = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 1;
 
-    // Y Axis lines & labels
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    final yLabels = ['8', '6', '4', '2', '0'];
-    for (int i = 0; i < yLabels.length; i++) {
-        final yValue = chartHeight * (i / (yLabels.length - 1));
-        
-        // Draw dashed grid line
-        double startX = xOffset;
-        while (startX < size.width) {
-          canvas.drawLine(Offset(startX, yValue), Offset(startX + 5, yValue), gridPaint);
-          startX += 10;
-        }
-
-        textPainter.text = TextSpan(
-          text: yLabels[i],
-          style: TextStyle(color: isDark ? Colors.white38 : Colors.black38, fontSize: 10),
-        );
-        textPainter.layout();
-        textPainter.paint(canvas, Offset(0, yValue - 5));
+    for (var i = 0; i <= 4; i++) {
+       final y = chartHeight * (i / 4);
+       canvas.drawLine(Offset(xOffset, y), Offset(size.width, y), gridPaint);
     }
 
-    // X Axis labels
-    final xLabels = ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM', '12 AM'];
-    for (int i = 0; i < xLabels.length; i++) {
-      final xValue = xOffset + (chartWidth * (i / (xLabels.length - 1)));
-      textPainter.text = TextSpan(
-        text: xLabels[i],
-        style: TextStyle(color: isDark ? Colors.white38 : Colors.black38, fontSize: 9),
-      );
-      textPainter.layout();
-      textPainter.paint(canvas, Offset(xValue - textPainter.width/2, chartHeight + 10));
-    }
-
-    // Data points
-    final points = [
-      Offset(xOffset, chartHeight * 0.1),              // 6 AM (High)
-      Offset(xOffset + chartWidth * 0.16, chartHeight * 0.9), // 9 AM (Low)
-      Offset(xOffset + chartWidth * 0.33, chartHeight * 0.95), // 12 PM (Low)
-      Offset(xOffset + chartWidth * 0.5, chartHeight * 0.9), // 3 PM (Low)
-      Offset(xOffset + chartWidth * 0.66, chartHeight * 0.8), // 6 PM
-      Offset(xOffset + chartWidth * 0.83, chartHeight * 0.9), // 9 PM
-      Offset(xOffset + chartWidth, chartHeight * 0.2),        // 12 AM (High)
-    ];
-
+    // Mock Path for timeline
     final path = Path();
-    path.moveTo(points.first.dx, points.first.dy);
+    path.moveTo(xOffset, chartHeight * 0.8);
+    path.quadraticBezierTo(size.width * 0.2, chartHeight * 0.2, size.width * 0.4, chartHeight * 0.5);
+    path.quadraticBezierTo(size.width * 0.6, chartHeight * 0.8, size.width * 0.8, chartHeight * 0.3);
+    path.lineTo(size.width, chartHeight * 0.4);
 
-    // Natural spline curve
-    for (int i = 0; i < points.length - 1; i++) {
-      final p0 = points[i];
-      final p1 = points[i + 1];
-      final controlPoint1 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p0.dy);
-      final controlPoint2 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p1.dy);
-      path.cubicTo(controlPoint1.dx, controlPoint1.dy, controlPoint2.dx, controlPoint2.dy, p1.dx, p1.dy);
-    }
-
-    // Gradient Area Fill
-    final areaPath = Path.from(path);
-    areaPath.lineTo(size.width, chartHeight);
-    areaPath.lineTo(xOffset, chartHeight);
-    areaPath.close();
-
-    final gradientPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          color.withValues(alpha: 0.4),
-          color.withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, chartHeight));
-    
-    canvas.drawPath(areaPath, gradientPaint);
-
-    // Stroke line
     final linePaint = Paint()
       ..color = color
-      ..strokeWidth = 2
+      ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final glowPaint = Paint()
-      ..color = color.withValues(alpha: 0.5)
-      ..strokeWidth = 6
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-
-    canvas.drawPath(path, glowPaint);
     canvas.drawPath(path, linePaint);
+
+    // Fill area under path
+    final fillPath = Path.from(path);
+    fillPath.lineTo(size.width, chartHeight);
+    fillPath.lineTo(xOffset, chartHeight);
+    fillPath.close();
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.0)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, chartHeight));
+    
+    canvas.drawPath(fillPath, fillPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

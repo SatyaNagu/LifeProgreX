@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/habit_model.dart';
 import '../models/mood_log_model.dart';
+import '../models/achievement_model.dart';
+import '../models/activity_model.dart';
+import 'achievement_service.dart';
 
 class AnalyticsData {
   final double lifeScore;
@@ -13,6 +16,11 @@ class AnalyticsData {
   final int achievements;
   final double wellnessScore;
   final List<Map<String, dynamic>> timelineEvents;
+  final List<String> earnedBadges;
+  final int readingMinutes;
+  final int workoutSessions;
+  final int learningMinutes;
+  final int habitsCompleted;
 
   AnalyticsData({
     required this.lifeScore,
@@ -24,10 +32,16 @@ class AnalyticsData {
     required this.achievements,
     required this.wellnessScore,
     required this.timelineEvents,
+    required this.earnedBadges,
+    required this.readingMinutes,
+    required this.workoutSessions,
+    required this.learningMinutes,
+    required this.habitsCompleted,
   });
 }
 
 class AnalyticsService {
+  final AchievementService _achievementService = AchievementService();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -42,6 +56,9 @@ class AnalyticsService {
       'emoji': emoji,
       'timestamp': FieldValue.serverTimestamp(),
     });
+
+    // Notify achievements
+    await _achievementService.notifyActivity('mood_logged');
   }
 
   // Listens to all analytics data reactively
@@ -88,18 +105,31 @@ class AnalyticsService {
           .orderBy('createdAt', descending: true)
           .limit(20) // Limit to recent 20 for timeline
           .get();
-          
-      final activities = activitySnapshot.docs.map((doc) => doc.data()).toList();
 
-      return _computeAnalytics(habits, moods, activities, timeframe);
+      // Fetch Earned Achievements
+      final achievementSnapshot = await _db
+          .collection('users')
+          .doc(user.uid)
+          .collection('achievements')
+          .where('isUnlocked', isEqualTo: true)
+          .get();
+      
+      final earnedBadgeIds = achievementSnapshot.docs.map((doc) => doc.id).toList();
+
+      final activities = activitySnapshot.docs
+          .map((doc) => ActivityLog.fromMap(doc.data(), doc.id))
+          .toList();
+
+      return _computeAnalytics(habits, moods, activities, timeframe, earnedBadgeIds);
     });
   }
 
   AnalyticsData _computeAnalytics(
     List<HabitModel> habits, 
     List<MoodLogModel> moods, 
-    List<Map<String, dynamic>> activities, 
-    String timeframe
+    List<ActivityLog> activities, 
+    String timeframe,
+    List<String> earnedBadgeIds,
   ) {
     // 1. Life Score (based on % of habits that have streaks > 0, just a proxy metric)
     double lifeScore = 0.0;
@@ -135,21 +165,34 @@ class AnalyticsService {
     }
     int totalGoals = habits.length;
     
-    // Achievements (e.g. streaks > 10)
-    int achievements = habits.where((h) => h.currentStreak >= 10).length;
+    // Achievements (Map IDs to Badges using AchievementConstants)
+    final earnedBadges = AchievementConstants.allAchievements
+        .where((def) => earnedBadgeIds.contains(def.id))
+        .map((def) => def.badge)
+        .toList();
+    
+    int achievementsCount = earnedBadgeIds.length;
     
     // Wellness scale 1-10
     double wellnessScore = (lifeScore * 10 + avgMood) / 2;
     if (wellnessScore.isNaN) wellnessScore = 0.0;
 
-    // 5. Timeline Formatting (Basic mapping)
-    List<Map<String, dynamic>> timeline = activities.map((a) {
-      final t = a['createdAt'] as Timestamp?;
-      return {
-        'type': a['type'] ?? 'Unknown',
-        'time': t?.toDate() ?? DateTime.now(),
-      };
-    }).toList();
+    // 6. Granular Stats for Life Resume
+    int rMin = 0;
+    int wCount = 0;
+    int lMin = 0;
+    int hCompleted = activities.length;
+
+    for (var a in activities) {
+      final type = a.type.toLowerCase();
+      if (type.contains('read')) {
+        rMin += (a.duration ?? 0);
+      } else if (type.contains('workout') || type.contains('gym') || type.contains('fit')) {
+        wCount++;
+      } else if (type.contains('learn') || type.contains('skill')) {
+        lMin += (a.duration ?? 0);
+      }
+    }
 
     return AnalyticsData(
       lifeScore: lifeScore,
@@ -158,9 +201,17 @@ class AnalyticsService {
       categoryStats: catStats,
       maxStreak: maxStreak,
       totalGoals: totalGoals,
-      achievements: achievements,
+      achievements: achievementsCount,
       wellnessScore: wellnessScore,
-      timelineEvents: timeline,
+      timelineEvents: activities.map((a) => {
+        'type': a.type,
+        'time': a.createdAt,
+      }).toList(),
+      earnedBadges: earnedBadges,
+      readingMinutes: rMin,
+      workoutSessions: wCount,
+      learningMinutes: lMin,
+      habitsCompleted: hCompleted,
     );
   }
 }

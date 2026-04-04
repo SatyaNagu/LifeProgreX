@@ -91,6 +91,7 @@ flutter:
     - Assets/onboarding_image_5.png
     - Assets/onboarding_image_6.png
     - Assets/logo_placeholder.png
+    - Assets/ai_coach_max.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
