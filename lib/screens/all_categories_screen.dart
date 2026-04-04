@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../widgets/glass_card.dart';
 import '../utils/theme_manager.dart';
 import '../utils/premium_background.dart';
+import '../services/activity_service.dart';
+import '../models/activity_model.dart';
+import '../auth_service.dart';
+import 'package:intl/intl.dart';
 
 class AllCategoriesScreen extends StatefulWidget {
   const AllCategoriesScreen({super.key});
@@ -20,31 +24,47 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
     final textColor = isDark ? Colors.white : const Color(0xFF16102B);
     final subTextColor = isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF16102B).withValues(alpha: 0.5);
 
+    final user = AuthService().currentUser;
+    if (user == null) return const PremiumBackground(child: Scaffold(body: Center(child: Text("Please login"))));
+
     return PremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton: _buildLogActivityFAB(),
+        floatingActionButton: _buildLogActivityFAB(context),
         body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context, textColor),
-              _buildDateSwitcher(isDark, textColor),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSummaryGrid(isDark, textColor, subTextColor),
-                      const SizedBox(height: 32),
-                      _buildRecentActivitySection(isDark, textColor, subTextColor),
-                      const SizedBox(height: 100), // Space for FAB
-                    ],
+          child: StreamBuilder<List<ActivityLog>>(
+            stream: ActivityService.listenToActivities(user.uid),
+            builder: (context, snapshot) {
+              final activities = snapshot.data ?? [];
+              final filteredActivities = _filterActivitiesByDate(activities, selectedDate);
+              
+              // Calculate metrics from today's logs for the summary grid
+              final todayLogs = _filterActivitiesByDate(activities, 'Today');
+              final totalDuration = todayLogs.fold(0, (sum, log) => sum + (log.duration ?? 0));
+              final totalTasks = todayLogs.length;
+
+              return Column(
+                children: [
+                  _buildHeader(context, textColor),
+                  _buildDateSwitcher(isDark, textColor),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSummaryGrid(isDark, textColor, subTextColor, totalDuration, totalTasks),
+                          const SizedBox(height: 32),
+                          _buildRecentActivitySection(isDark, textColor, subTextColor, filteredActivities),
+                          const SizedBox(height: 100), // Space for FAB
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            }
           ),
         ),
       ),
@@ -73,6 +93,27 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
         ],
       ),
     );
+  }
+
+  List<ActivityLog> _filterActivitiesByDate(List<ActivityLog> logs, String dateLabel) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final tomorrow = today.add(const Duration(days: 1));
+
+    DateTime target;
+    if (dateLabel == 'Yesterday') {
+      target = yesterday;
+    } else if (dateLabel == 'Tomorrow') {
+      target = tomorrow;
+    } else {
+      target = today;
+    }
+
+    return logs.where((log) {
+      final logDate = DateTime(log.createdAt.year, log.createdAt.month, log.createdAt.day);
+      return logDate.isAtSameMomentAs(target);
+    }).toList();
   }
 
   Widget _buildDateSwitcher(bool isDark, Color textColor) {
@@ -118,7 +159,10 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
     );
   }
 
-  Widget _buildSummaryGrid(bool isDark, Color textColor, Color subTextColor) {
+  Widget _buildSummaryGrid(bool isDark, Color textColor, Color subTextColor, int totalDuration, int totalTasks) {
+    // 5 kcal per minute focus estimate
+    final calories = totalDuration * 5; 
+    
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -128,8 +172,8 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
       childAspectRatio: 0.85,
       children: [
         _buildSummaryCard(
-          'Active Calories',
-          '2,390',
+          'Active Burn',
+          '$calories',
           'kcal',
           Icons.local_fire_department,
           const Color(0xFFFF5B5B),
@@ -137,23 +181,23 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
             ? [const Color(0xFF3D1F1A).withValues(alpha: 0.4), const Color(0xFF221110).withValues(alpha: 0.4)]
             : [const Color(0xFFFFEEEA), const Color(0xFFFFEEEA).withValues(alpha: 0.4)],
           isDark, textColor, subTextColor,
-          progress: 0.85,
+          progress: (calories / 500).clamp(0.0, 1.0), // Target 500 kcal
         ),
         _buildSummaryCard(
-          'Total Distance',
-          '2000',
-          'km',
-          Icons.show_chart,
+          'Focus Time',
+          '$totalDuration',
+          'min',
+          Icons.timer_outlined,
           const Color(0xFF8CE063),
           isDark 
             ? [const Color(0xFF1E2F1A).withValues(alpha: 0.4), const Color(0xFF0F180D).withValues(alpha: 0.4)]
             : [const Color(0xFFF1F8E9), const Color(0xFFF1F8E9).withValues(alpha: 0.4)],
           isDark, textColor, subTextColor,
-          progress: 0.65,
+          progress: (totalDuration / 120).clamp(0.0, 1.0), // Target 120 min
         ),
         _buildSummaryCard(
           'Wellness',
-          '15',
+          '$totalTasks',
           'tasks',
           Icons.favorite,
           const Color(0xFFFF5BAE),
@@ -161,19 +205,19 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
             ? [const Color(0xFF3D1A2F).withValues(alpha: 0.4), const Color(0xFF1F0D18).withValues(alpha: 0.4)]
             : [const Color(0xFFFCE4EC), const Color(0xFFFCE4EC).withValues(alpha: 0.4)],
           isDark, textColor, subTextColor,
-          progress: 0.92,
+          progress: (totalTasks / 5).clamp(0.0, 1.0), // Target 5 tasks
         ),
         _buildSummaryCard(
-          'Reading',
-          '10',
-          'books',
-          Icons.book,
+          'Consistency',
+          '${(totalTasks > 0 ? 100 : 0)}',
+          '%',
+          Icons.auto_awesome,
           const Color(0xFFAF52DE),
           isDark 
             ? [const Color(0xFF261A3D).withValues(alpha: 0.4), const Color(0xFF130D1F).withValues(alpha: 0.4)]
             : [const Color(0xFFF3E5F5), const Color(0xFFF3E5F5).withValues(alpha: 0.4)],
           isDark, textColor, subTextColor,
-          progress: 0.75,
+          progress: totalTasks > 0 ? 1.0 : 0.0,
         ),
       ],
     );
@@ -268,14 +312,14 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
     );
   }
 
-  Widget _buildRecentActivitySection(bool isDark, Color textColor, Color subTextColor) {
+  Widget _buildRecentActivitySection(bool isDark, Color textColor, Color subTextColor, List<ActivityLog> filteredActivities) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 16),
           child: Text(
-            "Today's Activity",
+            "$selectedDate's Activity",
             style: TextStyle(
               color: textColor,
               fontSize: 18,
@@ -283,12 +327,67 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
             ),
           ),
         ),
-        _buildActivityItem('Workout', '35 min', Icons.fitness_center_rounded, const Color(0xFFA855F7), isDark, textColor, subTextColor, "08:30 AM"),
-        _buildActivityItem('Reading', '20 min', Icons.menu_book_rounded, const Color(0xFF06B6D4), isDark, textColor, subTextColor, "10:15 AM"),
-        _buildActivityItem('Meditation', '10 min', Icons.spa_rounded, const Color(0xFF10B981), isDark, textColor, subTextColor, "12:45 PM"),
-        _buildActivityItem('Walk', '1 km', Icons.directions_walk_rounded, const Color(0xFFF59E0B), isDark, textColor, subTextColor, "05:20 PM"),
+        if (filteredActivities.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.history, color: textColor.withValues(alpha: 0.1), size: 64),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No activities found for $selectedDate',
+                    style: TextStyle(color: subTextColor, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...filteredActivities.map((log) {
+            final emoji = log.data['emoji'] ?? '';
+            final typeDisplay = log.type.length > 1 
+                ? '${log.type[0].toUpperCase()}${log.type.substring(1)}' 
+                : log.type;
+            
+            // If value is specific (like "Great" for mood), use it as the main title with the emoji
+            final mainTitle = log.value != null ? '$emoji ${log.value}' : '$emoji $typeDisplay';
+            final metric = log.duration != null ? '${log.duration} min' : '';
+
+            return _buildActivityItem(
+              mainTitle, 
+              metric, 
+              _getActivityIcon(log.type), 
+              _getActivityColor(log.type), 
+              isDark, textColor, subTextColor, 
+              DateFormat('h:mm a').format(log.createdAt),
+              note: log.notes,
+            );
+          }),
       ],
     );
+  }
+
+  IconData _getActivityIcon(String type) {
+    final t = type.toLowerCase();
+    if (t.contains('workout')) return Icons.fitness_center_rounded;
+    if (t.contains('read')) return Icons.menu_book_rounded;
+    if (t.contains('mood')) return Icons.sentiment_satisfied_rounded;
+    if (t.contains('meditation')) return Icons.spa_rounded;
+    if (t.contains('water')) return Icons.opacity;
+    if (t.contains('sleep')) return Icons.bedtime_rounded;
+    return Icons.bolt_rounded;
+  }
+
+  Color _getActivityColor(String type) {
+    final t = type.toLowerCase();
+    if (t.contains('workout')) return const Color(0xFFFF5B5B);
+    if (t.contains('read')) return const Color(0xFF06B6D4);
+    if (t.contains('mood')) return const Color(0xFFA855F7);
+    if (t.contains('meditation')) return const Color(0xFF10B981);
+    if (t.contains('water')) return const Color(0xFF3B82F6);
+    if (t.contains('sleep')) return const Color(0xFF6366F1);
+    return const Color(0xFFA855F7);
   }
 
   Widget _buildActivityItem(
@@ -299,8 +398,9 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
     bool isDark, 
     Color textColor, 
     Color subTextColor,
-    String time
-  ) {
+    String time, {
+    String? note,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: GlassCard(
@@ -330,24 +430,44 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 2),
                   Text(
-                    time,
+                    note != null && note.isNotEmpty ? note : time,
                     style: TextStyle(
                       color: subTextColor,
                       fontSize: 11,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            Text(
-              metric,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-              ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (metric.isNotEmpty)
+                  Text(
+                    metric,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                if (note != null && note.isNotEmpty)
+                  Text(
+                    time,
+                    style: TextStyle(
+                      color: subTextColor,
+                      fontSize: 10,
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
@@ -355,7 +475,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
     );
   }
 
-  Widget _buildLogActivityFAB() {
+  Widget _buildLogActivityFAB(BuildContext context) {
     return Container(
       height: 56,
       decoration: BoxDecoration(

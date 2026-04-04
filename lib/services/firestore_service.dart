@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/habit_model.dart';
+import 'achievement_service.dart';
 import 'dart:developer';
 
 class FirestoreService {
+  final AchievementService _achievementService = AchievementService();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -19,6 +21,9 @@ class FirestoreService {
 
       // Write to Firestore using an auto-generated Document ID
       await _db.collection('habits').add(habitData);
+
+      // Trigger achievement notification
+      await _achievementService.notifyActivity('habit_created');
     } on FirebaseException catch (e) {
       throw Exception('Database Error adding Habit: ${e.message}');
     } catch (e) {
@@ -58,6 +63,11 @@ class FirestoreService {
           'note': note,
         });
       });
+
+      // Notify achievement service of a habit completion with streak info (OUTSIDE Transaction)
+      final habitDoc = await habitRef.get();
+      final int currentStreak = habitDoc.data()?['currentStreak'] ?? 0;
+      await _achievementService.notifyActivity('habit_complete', context: {'streak': currentStreak});
     } on FirebaseException catch (e) {
       throw Exception('Database Error logging Activity: ${e.message}');
     } catch (e) {

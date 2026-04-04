@@ -38,7 +38,7 @@ class GoalModel {
     final categoryStr = json['category'] as String?;
     if (categoryStr != null) {
       parsedCategory = GoalCategory.values.firstWhere(
-        (e) => e.name.toLowerCase() == categoryStr.toLowerCase(),
+        (e) => e.toString().split('.').last.toLowerCase() == categoryStr.toLowerCase(),
         orElse: () => GoalCategory.personal,
       );
     }
@@ -60,7 +60,7 @@ class GoalModel {
       'userId': userId,
       'title': title,
       'description': description,
-      'category': category.name[0].toUpperCase() + category.name.substring(1),
+      'category': category.toString().split('.').last[0].toUpperCase() + category.toString().split('.').last.substring(1),
       'targetDate': Timestamp.fromDate(targetDate),
       'createdAt': Timestamp.fromDate(createdAt),
       'isCompleted': isCompleted,

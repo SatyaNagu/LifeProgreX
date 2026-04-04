@@ -27,7 +27,7 @@ class HabitModel {
     final categoryStr = json['category'] as String?;
     if (categoryStr != null) {
       parsedCategory = HabitCategory.values.firstWhere(
-        (e) => e.name.toLowerCase() == categoryStr.toLowerCase(),
+        (e) => e.toString().split('.').last.toLowerCase() == categoryStr.toLowerCase(),
         orElse: () => HabitCategory.health,
       );
     }
@@ -46,7 +46,7 @@ class HabitModel {
     return {
       'userId': userId,
       'title': title,
-      'category': category.name[0].toUpperCase() + category.name.substring(1),
+      'category': category.toString().split('.').last[0].toUpperCase() + category.toString().split('.').last.substring(1),
       'createdAt': Timestamp.fromDate(createdAt),
       'currentStreak': currentStreak,
     };

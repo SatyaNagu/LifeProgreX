@@ -7,6 +7,7 @@ import 'screens/analytics_screen.dart';
 
 import 'appearance.dart';
 import 'help_and_support.dart';
+import 'screens/achievements_screen.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
 
@@ -106,6 +107,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 30),
 
                       // Profile card removed here
+
+                      // Progress Section
+                      _buildSectionHeader('PROGRESS', subTextColor),
+                      _buildSectionCard(
+                        color: cardBgColor,
+                        child: _buildNavigationTile(
+                          icon: Icons.emoji_events_outlined,
+                          title: 'Achievements',
+                          subtitle: 'View your milestones and badges',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AchievementsScreen(),
+                            ),
+                          ),
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
 
                       // Settings Section
                       _buildSectionHeader('SETTINGS', subTextColor),
