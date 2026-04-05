@@ -386,7 +386,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildStatBox('$maxStreak', 'STREAK', const Color(0xFFF98E2F), isDark),
-                      _buildStatBox('$completedHabits', 'HABITS', const Color(0xFF8B5CF6), isDark),
+                      _buildStatBox('$completedHabits', 'ACTIVITIES', const Color(0xFF8B5CF6), isDark),
                       _buildStatBox('4', 'CATS', isDark ? Colors.white : const Color(0xFF111827), isDark),
                     ],
                   );

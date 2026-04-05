@@ -71,7 +71,12 @@ class _GoalsScreenState extends State<GoalsScreen> {
               child: StreamBuilder<List<GoalModel>>(
                 stream: _goalService.getGoalsStream(),
                 builder: (context, snapshot) {
-                  final goals = snapshot.data ?? [];
+                  final goals = List<GoalModel>.from(snapshot.data ?? []);
+                  goals.sort((a, b) {
+                    if (a.isCompleted && !b.isCompleted) return 1;
+                    if (!a.isCompleted && b.isCompleted) return -1;
+                    return b.createdAt.compareTo(a.createdAt);
+                  });
                   final completedGoals = goals.where((g) => g.isCompleted).length;
 
                   return CustomScrollView(
@@ -401,76 +406,95 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               const SizedBox(height: 12),
                               // Metadata & Actions row
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  // Category Pill
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                  Expanded(
+                                    child: Wrap(
+                                      spacing: 12,
+                                      runSpacing: 8,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
                                       children: [
+                                        // Category Pill
                                         Container(
-                                          width: 6,
-                                          height: 6,
-                                          decoration: BoxDecoration(color: categoryColor, shape: BoxShape.circle),
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                width: 6,
+                                                height: 6,
+                                                decoration: BoxDecoration(color: categoryColor, shape: BoxShape.circle),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                goal.category.toString().split('.').last[0].toUpperCase() + goal.category.toString().split('.').last.substring(1),
+                                                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          goal.category.toString().split('.').last[0].toUpperCase() + goal.category.toString().split('.').last.substring(1),
-                                          style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                                        // Target Date
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.calendar_today, size: 12, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              DateFormat('MMM dd, yyyy').format(goal.targetDate),
+                                              style: TextStyle(color: isDark ? Colors.grey.shade500 : Colors.grey.shade500, fontSize: 12),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
-                                  // Target Date
-                                  Icon(Icons.calendar_today, size: 12, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    DateFormat('MMM dd, yyyy').format(goal.targetDate),
-                                    style: TextStyle(color: isDark ? Colors.grey.shade500 : Colors.grey.shade500, fontSize: 12),
-                                  ),
-                                  const Spacer(),
-                                  // Right side actions
-                                  GestureDetector(
-                                    onTap: () => _showGoalModal(existingGoal: goal),
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF00D9FF).withValues(alpha: isDark ? 0.2 : 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(Icons.edit, color: Color(0xFF00D9FF), size: 16),
-                                    ),
-                                  ),
                                   const SizedBox(width: 8),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      // Optional confirmation dialog here
-                                      try {
-                                        await _goalService.deleteGoal(goal.id);
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('🗑️ Goal deleted successfully!'), backgroundColor: Color(0xFF10C655)),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-                                      }
-                                    },
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFFF6B35).withValues(alpha: isDark ? 0.2 : 0.1),
-                                        borderRadius: BorderRadius.circular(8),
+                                  // Right side actions
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => _showGoalModal(existingGoal: goal),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF00D9FF).withValues(alpha: isDark ? 0.2 : 0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: const Icon(Icons.edit, color: Color(0xFF00D9FF), size: 16),
+                                        ),
                                       ),
-                                      child: const Icon(Icons.delete_outline, color: Color(0xFFFF6B35), size: 16),
-                                    ),
+                                      const SizedBox(width: 8),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          try {
+                                            await _goalService.deleteGoal(goal.id);
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('🗑️ Goal deleted successfully!'), backgroundColor: Color(0xFF10C655)),
+                                              );
+                                            }
+                                          } catch (e) {
+                                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                          }
+                                        },
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFF6B35).withValues(alpha: isDark ? 0.2 : 0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: const Icon(Icons.delete_outline, color: Color(0xFFFF6B35), size: 16),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -599,6 +623,26 @@ class _EditGoalModalState extends State<EditGoalModal> {
     }
   }
 
+    Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: _targetDate != null 
+          ? TimeOfDay.fromDateTime(_targetDate!) 
+          : TimeOfDay.now(),
+    );
+    if (pickedTime != null) {
+      setState(() {
+        final current = _targetDate ?? DateTime.now();
+        _targetDate = DateTime(
+          current.year,
+          current.month,
+          current.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+      });
+    }
+  }
   Future<void> _handleSave() async {
     if (_titleController.text.trim().isEmpty) return;
     if (_targetDate == null) return;
@@ -707,66 +751,149 @@ class _EditGoalModalState extends State<EditGoalModal> {
 
               const Text('Category', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: GoalCategory.values.map((cat) {
-                  final isSelected = _selectedCategory == cat;
-                  final data = _categoryData[cat]!;
-                  final color = data['color'] as Color;
-                  
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedCategory = cat),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? color.withValues(alpha: 0.1) : inputColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected ? color : Colors.transparent,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(data['icon'] as String, style: const TextStyle(fontSize: 14)),
-                          const SizedBox(width: 6),
-                          Text(
-                            cat.toString().split('.').last[0].toUpperCase() + cat.toString().split('.').last.substring(1),
-                            style: TextStyle(
-                              color: isSelected ? color : (isDark ? Colors.white70 : Colors.black87),
-                              fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              Column(
+                children: [
+                  Row(
+                    children: GoalCategory.values.take(3).map((cat) {
+                      final isSelected = _selectedCategory == cat;
+                      final data = _categoryData[cat]!;
+                      final color = data['color'] as Color;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedCategory = cat),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? color.withValues(alpha: 0.1) : inputColor,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: isSelected ? color : Colors.transparent, width: 1.5),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(data['icon'] as String, style: const TextStyle(fontSize: 16)),
+                                const SizedBox(height: 4),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    cat.toString().split('.').last[0].toUpperCase() + cat.toString().split('.').last.substring(1),
+                                    style: TextStyle(
+                                      color: isSelected ? color : (isDark ? Colors.white70 : Colors.black87),
+                                      fontSize: 11,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: GoalCategory.values.skip(3).map((cat) {
+                      final isSelected = _selectedCategory == cat;
+                      final data = _categoryData[cat]!;
+                      final color = data['color'] as Color;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedCategory = cat),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? color.withValues(alpha: 0.1) : inputColor,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: isSelected ? color : Colors.transparent, width: 1.5),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(data['icon'] as String, style: const TextStyle(fontSize: 16)),
+                                const SizedBox(height: 4),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    cat.toString().split('.').last[0].toUpperCase() + cat.toString().split('.').last.substring(1),
+                                    style: TextStyle(
+                                      color: isSelected ? color : (isDark ? Colors.white70 : Colors.black87),
+                                      fontSize: 11,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
 
-              const Text('Target Date', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: inputColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _targetDate == null ? 'Select Date' : DateFormat('MMM dd, yyyy').format(_targetDate!),
-                    style: TextStyle(
-                      color: _targetDate == null ? Colors.grey : textColor,
-                      fontSize: 14,
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Target Date', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () => _selectDate(context),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: inputColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _targetDate == null ? 'Select Date' : DateFormat('MMM dd, yyyy').format(_targetDate!),
+                              style: TextStyle(
+                                color: _targetDate == null ? Colors.grey : textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Target Time', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () => _selectTime(context),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: inputColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _targetDate == null ? 'Select Time' : DateFormat('h:mm a').format(_targetDate!),
+                              style: TextStyle(
+                                color: _targetDate == null ? Colors.grey : textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 32),
 

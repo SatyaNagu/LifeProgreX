@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/activity_model.dart';
-import 'firestore_service.dart';
 import 'achievement_service.dart';
+import '../utils/quick_log_manager.dart';
 
 class ActivityService {
   static final AchievementService _achievementService = AchievementService();
@@ -19,16 +19,8 @@ class ActivityService {
           .add(activity.toMap())
           .timeout(const Duration(seconds: 10));
 
-      try {
-        final String formattedType = activity.type.isNotEmpty 
-            ? '${activity.type[0].toUpperCase()}${activity.type.substring(1).toLowerCase()}' 
-            : activity.type;
-        await FirestoreService().logActivityByTitle(formattedType, note: activity.notes);
-      } catch (e) {
-        // If the user hasn't created a rigid Habit mapped to this exact template yet, 
-        // silently bypass this exception to allow raw Activity Logs to persist functionally standalone.
-        debugPrint('Background streak sync bypassed: $e');
-      }
+      // Quick Logs dynamically route backwards locally into edit shortcut configurations independent of rigid background streaks.
+      QuickLogManager.removeAction(activity.type);
 
       // Notify achievements service
       await _achievementService.notifyActivity('activity_logged', context: {'type': activity.type});
