@@ -20,6 +20,7 @@ import 'services/goal_service.dart';
 import 'services/activity_service.dart';
 import 'models/activity_model.dart';
 import 'auth_service.dart';
+import 'widgets/animated_goals_card.dart';
 import 'models/notification_model.dart';
 import 'services/notification_service.dart';
 import 'screens/notifications_screen.dart';
@@ -140,11 +141,17 @@ class _LandingScreenState extends State<LandingScreen> {
                     children: [
                       _buildHeader(textColor),
                       const SizedBox(height: 24),
-                      _buildGoalsCard(completedGoals: completedTodayGoals, totalGoals: totalTodayGoals, score: goalScore),
+                      AnimatedGoalsCard(
+                        completedGoals: goals.where((g) => g.isCompleted).length,
+                        totalGoals: goals.length,
+                        score: goals.isNotEmpty ? ((goals.where((g) => g.isCompleted).length / goals.length) * 100).toInt() : 0,
+                        hasAnyGoals: goals.isNotEmpty,
+                        themeManager: _themeManager,
+                      ),
                       const SizedBox(height: 32),
                       _buildSectionHeader('Overview', textColor),
                       const SizedBox(height: 16),
-                      _buildOverviewGrid(maxStreak: maxStreak, score: habitScore, totalHabits: totalHabits),
+                      _buildOverviewGrid(maxStreak: maxStreak, score: habitScore, totalHabits: activities.length),
                       const SizedBox(height: 32),
                       _buildQuickLogHeader(context, textColor),
                       const SizedBox(height: 16),
@@ -279,12 +286,12 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildGoalActionCard(GoalModel goal, bool isDark, Color textColor) {
     final Map<GoalCategory, String> categoryEmoji = {
-      GoalCategory.fitness: '💪',
-      GoalCategory.learning: '📚',
-      GoalCategory.wellness: '❤️',
-      GoalCategory.career: '💼',
-      GoalCategory.habits: '⭐',
-      GoalCategory.personal: '🎯',
+      GoalCategory.fitness: 'ðŸ’ª',
+      GoalCategory.learning: 'ðŸ“š',
+      GoalCategory.wellness: 'â¤ï¸',
+      GoalCategory.career: 'ðŸ’¼',
+      GoalCategory.habits: 'â­',
+      GoalCategory.personal: 'ðŸŽ¯',
     };
 
     return Container(
@@ -323,7 +330,7 @@ class _LandingScreenState extends State<LandingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${categoryEmoji[goal.category] ?? '🎯'} ${goal.title}',
+                  '${categoryEmoji[goal.category] ?? 'ðŸŽ¯'} ${goal.title}',
                   style: TextStyle(
                     color: textColor,
                     fontSize: 16,
@@ -355,11 +362,11 @@ class _LandingScreenState extends State<LandingScreen> {
     final hour = DateTime.now().hour;
     String greeting;
     if (hour < 12) {
-      greeting = "Good Morning 👋";
+      greeting = "Good Morning ðŸ‘‹";
     } else if (hour < 17) {
-      greeting = "Good Afternoon 👋";
+      greeting = "Good Afternoon ðŸ‘‹";
     } else {
-      greeting = "Good Evening 👋";
+      greeting = "Good Evening ðŸ‘‹";
     }
 
     return Row(
@@ -506,263 +513,7 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  // --- Today's Goals Card ---
-  Widget _buildGoalsCard({int completedGoals = 0, int totalGoals = 0, int score = 0}) {
-    final isDark = _themeManager.isDarkMode;
-    final displayTotal = totalGoals == 0 ? 5 : totalGoals; // Fallback so bar isn't just 0/0 visually
-    final remaining = displayTotal - completedGoals;
-    final progress = (score / 100.0).clamp(0.0, 1.0);
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const GoalsScreen()),
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark 
-                ? [
-                    const Color(0xFF1F1033).withValues(alpha: 0.8), 
-                    const Color(0xFF261547).withValues(alpha: 0.6),
-                    const Color(0xFF2D1B57).withValues(alpha: 0.4)
-                  ]
-                : [
-                    Colors.white.withValues(alpha: 0.9), 
-                    const Color(0xFFF9FAFB).withValues(alpha: 0.6)
-                  ],
-          ),
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-            color: isDark ? const Color(0xFFB24BF3).withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.2),
-            width: 1.5,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: Stack(
-            children: [
-              // Decorative blobs inside card
-              Positioned(
-                top: -40,
-                right: -40,
-                child: _buildBlob(
-                  size: 160, 
-                  color: const Color(0xFFFFBF00).withValues(alpha: isDark ? 0.3 : 0.15), 
-                  blur: 64, // blur-3xl
-                ),
-              ),
-              Positioned(
-                bottom: -32,
-                left: -32,
-                child: _buildBlob(
-                  size: 128, 
-                  color: const Color(0xFFB24BF3).withValues(alpha: isDark ? 0.3 : 0.15), 
-                  blur: 40, // blur-2xl
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                               const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFBF00), size: 24),
-                               const SizedBox(width: 12),
-                               Expanded(
-                                 child: Column(
-                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                   children: [
-                                     Text(
-                                       "Today's Goals",
-                                       style: TextStyle(
-                                         color: isDark ? Colors.white : const Color(0xFF111827),
-                                         fontSize: 20,
-                                         fontWeight: FontWeight.w900,
-                                       ),
-                                     ),
-                                     Text(
-                                       "Keep the momentum going! 🚀",
-                                       style: TextStyle(
-                                         color: isDark ? Colors.grey[300] : const Color(0xFF6B7280),
-                                         fontSize: 13,
-                                       ),
-                                       overflow: TextOverflow.ellipsis,
-                                     ),
-                                   ],
-                                 ),
-                               ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFFFFBF00), Color(0xFFF59E0B)]),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFFFBF00).withValues(alpha: 0.3),
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            '$completedGoals/$displayTotal',
-                            style: TextStyle(
-                              color: Color(0xFF0A0E0A),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    
-                    // Progress Bar
-                    Column(
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              height: 6,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.transparent),
-                              ),
-                            ),
-                            FractionallySizedBox(
-                              widthFactor: progress,
-                              child: Container(
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFFFF6B35), Color(0xFFFFBF00), Color(0xFF9FE82E)],
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFFFFBF00).withValues(alpha: 0.4),
-                                      blurRadius: 15,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Percentage Indicator
-                            Positioned(
-                              left: (MediaQuery.of(context).size.width - 88) * progress - 25,
-                              top: -35,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                       gradient: const LinearGradient(colors: [Color(0xFFFF2D95), Color(0xFFFF6B35)]),
-                                       borderRadius: BorderRadius.circular(10),
-                                       boxShadow: [
-                                         BoxShadow(
-                                           color: const Color(0xFFFF2D95).withValues(alpha: 0.3),
-                                           blurRadius: 10,
-                                         ),
-                                       ],
-                                    ),
-                                    child: Text(
-                                      '$score%',
-                                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900),
-                                    ),
-                                  ),
-                                  CustomPaint(
-                                    size: const Size(10, 5),
-                                    painter: TrianglePainter(color: const Color(0xFFFF6B35)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            _buildStatusDot(const Color(0xFFFFBF00), 'Completed: $completedGoals', isDark),
-                            const SizedBox(width: 20),
-                            _buildStatusDot(isDark ? Colors.grey[600]! : Colors.grey[400]!, 'Remaining: $remaining', isDark),
-                          ],
-                        ),
-                        if (progress >= 0.8)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF9FE82E).withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFF9FE82E).withValues(alpha: 0.4)),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.auto_awesome, color: Color(0xFF9FE82E), size: 14),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'Excellent!',
-                                    style: TextStyle(color: Color(0xFF9FE82E), fontSize: 12, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusDot(Color color, String label, bool isDark) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            gradient: label.contains('Completed') 
-                ? const LinearGradient(colors: [Color(0xFFFF6B35), Color(0xFFFFBF00)])
-                : null,
-            color: label.contains('Completed') ? null : color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: isDark ? Colors.white70 : Colors.grey.shade600,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
+  // Animated Goals Card extracted
 
   // --- Overview Grid ---
   Widget _buildOverviewGrid({int maxStreak = 0, int score = 0, int totalHabits = 0}) {
@@ -798,7 +549,7 @@ class _LandingScreenState extends State<LandingScreen> {
         _buildOverviewCard(
           icon: Icons.trending_up, 
           iconColor: const Color(0xFF5AC8FA), 
-          title: 'HABITS', 
+          title: 'ACTIVITIES', 
           value: '$totalHabits', 
           unit: 'total',
           cardGradient: isDark 
@@ -923,7 +674,7 @@ class _LandingScreenState extends State<LandingScreen> {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Center(
-              child: Text('All daily logs completed! 🎉', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+              child: Text('All daily logs completed! ðŸŽ‰', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
             ),
           );
         }
@@ -1455,3 +1206,4 @@ class LineChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+

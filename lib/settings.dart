@@ -4,6 +4,7 @@ import 'auth_service.dart';
 import 'login_screen.dart';
 import 'landing_screen.dart';
 import 'screens/analytics_screen.dart';
+import 'screens/ai_coach_screen.dart';
 
 import 'appearance.dart';
 import 'help_and_support.dart';
@@ -75,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 60),
+                      const SizedBox(height: 20),
 
                       // Header with Back Button
                       Row(
@@ -538,12 +539,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             );
           }),
-          _buildNavItem(
-            Icons.auto_awesome_outlined,
-            Colors.white54,
-            false,
-            null,
-          ),
+          _buildNavItem(Icons.auto_awesome_outlined, Colors.white54, false, () {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const AiCoachScreen(),
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+              ),
+            );
+          }),
           _buildNavItem(
             Icons.settings_outlined,
             const Color(0xFFF98E2F),

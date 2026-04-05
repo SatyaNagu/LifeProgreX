@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/theme_manager.dart';
 import '../utils/premium_background.dart';
 import 'dart:math';
-import '../profile.dart';
+
 import '../landing_screen.dart';
 import '../services/analytics_service.dart';
 import '../models/habit_model.dart';
@@ -84,24 +84,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
             ],
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
-                  child: const Icon(Icons.person, color: Color(0xFF8B5CF6), size: 20),
-                ),
-              ),
-            ),
-          ],
         ),
         body: StreamBuilder<AnalyticsData>(
           stream: _analyticsService.getAnalyticsDataStream(_selectedTab),
