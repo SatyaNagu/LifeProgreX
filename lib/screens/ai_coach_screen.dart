@@ -10,7 +10,9 @@ import '../landing_screen.dart';
 import 'analytics_screen.dart';
 import '../settings.dart';
 import '../services/firestore_service.dart';
+import '../services/goal_service.dart';
 import 'dart:math';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class ChatMessage {
   final String id;
@@ -47,7 +49,8 @@ class AiCoachScreen extends StatefulWidget {
   State<AiCoachScreen> createState() => _AiCoachScreenState();
 }
 
-class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateMixin {
+class _AiCoachScreenState extends State<AiCoachScreen>
+    with TickerProviderStateMixin {
   final ThemeManager _themeManager = ThemeManager();
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -85,12 +88,15 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
       _scrollToBottom();
     } else {
       // Add welcome message if new user
-      _messages.add(ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: "Hi! I'm MAX, your AI life coach. I've analyzed your progress and I'm here to help you achieve your goals. How can I support you today?",
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text:
+              "Hi! I'm MAX, your AI life coach. I've analyzed your progress and I'm here to help you achieve your goals. How can I support you today?",
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
     }
   }
 
@@ -118,12 +124,14 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
 
     _inputController.clear();
     setState(() {
-      _messages.add(ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: text,
-        isUser: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: text,
+          isUser: true,
+          timestamp: DateTime.now(),
+        ),
+      );
       _isTyping = true;
     });
     _saveHistory();
@@ -133,47 +141,154 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
     await Future.delayed(const Duration(milliseconds: 1500));
 
     final aiResponse = await _getAIResponse(text);
-    
+
     if (mounted) {
       setState(() {
         _isTyping = false;
-        _messages.add(ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: aiResponse,
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
+        _messages.add(
+          ChatMessage(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            text: aiResponse,
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
       });
       _saveHistory();
       _scrollToBottom();
     }
   }
 
+  // Free Gemini Key. Please update to your personal GenAI key eventually from Google AI Studio.
+  static const String _geminiApiKey = 'REPLACE_WITH_YOUR_GEMINI_API_KEY';
+
   Future<String> _getAIResponse(String userMessage) async {
-    final lower = userMessage.toLowerCase();
-    
-    // Attempt to pull user data for contextual response (simplification for demo)
-    int streak = 0;
+    int maxStreak = 0;
+    int completedGoals = 0;
+    int totalHabits = 0;
+
+    // 1. Gather all local offline context for the pseudo AI
     try {
       final habits = await FirestoreService().getHabitsStream().first;
+      final goals = await GoalService().getGoalsStream().first;
       if (habits.isNotEmpty) {
-        streak = habits.map((h) => h.currentStreak).reduce(max);
+        maxStreak = habits.map((h) => h.currentStreak).reduce(max);
+        totalHabits = habits.length;
       }
+      completedGoals = goals.where((g) => g.isCompleted).length;
     } catch (_) {}
 
-    if (lower.contains('habit') || lower.contains('streak')) {
-      return "You're currently hitting a $streak-day streak! That's fantastic momentum. To improve further, try 'habit stacking'—linking a new habit to something you already do every day. Studies show this increases success rates by 65%!";
-    } else if (lower.contains('mood') || lower.contains('feel')) {
-      return "I've noticed from your logs that your energy tends to be highest in the mornings. Perhaps we can schedule your most challenging habits for that window? Reflecting on what triggers positive moods can help us optimize your routine.";
-    } else if (lower.contains('goal') || lower.contains('improve')) {
-      return "Based on your progress, you've completed several milestones this week. To maintain this growth, focus on one small 'keystone' goal tomorrow. What's the one thing that would make everything else easier?";
-    } else if (lower.contains('motivation') || lower.contains('help')) {
-      return "Success is the sum of small efforts repeated day in and day out. You've already made 45 total completions! Don't focus on the mountain, just focus on the next step. I'm right here with you.";
-    } else if (lower.contains('report') || lower.contains('analytics')) {
-      return "Your personalized growth report shows you're most consistent with wellness habits. Check your Detailed Analytics page for a full breakdown, but my immediate advice: protect that morning routine!";
+    final contextString =
+        "Context: The user has a maximum streak of $maxStreak days, $totalHabits active habits, and $completedGoals completed goals. They are using an app called LifeProgreX.";
+
+    // 2. Try reaching the Gemini Live API explicitly
+    if (_geminiApiKey != 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
+      try {
+        final model = GenerativeModel(
+          model: 'gemini-1.5-flash',
+          apiKey: _geminiApiKey,
+          systemInstruction: Content.system(
+            "You are MAX, the LifeProgreX AI life coach. Always use emojis. Keep answers strictly concise. Do NOT answer non-app/productivity queries (reply 'I don't know, please ask something else').",
+          ),
+        );
+
+        final prompt =
+            "$contextString\n\nThe user says: \"$userMessage\"\nReply to the user directly.";
+        final response = await model.generateContent([Content.text(prompt)]);
+        if (response.text != null && response.text!.isNotEmpty) {
+          return response.text!;
+        }
+      } catch (e) {
+        // Silently fallback to Regex Engine upon ANY failure (offline, parsing, ratelimit)
+        print("Gemini failed, falling back to local hybrid...");
+      }
     }
-    
-    return "That's an interesting perspective! Based on your current progress patterns, I'd suggest focusing on maintaining your consistency while gradually introducing one new small challenge. How does that sound for your next growth area?";
+
+    // 3. Advanced Local Offline / Fallback NLP rule engine
+    final Random rnd = Random();
+
+    // 5 Greeting Strings
+    final List<String> greetings = [
+      "Hey there! 👋 I'm MAX. How are your $totalHabits active habits treating you today? Let's grow! 🌱",
+      "Welcome back! ✨ Ready to crush your targets today? You have building momentum!",
+      "Hi! 🚀 I'm MAX, your offline coach. What are we focusing on right now? 🔥",
+      "Hello! 🌟 It's a great day to build consistency! How can I assist your productivity? 💪",
+      "Greetings! 👋 Let's make today count. Need advice on your $totalHabits habits? 🎯",
+    ];
+
+    // 5 Rejection Strings
+    final List<String> rejections = [
+      "I don't know, please ask something else directly related to your LifeProgreX goals or habits! 🤷‍♂️🚀",
+      "That's outside my programming! 🤖 Please ask me about your habits, goals, or productivity!",
+      "I'm laser-focused on your growth! 🌱 Let's steer this back to your active goals or analytics.",
+      "Hmm, I can't help with that! 😅 Ask me about streaks, motivation, or your daily activities instead!",
+      "I'm an expert in LifeProgreX, not that! 🧠 Try asking how to improve your habits instead! 📈",
+    ];
+
+    final lower = userMessage.toLowerCase();
+
+    // Greeting recognition
+    if (lower.contains('hello') ||
+        lower.contains('hi') ||
+        lower.contains('hey') ||
+        lower.contains('morning') ||
+        lower.contains('evening') ||
+        lower.contains('greetings')) {
+      return greetings[rnd.nextInt(greetings.length)];
+    }
+
+    // Habit & Streaks (Robust keywords)
+    if (lower.contains('habit') ||
+        lower.contains('streak') ||
+        lower.contains('activity') ||
+        lower.contains('routine') ||
+        lower.contains('daily') ||
+        lower.contains('consistent') ||
+        lower.contains('tracker')) {
+      return "You're carrying a $maxStreak-day streak 🔥! That's incredible momentum. Try 'habit stacking'—linking it to daily routines. 🚀";
+    }
+    // Mood & Energy
+    else if (lower.contains('mood') ||
+        lower.contains('feel') ||
+        lower.contains('energy') ||
+        lower.contains('exhausted') ||
+        lower.contains('tired') ||
+        lower.contains('happy') ||
+        lower.contains('sad')) {
+      return "I've noticed from your local logs that your energy fluctuates ☀️. Maybe lock down your top habits when you feel sharpest? Let's optimize! 💪";
+    }
+    // Goals & Improvement
+    else if (lower.contains('goal') ||
+        lower.contains('improve') ||
+        lower.contains('target') ||
+        lower.contains('achieve') ||
+        lower.contains('plan') ||
+        lower.contains('aim')) {
+      return "Fantastic work! You've crushed $completedGoals goals recently 🏆! Let's pick just ONE major keystone goal for tomorrow and smash it! 🎯";
+    }
+    // Motivation & Help
+    else if (lower.contains('motivation') ||
+        lower.contains('help') ||
+        lower.contains('stuck') ||
+        lower.contains('lazy') ||
+        lower.contains('hard') ||
+        lower.contains('advice') ||
+        lower.contains('procrastinat')) {
+      return "Success is the sum of small parts done daily! Don't look at the massive mountain, just take the next literal step 🏔️. I'm right here with you! 🤝";
+    }
+    // Reports & Analytics
+    else if (lower.contains('report') ||
+        lower.contains('analytics') ||
+        lower.contains('stats') ||
+        lower.contains('progress') ||
+        lower.contains('summary') ||
+        lower.contains('data') ||
+        lower.contains('history')) {
+      return "Your personalized growth signals point towards huge consistency! 📈 Remember to check your 'Detailed Analytics' dashboard for a full breakdown! 📊";
+    }
+
+    // Default Rejection
+    return rejections[rnd.nextInt(rejections.length)];
   }
 
   @override
@@ -217,24 +332,48 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
 
   Widget _buildHeader(Color textColor, bool isDark) {
     return Container(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10, left: 20, right: 20, bottom: 16),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 10,
+        left: 20,
+        right: 20,
+        bottom: 16,
+      ),
       decoration: BoxDecoration(
-        color: (isDark ? const Color(0xFF1A0B2E) : Colors.white).withValues(alpha: 0.8),
-        border: Border(bottom: BorderSide(color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1))),
+        color: (isDark ? const Color(0xFF1A0B2E) : Colors.white).withValues(
+          alpha: 0.8,
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.1,
+            ),
+          ),
+        ),
       ),
       child: Column(
         children: [
           Row(
             children: [
               GestureDetector(
-                onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LandingScreen())),
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LandingScreen(),
+                  ),
+                ),
                 child: Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: (isDark ? Colors.white : Colors.white).withValues(alpha: isDark ? 0.1 : 0.8),
+                    color: (isDark ? Colors.white : Colors.white).withValues(
+                      alpha: isDark ? 0.1 : 0.8,
+                    ),
                     shape: BoxShape.circle,
-                    border: Border.all(color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1)),
+                    border: Border.all(
+                      color: (isDark ? Colors.white : Colors.black).withValues(
+                        alpha: 0.1,
+                      ),
+                    ),
                   ),
                   child: Icon(Icons.chevron_left, color: textColor, size: 20),
                 ),
@@ -245,11 +384,18 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
                 children: [
                   Text(
                     'AI Coach',
-                    style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     'Meet MAX - Your Personal Growth Guide',
-                    style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 11),
+                    style: TextStyle(
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -292,7 +438,11 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: const Color(0xFF1F1033),
-                  child: const Icon(Icons.smart_toy_outlined, color: Colors.white24, size: 40),
+                  child: const Icon(
+                    Icons.smart_toy_outlined,
+                    color: Colors.white24,
+                    size: 40,
+                  ),
                 ),
               ),
             ),
@@ -301,7 +451,10 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [const Color(0xFFB24BF3).withValues(alpha: 0.8), Colors.transparent],
+                  colors: [
+                    const Color(0xFFB24BF3).withValues(alpha: 0.8),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
@@ -310,11 +463,19 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
               left: 16,
               child: Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: Color(0xFFFFBF00), size: 20),
+                  const Icon(
+                    Icons.auto_awesome,
+                    color: Color(0xFFFFBF00),
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     'MAX AI Coach',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -340,12 +501,23 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage msg, bool isDark, Color textColor, Color themeColor) {
-    final alignment = msg.isUser ? MainAxisAlignment.end : MainAxisAlignment.start;
-    final bubbleColor = msg.isUser 
-        ? themeColor 
-        : (isDark ? const Color(0xFF1F1033).withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9));
-    final bubbleTextColor = msg.isUser ? Colors.white : (isDark ? Colors.white : const Color(0xFF111827));
+  Widget _buildMessageBubble(
+    ChatMessage msg,
+    bool isDark,
+    Color textColor,
+    Color themeColor,
+  ) {
+    final alignment = msg.isUser
+        ? MainAxisAlignment.end
+        : MainAxisAlignment.start;
+    final bubbleColor = msg.isUser
+        ? themeColor
+        : (isDark
+              ? const Color(0xFF1F1033).withValues(alpha: 0.8)
+              : Colors.white.withValues(alpha: 0.9));
+    final bubbleTextColor = msg.isUser
+        ? Colors.white
+        : (isDark ? Colors.white : const Color(0xFF111827));
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -370,14 +542,23 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
                     offset: const Offset(0, 4),
                   ),
                 ],
-                border: msg.isUser ? null : Border.all(color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05)),
+                border: msg.isUser
+                    ? null
+                    : Border.all(
+                        color: (isDark ? Colors.white : Colors.black)
+                            .withValues(alpha: 0.05),
+                      ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     msg.text,
-                    style: TextStyle(color: bubbleTextColor, fontSize: 14, height: 1.5),
+                    style: TextStyle(
+                      color: bubbleTextColor,
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -405,18 +586,27 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1F1033).withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9),
+              color: isDark
+                  ? const Color(0xFF1F1033).withValues(alpha: 0.8)
+                  : Colors.white.withValues(alpha: 0.9),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
                 bottomLeft: Radius.circular(4),
                 bottomRight: Radius.circular(20),
               ),
-              border: Border.all(color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05)),
+              border: Border.all(
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: 0.05,
+                ),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: List.generate(3, (index) => _buildTypingDot(index, themeColor)),
+              children: List.generate(
+                3,
+                (index) => _buildTypingDot(index, themeColor),
+              ),
             ),
           ),
         ],
@@ -433,7 +623,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
       "How can I improve my habits?",
       "Show me my progress",
       "I need motivation",
-      "Analyze my mood patterns"
+      "Analyze my mood patterns",
     ];
 
     return Padding(
@@ -445,7 +635,11 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
               'Quick Questions:',
-              style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           GridView.builder(
@@ -461,20 +655,32 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                   _inputController.text = prompts[index];
-                   HapticFeedback.lightImpact();
+                  _inputController.text = prompts[index];
+                  HapticFeedback.lightImpact();
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: (isDark ? const Color(0xFF1F1033) : Colors.white).withValues(alpha: 0.8),
+                    color: (isDark ? const Color(0xFF1F1033) : Colors.white)
+                        .withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05)),
+                    border: Border.all(
+                      color: (isDark ? Colors.white : Colors.black).withValues(
+                        alpha: 0.05,
+                      ),
+                    ),
                   ),
                   alignment: Alignment.centerLeft,
                   child: Text(
                     prompts[index],
-                    style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               );
@@ -489,8 +695,16 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: (isDark ? const Color(0xFF1A0B2E) : Colors.white).withValues(alpha: 0.8),
-        border: Border(top: BorderSide(color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1))),
+        color: (isDark ? const Color(0xFF1A0B2E) : Colors.white).withValues(
+          alpha: 0.8,
+        ),
+        border: Border(
+          top: BorderSide(
+            color: (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.1,
+            ),
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -498,7 +712,9 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: 0.05,
+                ),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: TextField(
@@ -506,7 +722,10 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
                 style: TextStyle(color: textColor, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Ask MAX anything...',
-                  hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400], fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: isDark ? Colors.grey[500] : Colors.grey[400],
+                    fontSize: 14,
+                  ),
                   border: InputBorder.none,
                 ),
                 onSubmitted: (_) => _handleSend(),
@@ -520,13 +739,23 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [themeColor, themeColor.withValues(alpha: 0.8)]),
+                gradient: LinearGradient(
+                  colors: [themeColor, themeColor.withValues(alpha: 0.8)],
+                ),
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: themeColor.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: themeColor.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
-              child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.send_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -556,11 +785,13 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const LandingScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const LandingScreen(),
                 transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
               ),
             );
           }),
@@ -568,24 +799,33 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const AnalyticsScreen(),
                 transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
               ),
             );
           }),
-          _buildNavItem(Icons.auto_awesome_outlined, const Color(0xFFB24BF3), true, null),
+          _buildNavItem(
+            Icons.auto_awesome_outlined,
+            const Color(0xFFB24BF3),
+            true,
+            null,
+          ),
           _buildNavItem(Icons.settings_outlined, Colors.white54, false, () {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const SettingsScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const SettingsScreen(),
                 transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
               ),
             );
           }),
@@ -594,7 +834,12 @@ class _AiCoachScreenState extends State<AiCoachScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? onTap) {
+  Widget _buildNavItem(
+    IconData icon,
+    Color color,
+    bool isActive,
+    VoidCallback? onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -616,18 +861,23 @@ class _TypingDot extends StatefulWidget {
   State<_TypingDot> createState() => _TypingDotState();
 }
 
-class _TypingDotState extends State<_TypingDot> with SingleTickerProviderStateMixin {
+class _TypingDotState extends State<_TypingDot>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _animation = Tween<double>(begin: 1.0, end: 1.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
     );
-    
+    _animation = Tween<double>(
+      begin: 1.0,
+      end: 1.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.repeat(reverse: true);
     });
@@ -648,7 +898,10 @@ class _TypingDotState extends State<_TypingDot> with SingleTickerProviderStateMi
           margin: const EdgeInsets.symmetric(horizontal: 2),
           width: 6 * _animation.value,
           height: 6 * _animation.value,
-          decoration: BoxDecoration(color: widget.color.withValues(alpha: 0.6), shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: widget.color.withValues(alpha: 0.6),
+            shape: BoxShape.circle,
+          ),
         );
       },
     );

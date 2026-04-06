@@ -198,7 +198,9 @@ class _AnimatedGoalsCardState extends State<AnimatedGoalsCard>
                           child: Text(
                             "Ready to grow? Create or continue a goal 🌱",
                             style: TextStyle(
-                              color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black87,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.8)
+                                  : Colors.black87,
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.2,
@@ -348,7 +350,9 @@ class _AnimatedGoalsCardState extends State<AnimatedGoalsCard>
                                   ),
                                   const SizedBox(width: 32),
                                   _buildAnimatedStatusDot(
-                                    color: const Color(0xFFA855F7), // Purple shade requested
+                                    color: const Color(
+                                      0xFFA855F7,
+                                    ), // Purple shade requested
                                     label: 'Remaining: $remaining',
                                     isDark: isDark,
                                     glowIntensity: glowOp,
