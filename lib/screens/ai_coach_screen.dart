@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../utils/theme_manager.dart';
 import '../utils/premium_background.dart';
-import '../landing_screen.dart';
 import 'analytics_screen.dart';
 import '../settings.dart';
 import '../services/firestore_service.dart';
@@ -182,7 +181,7 @@ class _AiCoachScreenState extends State<AiCoachScreen>
         "Context: The user has a maximum streak of $maxStreak days, $totalHabits active habits, and $completedGoals completed goals. They are using an app called LifeProgreX.";
 
     // 2. Try reaching the Gemini Live API explicitly
-    if (_geminiApiKey != 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
+    if (_geminiApiKey != 'AIzaSyDjU9K7_E6i8Los4PpFfLtmftpXZYYBaYk') {
       try {
         final model = GenerativeModel(
           model: 'gemini-1.5-flash',
@@ -216,6 +215,52 @@ class _AiCoachScreenState extends State<AiCoachScreen>
       "Greetings! 👋 Let's make today count. Need advice on your $totalHabits habits? 🎯",
     ];
 
+    final List<String> howAreYou = [
+      "I'm feeling fantastic, bouncing bytes around! ⚡ How are you doing?",
+      "Running strictly at 100% efficiency! 🔋 What's on your mind?",
+      "I'm here, perfectly energized to help you crush your goals! 🚀 How are you?",
+      "Doing great! Ready to parse your awesome progress! 📈 And you?",
+      "System fully operational and feeling chatty! 🤖 What's up?",
+    ];
+
+    final List<String> whatAreYouDoing = [
+      "I was just analyzing your amazing streak logs! 🧐 What's up with you?",
+      "Waiting here patiently to spark your next big productivity wave! 🌊 What are you up to?",
+      "Just crunching some numbers about your $totalHabits habits! 🧮 What's on the agenda?",
+      "Reviewing your personalized analytics for maximum growth! 📈 How's your day going?",
+      "Currently hyper-focused on helping you become your best self! 🌱 What's happening?",
+    ];
+
+    final List<String> howWasYourDay = [
+      "My digital days are always bright! ☀️ But I care more about yours—how are your habits holding up?",
+      "I've had a flawless 24 hours of uptime! ⏱️ How have you been feeling lately?",
+      "Every day is a good day when I see you logging activities! 🔥 How's your week been?",
+      "I've been well! Just processing your awesome growth over the last 7 days! 📊 How are you?",
+      "Excellent! The server weather is clear and sunny! 🌤️ How have things been on your end?",
+    ];
+
+    // Habit Knowledge Base Mapping
+    final Map<String, String> habitKb = {
+      'sleep':
+          "Did you know that consistent sleep directly increases cognitive recall by 30%? Let's check your sleep habits! 💤",
+      'water':
+          "Hydration fact: Drinking water right after waking up fires up your metabolism instantly! 💧 Let's keep your water intake steady.",
+      'workout':
+          "Physical movement for just 15 mins daily dumps endorphins into your system! 🏋️‍♂️ Your fitness goals are looking strong!",
+      'run':
+          "Running is incredible for neurogenesis (new brain cells)! 🏃 Keep up that running routine, you're doing great!",
+      'meditat':
+          "Just 10 minutes of meditation lowers cortisol stress levels significantly! 🧘‍♂️ Are you logging your calm times?",
+      'read':
+          "Reading rewires the brain's white matter! 📚 Even 5 pages a day compounds into massive knowledge. Let's hit that reading goal!",
+      'learn':
+          "Active learning builds neuroplasticity! 🧠 Keep hitting your learning sessions, your future self is thanking you!",
+      'diet':
+          "Your gut dictates your serotonin! 🥗 Eating clean fuels your high-energy habits. Keep it up!",
+      'eat':
+          "Your gut dictates your serotonin! 🥗 Eating clean fuels your high-energy habits. Keep it up!",
+    };
+
     // 5 Rejection Strings
     final List<String> rejections = [
       "I don't know, please ask something else directly related to your LifeProgreX goals or habits! 🤷‍♂️🚀",
@@ -227,14 +272,35 @@ class _AiCoachScreenState extends State<AiCoachScreen>
 
     final lower = userMessage.toLowerCase();
 
-    // Greeting recognition
-    if (lower.contains('hello') ||
+    // Chit-chat recognition
+    if (lower.contains("how are you") ||
+        lower.contains("how do you do") ||
+        lower.contains("how you doing") ||
+        lower.contains("how u doing")) {
+      return howAreYou[rnd.nextInt(howAreYou.length)];
+    } else if (lower.contains("what are you doing") ||
+        lower.contains("whats up") ||
+        lower.contains("what's up")) {
+      return whatAreYouDoing[rnd.nextInt(whatAreYouDoing.length)];
+    } else if (lower.contains("how was your") ||
+        lower.contains("how have you") ||
+        lower.contains("hows your day") ||
+        lower.contains("how's your day")) {
+      return howWasYourDay[rnd.nextInt(howWasYourDay.length)];
+    } else if (lower.contains('hello') ||
         lower.contains('hi') ||
         lower.contains('hey') ||
         lower.contains('morning') ||
         lower.contains('evening') ||
         lower.contains('greetings')) {
       return greetings[rnd.nextInt(greetings.length)];
+    }
+
+    // Checking offline suggestion knowledge base natively
+    for (final key in habitKb.keys) {
+      if (lower.contains(key)) {
+        return "${habitKb[key]}\nBy the way, you currently have $totalHabits active habits on LifeProgreX! Keep it up! 🚀";
+      }
     }
 
     // Habit & Streaks (Robust keywords)
@@ -293,6 +359,9 @@ class _AiCoachScreenState extends State<AiCoachScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.of(context).viewInsets.bottom > 0) {
+      _scrollToBottom();
+    }
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
     final themeColor = const Color(0xFFB24BF3);
@@ -355,12 +424,7 @@ class _AiCoachScreenState extends State<AiCoachScreen>
           Row(
             children: [
               GestureDetector(
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LandingScreen(),
-                  ),
-                ),
+                onTap: () => Navigator.pop(context),
                 child: Container(
                   width: 40,
                   height: 40,
@@ -489,7 +553,7 @@ class _AiCoachScreenState extends State<AiCoachScreen>
   Widget _buildMessagesList(bool isDark, Color textColor, Color themeColor) {
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 50),
       itemCount: _messages.length + (_isTyping ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == _messages.length) {
@@ -782,18 +846,7 @@ class _AiCoachScreenState extends State<AiCoachScreen>
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(Icons.home_outlined, Colors.white54, false, () {
-            Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const LandingScreen(),
-                transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-              ),
-            );
+            Navigator.popUntil(context, (route) => route.isFirst);
           }),
           _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, () {
             Navigator.pushReplacement(

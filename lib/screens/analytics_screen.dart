@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/theme_manager.dart';
 import '../utils/premium_background.dart';
 import 'dart:math';
+import 'package:intl/intl.dart';
 
 import '../landing_screen.dart';
 import '../services/analytics_service.dart';
@@ -331,12 +332,16 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
     }
   }
 
-  int _calculateHealthScore(List<String> activeIds) {
+  int _calculateHealthScore(List<String> activeIds, AnalyticsData data) {
     if (activeIds.isEmpty) return 0;
     double total = 0;
     for (final id in activeIds) {
-      final val = _getMockQuickLogValue(id);
-      total += (val / 30) * 100;
+      if (id == 'mood') {
+         total += (data.averageMood * 10);
+      } else {
+         final val = _getMockQuickLogValue(id);
+         total += (val / 30) * 100;
+      }
     }
     return (total / activeIds.length).round();
   }
@@ -344,9 +349,10 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
   Widget _buildOverallProgress(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
     return ValueListenableBuilder<List<String>>(
       valueListenable: QuickLogManager.currentActionIds,
-      builder: (context, currentIds, child) {
-        final activeLogs = currentIds.take(3).toList();
-        final healthScore = _calculateHealthScore(currentIds);
+      builder: (context, _, child) {
+        // Enforce specific tiles requested by user dynamically masking the list.
+        final activeLogs = ['mood', 'workout', 'skill'];
+        final healthScore = _calculateHealthScore(activeLogs, data);
 
         return Container(
           margin: const EdgeInsets.only(bottom: 24),
@@ -434,28 +440,14 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                               ),
                             ],
                           ),
-                          AnimatedBuilder(
-                            animation: _iconRotationController,
-                            builder: (context, child) {
-                              return Transform.rotate(
-                                angle: _iconRotationController.value * 2 * pi,
-                                child: Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: isDark 
-                                        ? [const Color(0xFF00D9FF).withValues(alpha: 0.2), const Color(0xFFB24BF3).withValues(alpha: 0.2)]
-                                        : [const Color(0xFF00D9FF).withValues(alpha: 0.1), const Color(0xFFB24BF3).withValues(alpha: 0.1)],
-                                    ),
-                                  ),
-                                  child: const Icon(Icons.trending_up, color: Color(0xFF00D9FF), size: 24),
-                                ),
-                              );
-                            },
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                            ),
+                            child: const Icon(Icons.trending_up, color: Color(0xFF00D9FF), size: 24),
                           ),
                         ],
                       ),
@@ -580,8 +572,9 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                           final idx = entry.key;
                           final id = entry.value;
                           final action = QuickLogManager.allActions[id]!;
-                          final val = _getMockQuickLogValue(id);
-                          final pct = ((val / 30) * 100).round();
+                          final pct = id == 'mood' 
+                             ? (data.averageMood * 10).round()
+                             : ((_getMockQuickLogValue(id) / 30) * 100).round();
                           
                           String status = pct >= 80 ? 'Excellent' : (pct >= 60 ? 'Good' : 'Growing');
                           
@@ -645,29 +638,30 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 2),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                                        textBaseline: TextBaseline.alphabetic,
-                                        children: [
-                                          Text(
-                                            '$val',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w900,
-                                              color: isDark ? Colors.white : Colors.black87,
+                                      if (id != 'mood')
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                                          textBaseline: TextBaseline.alphabetic,
+                                          children: [
+                                            Text(
+                                              '${_getMockQuickLogValue(id)}',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w900,
+                                                color: isDark ? Colors.white : Colors.black87,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            'days',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              color: isDark ? Colors.grey[500] : Colors.grey[400],
+                                            const SizedBox(width: 2),
+                                            Text(
+                                              'days',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: isDark ? Colors.grey[500] : Colors.grey[400],
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
+                                          ],
+                                        ),
                                       const SizedBox(height: 8),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
@@ -710,15 +704,33 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
   // --- Mood Tracker ---
 
   Widget _buildMoodTracker(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
-    final List<Map<String, dynamic>> weeklyMoodData = [
-      { 'day': 'Mon', 'mood': 8, 'emoji': '😊' },
-      { 'day': 'Tue', 'mood': 7, 'emoji': '🙂' },
-      { 'day': 'Wed', 'mood': 9, 'emoji': '😄' },
-      { 'day': 'Thu', 'mood': 8, 'emoji': '😊' },
-      { 'day': 'Fri', 'mood': 6, 'emoji': '😐' },
-      { 'day': 'Sat', 'mood': 9, 'emoji': '😄' },
-      { 'day': 'Sun', 'mood': 8, 'emoji': '😊' },
-    ];
+    // Dynamically calculate the grouped days out of the timeframe bounds.
+    final Map<String, Map<String, dynamic>> groupedMoods = {};
+    for (var m in data.weekMoods) {
+       final dayStr = DateFormat('E').format(m.timestamp); // "Mon", "Tue"
+       if (!groupedMoods.containsKey(dayStr)) {
+         groupedMoods[dayStr] = {'day': dayStr, 'mood': m.score, 'emoji': m.emoji};
+       } else {
+         // Display dominant emoji (highest score) if multiple exist natively
+         if (m.score > (groupedMoods[dayStr]!['mood'] as int)) {
+            groupedMoods[dayStr]!['mood'] = m.score;
+            groupedMoods[dayStr]!['emoji'] = m.emoji;
+         }
+       }
+    }
+    
+    // Sort array logically based on standard timeframe logs.
+    final List<Map<String, dynamic>> activeMoodData = groupedMoods.values.toList().reversed.take(7).toList();
+
+    // Mathematically calculate 0-10 baseline percentage output.
+    final percentage = (data.averageMood * 10).toStringAsFixed(0);
+    // Find absolute dominant emoji for the summary
+    String summaryEmoji = '😐';
+    if (data.averageMood >= 8) summaryEmoji = '😁';
+    else if (data.averageMood >= 6) summaryEmoji = '😊';
+    else if (data.averageMood >= 4) summaryEmoji = '🙂';
+    else if (data.averageMood >= 2) summaryEmoji = '🙁';
+    else if (data.averageMood >= 0 && data.weekMoods.isNotEmpty) summaryEmoji = '😫';
 
     return SlideTransition(
       position: Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
@@ -783,11 +795,16 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
               const SizedBox(height: 16),
               
               // Emoji Grid
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(weeklyMoodData.length, (index) {
-                  final day = weeklyMoodData[index];
-                  // Stagger logic: 0.2 to 1.0 spreading 7 items => 0.2 + (index * 0.1) ends at 0.8.
+              activeMoodData.isEmpty 
+               ? Padding(
+                 padding: const EdgeInsets.symmetric(vertical: 24),
+                 child: Center(child: Text("No moods logged yet in this timeframe", style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
+               ) 
+               : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(activeMoodData.length, (index) {
+                  final day = activeMoodData[index];
+                  // Stagger logic: 0.2 to 1.0 spreading items => 0.2 + (index * 0.1) ends at 0.8.
                   final startOffset = 0.2 + (index * 0.08);
                   final endOffset = startOffset + 0.3 > 1.0 ? 1.0 : startOffset + 0.3;
                   
@@ -805,8 +822,8 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: 35,
+                            height: 35,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade100,
@@ -814,7 +831,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                             ),
                             child: Text(
                               day['emoji'],
-                              style: const TextStyle(fontSize: 20),
+                              style: const TextStyle(fontSize: 18),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -851,13 +868,13 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                     ),
                     children: [
                       TextSpan(
-                        text: '8.1/10',
+                        text: '$percentage%',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.grey.shade900,
                         ),
                       ),
-                      const TextSpan(text: ' 😊'),
+                      TextSpan(text: ' $summaryEmoji'),
                     ],
                   ),
                 ),

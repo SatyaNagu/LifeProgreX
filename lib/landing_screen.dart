@@ -25,6 +25,7 @@ import 'models/notification_model.dart';
 import 'services/notification_service.dart';
 import 'screens/notifications_screen.dart';
 
+
 class LandingScreen extends StatefulWidget {
   final String userName;
 
@@ -118,7 +119,6 @@ class _LandingScreenState extends State<LandingScreen> {
               final todayGoals = goals.where((g) => g.targetDate.year == now.year && g.targetDate.month == now.month && g.targetDate.day == now.day).toList();
               final totalTodayGoals = todayGoals.length;
               final completedTodayGoals = todayGoals.where((g) => g.isCompleted).length;
-              final goalScore = totalTodayGoals > 0 ? ((completedTodayGoals / totalTodayGoals) * 100).toInt() : 0;
               
               final user = AuthService().currentUser;
 
@@ -362,11 +362,11 @@ class _LandingScreenState extends State<LandingScreen> {
     final hour = DateTime.now().hour;
     String greeting;
     if (hour < 12) {
-      greeting = "Good Morning ðŸ‘‹";
+      greeting = "Good Morning";
     } else if (hour < 17) {
-      greeting = "Good Afternoon ðŸ‘‹";
+      greeting = "Good Afternoon";
     } else {
-      greeting = "Good Evening ðŸ‘‹";
+      greeting = "Good Evening";
     }
 
     return Row(
@@ -901,7 +901,8 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  // --- Daily Activity Grid ---
+
+
   Widget _buildDailyActivityGrid(int calories, int focusTime, int tasks) {
     final isDark = _themeManager.isDarkMode;
     return GridView.count(
