@@ -33,22 +33,22 @@ class QuickLogManager {
   static const String _prefsKey = 'quick_log_active_ids';
 
   static final Map<String, QuickLogAction> allActions = {
-    'mood': QuickLogAction(id: 'mood', name: 'MOOD', icon: Icons.waves, color: const Color(0xFFF98E2F), page: const MoodScreen()),
-    'workout': QuickLogAction(id: 'workout', name: 'WORKOUT', icon: Icons.fitness_center, color: const Color(0xFFF98E2F), page: const WorkoutScreen()),
-    'reading': QuickLogAction(id: 'reading', name: 'READING', icon: Icons.book_outlined, color: const Color(0xFFF98E2F), page: const ReadingScreen()),
-    'skill': QuickLogAction(id: 'skill', name: 'SKILL', icon: Icons.emoji_events_outlined, color: const Color(0xFFF98E2F), page: const SkillsScreen()),
-    'water': QuickLogAction(id: 'water', name: 'WATER', icon: Icons.opacity, color: const Color(0xFFF98E2F), page: const WaterScreen()),
-    'meditation': QuickLogAction(id: 'meditation', name: 'MEDITATION', icon: Icons.accessibility_new, color: const Color(0xFFF98E2F), page: const MeditationScreen()),
-    'journal': QuickLogAction(id: 'journal', name: 'JOURNAL', icon: Icons.description_outlined, color: const Color(0xFFF98E2F), page: const JournalScreen()),
-    'nutrition': QuickLogAction(id: 'nutrition', name: 'NUTRITION', icon: Icons.restaurant, color: const Color(0xFFF98E2F), page: const NutritionScreen()),
-    'sleep': QuickLogAction(id: 'sleep', name: 'SLEEP', icon: Icons.bedtime_outlined, color: const Color(0xFFF98E2F), page: const SleepScreen()),
-    'creative': QuickLogAction(id: 'creative', name: 'CREATIVE', icon: Icons.grid_view_rounded, color: const Color(0xFFF98E2F), page: const CreativeScreen()),
-    'music': QuickLogAction(id: 'music', name: 'MUSIC', icon: Icons.music_note, color: const Color(0xFFF98E2F), page: const MusicScreen()),
-    'social': QuickLogAction(id: 'social', name: 'SOCIAL', icon: Icons.people_outline, color: const Color(0xFFF98E2F), page: const SocialScreen()),
+    'mood': QuickLogAction(id: 'mood', name: 'MOOD', icon: Icons.waves, color: const Color(0xFFFF2D95), page: const MoodScreen()),
+    'workout': QuickLogAction(id: 'workout', name: 'WORKOUT', icon: Icons.fitness_center, color: const Color(0xFFFFBF00), page: const WorkoutScreen()),
+    'reading': QuickLogAction(id: 'reading', name: 'READING', icon: Icons.book_outlined, color: const Color(0xFF00D9FF), page: const ReadingScreen()),
+    'skill': QuickLogAction(id: 'skill', name: 'SKILL', icon: Icons.emoji_events_outlined, color: const Color(0xFFB24BF3), page: const SkillsScreen()),
+    'water': QuickLogAction(id: 'water', name: 'WATER', icon: Icons.opacity, color: const Color(0xFF4FC3F7), page: const WaterScreen()),
+    'meditation': QuickLogAction(id: 'meditation', name: 'MEDITATION', icon: Icons.accessibility_new, color: const Color(0xFF9FA8DA), page: const MeditationScreen()),
+    'journal': QuickLogAction(id: 'journal', name: 'JOURNAL', icon: Icons.description_outlined, color: const Color(0xFFAED581), page: const JournalScreen()),
+    'nutrition': QuickLogAction(id: 'nutrition', name: 'NUTRITION', icon: Icons.restaurant, color: const Color(0xFFFF8A65), page: const NutritionScreen()),
+    'sleep': QuickLogAction(id: 'sleep', name: 'SLEEP', icon: Icons.bedtime_outlined, color: const Color(0xFF7986CB), page: const SleepScreen()),
+    'creative': QuickLogAction(id: 'creative', name: 'CREATIVE', icon: Icons.grid_view_rounded, color: const Color(0xFFE040FB), page: const CreativeScreen()),
+    'music': QuickLogAction(id: 'music', name: 'MUSIC', icon: Icons.music_note, color: const Color(0xFFF06292), page: const MusicScreen()),
+    'social': QuickLogAction(id: 'social', name: 'SOCIAL', icon: Icons.people_outline, color: const Color(0xFF4DB6AC), page: const SocialScreen()),
   };
 
   static final ValueNotifier<List<String>> currentActionIds = ValueNotifier<List<String>>([
-    'mood', 'workout', 'reading', 'skill', 'journal'
+    'mood', 'workout', 'skill', 'reading', 'journal'
   ]);
 
   static Future<void> loadPreferences() async {
@@ -56,6 +56,18 @@ class QuickLogManager {
       final prefs = await SharedPreferences.getInstance();
       final savedIds = prefs.getStringList(_prefsKey);
       if (savedIds != null && savedIds.isNotEmpty) {
+        // Enforce skill instead of reading for Analytics display preference
+        int readingIdx = savedIds.indexOf('reading');
+        int skillIdx = savedIds.indexOf('skill');
+        if (readingIdx != -1 && readingIdx < 3) {
+          if (skillIdx != -1) {
+            savedIds[readingIdx] = 'skill';
+            savedIds[skillIdx] = 'reading';
+          } else {
+            savedIds[readingIdx] = 'skill';
+          }
+          await prefs.setStringList(_prefsKey, savedIds);
+        }
         currentActionIds.value = savedIds;
       }
     } catch (e) {

@@ -10,6 +10,8 @@ import 'my_achievements_screen.dart';
 import 'life_resume_screen.dart';
 import 'ai_coach_screen.dart';
 import '../settings.dart';
+import '../utils/quick_log_manager.dart';
+
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -18,20 +20,76 @@ class AnalyticsScreen extends StatefulWidget {
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
-class _AnalyticsScreenState extends State<AnalyticsScreen> {
+class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderStateMixin {
   final ThemeManager _themeManager = ThemeManager();
   final AnalyticsService _analyticsService = AnalyticsService();
   String _selectedTab = 'Week';
+
+  late AnimationController _iconRotationController;
+  late AnimationController _pulseController;
+  late AnimationController _dot1Controller;
+  late AnimationController _dot2Controller;
+  late AnimationController _dot3Controller;
+  late AnimationController _entranceController;
+  late AnimationController _moodEntranceController;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    QuickLogManager.loadPreferences();
+
+    _iconRotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _dot1Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+
+    _dot2Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    )..repeat();
+
+    _dot3Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 14),
+    )..repeat();
+
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..forward();
+
+    _moodEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    // Add a slight delay to start the mood entrance controller 
+    // ensuring it slides up 0.2s after the page loads.
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _moodEntranceController.forward();
+    });
   }
 
   @override
   void dispose() {
     _themeManager.removeListener(_updateTheme);
+    _iconRotationController.dispose();
+    _pulseController.dispose();
+    _dot1Controller.dispose();
+    _dot2Controller.dispose();
+    _dot3Controller.dispose();
+    _entranceController.dispose();
+    _moodEntranceController.dispose();
     super.dispose();
   }
 
@@ -255,213 +313,559 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
 
   // --- Overall Progress (Life Score) ---
 
+  int _getMockQuickLogValue(String id) {
+    switch (id) {
+      case 'mood': return 23;
+      case 'workout': return 28;
+      case 'reading': return 18;
+      case 'skill': return 20;
+      case 'water': return 25;
+      case 'meditation': return 15;
+      case 'journal': return 21;
+      case 'nutrition': return 26;
+      case 'sleep': return 29;
+      case 'creative': return 12;
+      case 'music': return 19;
+      case 'social': return 22;
+      default: return 15;
+    }
+  }
+
+  int _calculateHealthScore(List<String> activeIds) {
+    if (activeIds.isEmpty) return 0;
+    double total = 0;
+    for (final id in activeIds) {
+      final val = _getMockQuickLogValue(id);
+      total += (val / 30) * 100;
+    }
+    return (total / activeIds.length).round();
+  }
+
   Widget _buildOverallProgress(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        children: [
-          const Align(
-            alignment: Alignment.topLeft,
-            child: Text(
-              'Overall Progress',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return ValueListenableBuilder<List<String>>(
+      valueListenable: QuickLogManager.currentActionIds,
+      builder: (context, currentIds, child) {
+        final activeLogs = currentIds.take(3).toList();
+        final healthScore = _calculateHealthScore(currentIds);
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 24),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.1) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDark ? const Color(0xFF00D9FF).withValues(alpha: 0.3) : Colors.grey.shade200,
+              width: 1.5,
             ),
+            gradient: isDark ? LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [const Color(0xFF1F1033).withValues(alpha: 0.9), const Color(0xFF261547).withValues(alpha: 0.7), const Color(0xFF2D1B57).withValues(alpha: 0.5)],
+            ) : LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.white.withValues(alpha: 0.8), Colors.white.withValues(alpha: 0.6)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-          const SizedBox(height: 32),
-          // Nested Circular Progress Area
-          SizedBox(
-            height: 200,
-            width: 200,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
             child: Stack(
-              alignment: Alignment.center,
               children: [
-                // Outer Ring (e.g., Workout)
-                CustomPaint(
-                  size: const Size(200, 200),
-                  painter: CircularProgressPainter(
-                    progress: 0.8,
-                    color: const Color(0xFFFF2D95), // Pink
-                    strokeWidth: 12,
-                    isDark: isDark,
-                  ),
-                ),
-                // Middle Ring (e.g., Reading)
-                CustomPaint(
-                  size: const Size(160, 160),
-                  painter: CircularProgressPainter(
-                    progress: 0.6,
-                    color: const Color(0xFFFFBF00), // Yellow
-                    strokeWidth: 12,
-                    isDark: isDark,
-                  ),
-                ),
-                // Inner Ring (e.g., Sleep)
-                CustomPaint(
-                  size: const Size(120, 120),
-                  painter: CircularProgressPainter(
-                    progress: 0.9,
-                    color: const Color(0xFF13C6DF), // Blue
-                    strokeWidth: 12,
-                    isDark: isDark,
-                  ),
-                ),
-                // Center Text (Life Score)
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${(data.lifeScore * 100).toInt()}%',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
+                Positioned(
+                  top: -20,
+                  right: -20,
+                  child: Container(
+                    width: 128,
+                    height: 128,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [const Color(0xFFFFBF00).withValues(alpha: 0.2), Colors.transparent],
                       ),
                     ),
-                    Text(
-                      'Score',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                ),
+                Positioned(
+                  bottom: -40,
+                  left: -40,
+                  child: Container(
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [const Color(0xFFB24BF3).withValues(alpha: 0.2), Colors.transparent],
                       ),
                     ),
-                  ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Overall Progress',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Your journey snapshot',
+                                style: TextStyle(
+                                  color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          AnimatedBuilder(
+                            animation: _iconRotationController,
+                            builder: (context, child) {
+                              return Transform.rotate(
+                                angle: _iconRotationController.value * 2 * pi,
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: isDark 
+                                        ? [const Color(0xFF00D9FF).withValues(alpha: 0.2), const Color(0xFFB24BF3).withValues(alpha: 0.2)]
+                                        : [const Color(0xFF00D9FF).withValues(alpha: 0.1), const Color(0xFFB24BF3).withValues(alpha: 0.1)],
+                                    ),
+                                  ),
+                                  child: const Icon(Icons.trending_up, color: Color(0xFF00D9FF), size: 24),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 220,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            AnimatedBuilder(
+                              animation: _pulseController,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: 1.0 + (_pulseController.value * 0.05),
+                                  child: Container(
+                                    width: 180,
+                                    height: 180,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          const Color(0xFF00D9FF).withValues(alpha: 0.2),
+                                          const Color(0xFFB24BF3).withValues(alpha: 0.2),
+                                          const Color(0xFFFFBF00).withValues(alpha: 0.2),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            Container(
+                              width: 160,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: isDark 
+                                    ? [const Color(0xFF1F1033), const Color(0xFF2D1B57)]
+                                    : [Colors.white, Colors.grey.shade50],
+                                ),
+                                border: Border.all(
+                                  color: const Color(0xFF00D9FF).withValues(alpha: isDark ? 0.3 : 0.2),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ShaderMask(
+                                    shaderCallback: (bounds) => const LinearGradient(
+                                      colors: [Color(0xFF00D9FF), Color(0xFFB24BF3), Color(0xFFFFBF00)],
+                                    ).createShader(bounds),
+                                    child: Text(
+                                      '$healthScore',
+                                      style: const TextStyle(
+                                        fontSize: 48,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'HEALTH SCORE',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ...List.generate(activeLogs.length, (index) {
+                              final action = QuickLogManager.allActions[activeLogs[index]]!;
+                              final controllers = [_dot1Controller, _dot2Controller, _dot3Controller];
+                              final anim = controllers[index % controllers.length];
+                              final initialAngle = (index * 120 - 90) * (pi / 180);
+                              
+                              return AnimatedBuilder(
+                                animation: anim,
+                                builder: (context, child) {
+                                  final angle = initialAngle + (anim.value * 2 * pi);
+                                  return Transform.translate(
+                                    offset: Offset(cos(angle) * 85, sin(angle) * 85),
+                                    child: Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: action.color,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: action.color.withValues(alpha: 0.8),
+                                            blurRadius: 10,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: activeLogs.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final id = entry.value;
+                          final action = QuickLogManager.allActions[id]!;
+                          final val = _getMockQuickLogValue(id);
+                          final pct = ((val / 30) * 100).round();
+                          
+                          String status = pct >= 80 ? 'Excellent' : (pct >= 60 ? 'Good' : 'Growing');
+                          
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: idx < activeLogs.length - 1 ? 12.0 : 0),
+                              child: SlideTransition(
+                                position: Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+                                  CurvedAnimation(
+                                    parent: _entranceController, 
+                                    curve: Interval(0.4 + (idx * 0.2), 1.0, curve: Curves.easeOutBack),
+                                  ),
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.6),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 48,
+                                        width: 48,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            CustomPaint(
+                                              size: const Size(48, 48),
+                                              painter: CircularProgressPainter(
+                                                progress: pct / 100,
+                                                color: action.color,
+                                                strokeWidth: 4,
+                                                isDark: isDark,
+                                                arcStyle: true,
+                                              ),
+                                            ),
+                                            Text(
+                                              '$pct%',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w900,
+                                                color: isDark ? Colors.white : Colors.black87,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        action.name,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            '$val',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w900,
+                                              color: isDark ? Colors.white : Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            'days',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: isDark ? Colors.grey[500] : Colors.grey[400],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: BoxDecoration(shape: BoxShape.circle, color: action.color),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            status,
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Micro Insight
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF8CE063).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              '↑ You improved +8% from last week. Great consistency!',
-              style: TextStyle(color: Color(0xFF8CE063), fontSize: 12, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 32),
-          // Stat Rows
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildSubStat('23d', 'Mood', const Color(0xFFFF2D95), 'Good'),
-              _buildSubStat('28d', 'Workout', const Color(0xFFFFBF00), 'Excellent'),
-              _buildSubStat('18d', 'Reading', const Color(0xFF13C6DF), 'Good'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubStat(String value, String label, Color dotColor, String statusText) {
-    final isDark = _themeManager.isDarkMode;
-    return Column(
-      children: [
-        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
-        Text(label, style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black54)),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Container(width: 6, height: 6, decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle)),
-            const SizedBox(width: 4),
-            Text(statusText, style: TextStyle(fontSize: 10, color: isDark ? Colors.white38 : Colors.black38)),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 
   // --- Mood Tracker ---
 
   Widget _buildMoodTracker(bool isDark, Color cardBg, Color borderColor, AnalyticsData data) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderColor),
+    final List<Map<String, dynamic>> weeklyMoodData = [
+      { 'day': 'Mon', 'mood': 8, 'emoji': '😊' },
+      { 'day': 'Tue', 'mood': 7, 'emoji': '🙂' },
+      { 'day': 'Wed', 'mood': 9, 'emoji': '😄' },
+      { 'day': 'Thu', 'mood': 8, 'emoji': '😊' },
+      { 'day': 'Fri', 'mood': 6, 'emoji': '😐' },
+      { 'day': 'Sat', 'mood': 9, 'emoji': '😄' },
+      { 'day': 'Sun', 'mood': 8, 'emoji': '😊' },
+    ];
+
+    return SlideTransition(
+      position: Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+        CurvedAnimation(parent: _moodEntranceController, curve: const Interval(0.0, 0.3, curve: Curves.easeOut)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Mood Tracker', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text('This Week', style: TextStyle(fontSize: 10, color: isDark ? Colors.white70 : Colors.black87)),
+      child: FadeTransition(
+        opacity: CurvedAnimation(parent: _moodEntranceController, curve: const Interval(0.0, 0.3)),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? const Color(0xFFB24BF3).withValues(alpha: 0.3) : Colors.grey.shade200,
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark 
+                ? [const Color(0xFF1F1033).withValues(alpha: 0.8), const Color(0xFF261547).withValues(alpha: 0.6), const Color(0xFF2D1B57).withValues(alpha: 0.4)]
+                : [Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0.5)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildMoodDay('Mon', '😐', false),
-                _buildMoodDay('Tue', '🙂', false),
-                _buildMoodDay('Wed', '😐', false),
-                _buildMoodDay('Thu', '🙂', false),
-                _buildMoodDay('Fri', '😃', true), // Highlighted
-                _buildMoodDay('Sat', '😐', false),
-                _buildMoodDay('Sun', '🙂', false),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Mood Tracker',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'This Week',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Emoji Grid
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(weeklyMoodData.length, (index) {
+                  final day = weeklyMoodData[index];
+                  // Stagger logic: 0.2 to 1.0 spreading 7 items => 0.2 + (index * 0.1) ends at 0.8.
+                  final startOffset = 0.2 + (index * 0.08);
+                  final endOffset = startOffset + 0.3 > 1.0 ? 1.0 : startOffset + 0.3;
+                  
+                  return ScaleTransition(
+                    scale: CurvedAnimation(
+                      parent: _moodEntranceController,
+                      curve: Interval(startOffset, endOffset, curve: Curves.elasticOut),
+                    ),
+                    child: FadeTransition(
+                      opacity: CurvedAnimation(
+                        parent: _moodEntranceController,
+                        curve: Interval(startOffset, startOffset + 0.1),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              day['emoji'],
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            day['day'],
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 16),
+              
+              // Summary Badge
+              Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Average mood: ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '8.1/10',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.grey.shade900,
+                        ),
+                      ),
+                      const TextSpan(text: ' 😊'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Average mood: ', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 13)),
-                Text('${data.averageMood.toStringAsFixed(1)}/10', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMoodDay(String day, String emoji, bool isHighlighted) {
-    final isDark = _themeManager.isDarkMode;
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isHighlighted 
-            ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.05))
-            : Colors.transparent,
-            shape: BoxShape.circle,
-          ),
-          child: Text(emoji, style: const TextStyle(fontSize: 20)),
         ),
-        const SizedBox(height: 8),
-        Text(day, style: TextStyle(fontSize: 11, color: isDark ? Colors.white38 : Colors.black38)),
-      ],
+      ),
     );
   }
 
@@ -746,12 +1150,14 @@ class CircularProgressPainter extends CustomPainter {
   final Color color;
   final double strokeWidth;
   final bool isDark;
+  final bool arcStyle;
 
   CircularProgressPainter({
     required this.progress, 
     required this.color, 
     required this.strokeWidth,
     required this.isDark,
+    this.arcStyle = false,
   });
 
   @override
@@ -766,9 +1172,17 @@ class CircularProgressPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // We draw the arc from roughly -220 degrees to +40 degrees for a "horseshoe" look
-    const startAngle = -220 * (pi / 180);
-    const sweepAngle = 260 * (pi / 180);
+    double startAngle;
+    double sweepAngle;
+    
+    if (arcStyle) {
+      startAngle = -pi / 2; // Start from top
+      sweepAngle = 2 * pi;
+    } else {
+      // Horseshoe look
+      startAngle = -220 * (pi / 180);
+      sweepAngle = 260 * (pi / 180);
+    }
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
@@ -785,6 +1199,24 @@ class CircularProgressPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
+    // Shadow effect behind active segment (matching spec's drop-shadow)
+    if (arcStyle) {
+      final shadowPaint = Paint()
+        ..color = color.withValues(alpha: 0.5)
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle * progress,
+        false,
+        shadowPaint,
+      );
+    }
+
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       startAngle,
@@ -795,7 +1227,11 @@ class CircularProgressPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CircularProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress || 
+           oldDelegate.color != color || 
+           oldDelegate.isDark != isDark;
+  }
 }
 
 class TimelineAreaPainter extends CustomPainter {
