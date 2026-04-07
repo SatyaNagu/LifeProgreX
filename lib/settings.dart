@@ -11,6 +11,7 @@ import 'help_and_support.dart';
 import 'screens/achievements_screen.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
+import 'services/health_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -211,7 +212,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const SizedBox(height: 30),
-
+                      // Authorize Health Sync Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            try {
+                              final success = await HealthService().initializeAndRequestPermissions();
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(success ? 'Health Sync Authorized!' : 'Failed to authorize Health Sync. App may be missing permissions.')),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Health Error: $e')),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFB24BF3),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text('Authorize Health Sync', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       // Sign Out Button
                       SizedBox(
                         width: double.infinity,

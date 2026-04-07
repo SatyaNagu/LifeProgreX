@@ -68,11 +68,27 @@ class AnalyticsService {
       return const Stream.empty();
     }
 
-    // We use RxDart or just parallel streams. To keep it simple without adding new dependencies,
-    // we'll stream Habits and combine data using a Future inside the stream, 
-    // or just listen to the Habit stream and periodically fetch Moods/Activities.
-    
-    // For a simple stream implementation, we'll stream habits, then future-fetch the rest:
+    // Dynamic timeframe scoping
+    final now = DateTime.now();
+    DateTime startTime;
+    switch (timeframe.toLowerCase()) {
+      case 'today':
+      case 'day':
+        startTime = DateTime(now.year, now.month, now.day);
+        break;
+      case 'week':
+        startTime = now.subtract(const Duration(days: 7));
+        break;
+      case 'month':
+        startTime = DateTime(now.year, now.month - 1, now.day);
+        break;
+      case 'year':
+        startTime = DateTime(now.year - 1, now.month, now.day);
+        break;
+      default:
+        startTime = now.subtract(const Duration(days: 7));
+    }
+
     return _db
         .collection('habits')
         .where('userId', isEqualTo: user.uid)
@@ -83,28 +99,43 @@ class AnalyticsService {
           .map((doc) => HabitModel.fromJson(doc.data(), doc.id))
           .toList();
 
-      // Fetch Mood Logs (Last 7 days for ease)
-      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
-      final moodSnapshot = await _db
-          .collection('users')
-          .doc(user.uid)
-          .collection('mood_logs')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(sevenDaysAgo))
-          .orderBy('timestamp', descending: true)
-          .get();
-
-      final moods = moodSnapshot.docs
-          .map((doc) => MoodLogModel.fromJson(doc.data(), doc.id))
-          .toList();
-
-      // Fetch Activities (Quick Logs)
+      // Fetch Activities (Quick Logs) bounded by dynamic timeframe
       final activitySnapshot = await _db
           .collection('users')
           .doc(user.uid)
           .collection('activities')
+          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startTime))
           .orderBy('createdAt', descending: true)
-          .limit(20) // Limit to recent 20 for timeline
           .get();
+
+      final activities = activitySnapshot.docs
+          .map((doc) => ActivityLog.fromMap(doc.data(), doc.id))
+          .toList();
+
+      // Extrapolate Moods from Activities
+      final moods = <MoodLogModel>[];
+      for (var a in activities) {
+        if (a.type.toLowerCase() == 'mood' && a.value != null) {
+           int score = 4; // Default to 'Okay'
+           final lbl = a.value!.toLowerCase();
+           if (lbl == 'terrible') score = 0;
+           else if (lbl == 'bad') score = 2;
+           else if (lbl == 'okay') score = 4;
+           else if (lbl == 'good') score = 6;
+           else if (lbl == 'great') score = 8;
+           else if (lbl == 'amazing') score = 10;
+           
+           final emoji = a.data['emoji'] ?? '😐';
+           
+           moods.add(MoodLogModel(
+             id: a.id,
+             userId: a.userId,
+             score: score,
+             emoji: emoji,
+             timestamp: a.createdAt,
+           ));
+        }
+      }
 
       // Fetch Earned Achievements
       final achievementSnapshot = await _db
@@ -115,10 +146,6 @@ class AnalyticsService {
           .get();
       
       final earnedBadgeIds = achievementSnapshot.docs.map((doc) => doc.id).toList();
-
-      final activities = activitySnapshot.docs
-          .map((doc) => ActivityLog.fromMap(doc.data(), doc.id))
-          .toList();
 
       return _computeAnalytics(habits, moods, activities, timeframe, earnedBadgeIds);
     });
@@ -131,14 +158,14 @@ class AnalyticsService {
     String timeframe,
     List<String> earnedBadgeIds,
   ) {
-    // 1. Life Score (based on % of habits that have streaks > 0, just a proxy metric)
+    // 1. Life Score (based on % of habits that have streaks > 0)
     double lifeScore = 0.0;
     int activeHabits = habits.where((h) => h.currentStreak > 0).length;
     if (habits.isNotEmpty) {
       lifeScore = activeHabits / habits.length;
     }
 
-    // 2. Mood Stats
+    // 2. Mood Stats (0-10 scale mapped mathematically)
     double totalMood = 0;
     for (var m in moods) {
       totalMood += m.score;
@@ -165,7 +192,7 @@ class AnalyticsService {
     }
     int totalGoals = habits.length;
     
-    // Achievements (Map IDs to Badges using AchievementConstants)
+    // Achievements
     final earnedBadges = AchievementConstants.allAchievements
         .where((def) => earnedBadgeIds.contains(def.id))
         .map((def) => def.badge)
@@ -194,19 +221,22 @@ class AnalyticsService {
       }
     }
 
+    // Securely trim timelineEvents to last 20 inside memory to prevent UI lag.
+    final timelineEvents = activities.take(20).map((a) => {
+      'type': a.type,
+      'time': a.createdAt,
+    }).toList();
+
     return AnalyticsData(
       lifeScore: lifeScore,
-      averageMood: avgMood,
-      weekMoods: moods,
+      averageMood: avgMood, // Contains the 0-10 float metric
+      weekMoods: moods, // Now accurately bound dynamically to the timeframe logs
       categoryStats: catStats,
       maxStreak: maxStreak,
       totalGoals: totalGoals,
       achievements: achievementsCount,
       wellnessScore: wellnessScore,
-      timelineEvents: activities.map((a) => {
-        'type': a.type,
-        'time': a.createdAt,
-      }).toList(),
+      timelineEvents: timelineEvents,
       earnedBadges: earnedBadges,
       readingMinutes: rMin,
       workoutSessions: wCount,

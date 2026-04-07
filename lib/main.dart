@@ -11,9 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'loading_screen.dart';
 
 import 'utils/quick_log_manager.dart';
+import 'package:health/health.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Health().configure();
   await QuickLogManager.loadPreferences();
   runApp(const MyApp());
 }
