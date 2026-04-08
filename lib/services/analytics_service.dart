@@ -21,6 +21,8 @@ class AnalyticsData {
   final int workoutSessions;
   final int learningMinutes;
   final int habitsCompleted;
+  final double averageWorkoutIntensity;
+  final double averageSkillIntensity;
 
   AnalyticsData({
     required this.lifeScore,
@@ -37,6 +39,8 @@ class AnalyticsData {
     required this.workoutSessions,
     required this.learningMinutes,
     required this.habitsCompleted,
+    required this.averageWorkoutIntensity,
+    required this.averageSkillIntensity,
   });
 }
 
@@ -230,6 +234,12 @@ class AnalyticsService {
     int lMin = 0;
     int hCompleted = activities.length;
 
+    double totalWorkoutIntensity = 0.0;
+    int workoutLogsWithIntensity = 0;
+    
+    double totalSkillIntensity = 0.0;
+    int skillLogsWithIntensity = 0;
+
     for (var a in activities) {
       final type = a.type.toLowerCase();
       if (type.contains('read')) {
@@ -238,10 +248,44 @@ class AnalyticsService {
           type.contains('gym') ||
           type.contains('fit')) {
         wCount++;
+        
+        // Extrapolate workout intensity directly natively from 'value' or nested data map.
+        double? intensity;
+        if (a.data.containsKey('intensity')) {
+          intensity = double.tryParse(a.data['intensity'].toString());
+        }
+        if (intensity == null && a.value != null) {
+          intensity = double.tryParse(a.value!.toString());
+        }
+        if (intensity != null) {
+          totalWorkoutIntensity += intensity;
+          workoutLogsWithIntensity++;
+        }
       } else if (type.contains('learn') || type.contains('skill')) {
         lMin += (a.duration ?? 0);
+        
+        // Dynamic interpolator fallback taking raw duration converting automatically to mathematical intensity scalar constraints.
+        double? skillIntensity;
+        if (a.data.containsKey('points')) {
+           skillIntensity = double.tryParse(a.data['points'].toString());
+        }
+        if (skillIntensity == null && a.duration != null && a.duration! > 0) {
+           skillIntensity = a.duration! / 9.0;
+        }
+        if (skillIntensity != null) {
+           totalSkillIntensity += skillIntensity;
+           skillLogsWithIntensity++;
+        }
       }
     }
+    
+    double avgWorkoutIntensity = workoutLogsWithIntensity > 0 
+      ? totalWorkoutIntensity / workoutLogsWithIntensity 
+      : 0.0;
+      
+    double avgSkillIntensity = skillLogsWithIntensity > 0
+      ? totalSkillIntensity / skillLogsWithIntensity
+      : 0.0;
 
     // Securely trim timelineEvents to last 20 inside memory to prevent UI lag.
     final timelineEvents = activities
@@ -265,6 +309,8 @@ class AnalyticsService {
       workoutSessions: wCount,
       learningMinutes: lMin,
       habitsCompleted: hCompleted,
+      averageWorkoutIntensity: avgWorkoutIntensity,
+      averageSkillIntensity: avgSkillIntensity,
     );
   }
 }

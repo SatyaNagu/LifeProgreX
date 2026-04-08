@@ -184,7 +184,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
         children: [
           _buildStepButton(Icons.remove, () {
             if (_duration >= 10) setState(() => _duration -= 5);
-          }),
+          }, _duration <= 5),
           Column(
             children: [
               Text(
@@ -207,24 +207,30 @@ class _SkillsScreenState extends State<SkillsScreen> {
             ],
           ),
           _buildStepButton(Icons.add, () {
-            setState(() => _duration += 5);
-          }),
+            if (_duration <= 85) setState(() => _duration += 5);
+          }, _duration >= 90),
         ],
       ),
     );
   }
 
-  Widget _buildStepButton(IconData icon, VoidCallback onTap) {
+  Widget _buildStepButton(IconData icon, VoidCallback onTap, bool isDisabled) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Container(
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
+          color: isDisabled 
+            ? Colors.grey.withValues(alpha: 0.15) 
+            : const Color(0xFF8B5CF6).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
+        child: Icon(
+          icon, 
+          color: isDisabled ? Colors.grey : const Color(0xFF8B5CF6), 
+          size: 24
+        ),
       ),
     );
   }
@@ -277,7 +283,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
         value: _skillController.text,
         duration: _duration,
         notes: _reflectionController.text,
-        data: {'category': _selectedCategory},
+        data: {'category': _selectedCategory, 'points': _duration / 9.0},
         createdAt: DateTime.now(),
       );
 
