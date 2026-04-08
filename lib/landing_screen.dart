@@ -151,6 +151,51 @@ class _LandingScreenState extends State<LandingScreen> {
                   final totalTasks = todayLogs.length;
                   final calories = totalDuration * 5;
 
+                  final analyticsMathScore = (() {
+                     double moodPoints = 0; int moodCount = 0;
+                     double workoutPoints = 0; int workoutCount = 0;
+                     double skillPoints = 0; int skillCount = 0;
+
+                     for (var a in activities) {
+                        final type = a.type.toLowerCase();
+                        if (type == 'mood' && a.value != null) {
+                           int score = 4;
+                           final lbl = a.value!.toLowerCase();
+                           if (lbl == 'terrible') score = 0;
+                           else if (lbl == 'bad') score = 2;
+                           else if (lbl == 'okay') score = 4;
+                           else if (lbl == 'good') score = 6;
+                           else if (lbl == 'great') score = 8;
+                           else if (lbl == 'amazing') score = 10;
+                           moodPoints += score;
+                           moodCount++;
+                        } else if (type.contains('workout') || type.contains('gym') || type.contains('fit')) {
+                           double? intensity;
+                           if (a.data.containsKey('intensity')) {
+                              intensity = double.tryParse(a.data['intensity'].toString());
+                           }
+                           if (intensity == null && a.value != null) {
+                              intensity = double.tryParse(a.value!.toString());
+                           }
+                           if (intensity != null) { workoutPoints += intensity; workoutCount++; }
+                        } else if (type.contains('learn') || type.contains('skill')) {
+                           double? sInt;
+                           if (a.data.containsKey('points')) {
+                              sInt = double.tryParse(a.data['points'].toString());
+                           }
+                           if (sInt == null && a.duration != null && a.duration! > 0) {
+                              sInt = a.duration! / 9.0;
+                           }
+                           if (sInt != null) { skillPoints += sInt; skillCount++; }
+                        }
+                     }
+                     double avgMood = moodCount > 0 ? (moodPoints / moodCount) * 10 : 0.0;
+                     double avgWorkout = workoutCount > 0 ? (workoutPoints / workoutCount) * 10 : 0.0;
+                     double avgSkill = skillCount > 0 ? (skillPoints / skillCount) * 10 : 0.0;
+                     
+                     return ((avgMood + avgWorkout + avgSkill) / 3.0).ceil();
+                  })();
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -175,7 +220,7 @@ class _LandingScreenState extends State<LandingScreen> {
                       const SizedBox(height: 16),
                       _buildOverviewGrid(
                         maxStreak: maxStreak,
-                        score: habitScore,
+                        score: analyticsMathScore,
                         totalHabits: activities.length,
                       ),
                       const SizedBox(height: 32),

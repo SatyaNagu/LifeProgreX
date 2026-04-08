@@ -435,16 +435,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   int _calculateHealthScore(List<String> activeIds, AnalyticsData data) {
     if (activeIds.isEmpty) return 0;
-    double total = 0;
-    for (final id in activeIds) {
-      if (id == 'mood') {
-        total += (data.averageMood * 10);
-      } else {
-        final val = _getMockQuickLogValue(id);
-        total += (val / 30) * 100;
-      }
-    }
-    return (total / activeIds.length).round();
+    final moodPct = data.averageMood * 10.0;
+    final workoutPct = data.averageWorkoutIntensity * 10.0;
+    final skillPct = data.averageSkillIntensity * 10.0;
+
+    final avg = (moodPct + workoutPct + skillPct) / 3.0;
+    return avg.ceil();
   }
 
   Widget _buildOverallProgress(
