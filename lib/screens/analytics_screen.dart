@@ -156,28 +156,36 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             }
             return Stack(
               children: [
-                SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 120),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTimeToggle(isDark),
-                      const SizedBox(height: 24),
-                      _buildOverallProgress(isDark, cardBgColor, borderColor, data),
-                      const SizedBox(height: 24),
-                      _buildMoodTracker(isDark, cardBgColor, borderColor, data),
-                      const SizedBox(height: 24),
-                      _buildCategoryProgress(isDark, cardBgColor, borderColor, data),
-                      const SizedBox(height: 24),
-                      _buildActivityTimeline(isDark, cardBgColor, borderColor, data),
-                      const SizedBox(height: 24),
-                      _buildStatsGrid(isDark, cardBgColor, borderColor, data),
-                      const SizedBox(height: 32),
-                      _buildBottomCTA(),
-                      const SizedBox(height: 100), // Space for bottom nav
-                    ],
-                  ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                      child: _buildTimeToggle(isDark),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 12, bottom: 120),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildOverallProgress(isDark, cardBgColor, borderColor, data),
+                            const SizedBox(height: 24),
+                            _buildMoodTracker(isDark, cardBgColor, borderColor, data),
+                            const SizedBox(height: 24),
+                            _buildCategoryProgress(isDark, cardBgColor, borderColor, data),
+                            const SizedBox(height: 24),
+                            _buildActivityTimeline(isDark, cardBgColor, borderColor, data),
+                            const SizedBox(height: 24),
+                            _buildStatsGrid(isDark, cardBgColor, borderColor, data),
+                            const SizedBox(height: 32),
+                            _buildBottomCTA(),
+                            const SizedBox(height: 100), // Space for bottom nav
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 // Bottom Navigation Bar
                 Positioned(
@@ -384,34 +392,6 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
             borderRadius: BorderRadius.circular(24),
             child: Stack(
               children: [
-                Positioned(
-                  top: -20,
-                  right: -20,
-                  child: Container(
-                    width: 128,
-                    height: 128,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [const Color(0xFFFFBF00).withValues(alpha: 0.2), Colors.transparent],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: -40,
-                  left: -40,
-                  child: Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [const Color(0xFFB24BF3).withValues(alpha: 0.2), Colors.transparent],
-                      ),
-                    ),
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -440,15 +420,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                               ),
                             ],
                           ),
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
-                            ),
-                            child: const Icon(Icons.trending_up, color: Color(0xFF00D9FF), size: 24),
-                          ),
+                          // The animated spinning icon was removed entirely per user request
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -521,9 +493,9 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'HEALTH SCORE',
+                                    'PERSONAL SCORE',
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isDark ? Colors.grey[400] : Colors.grey[500],
                                       letterSpacing: 1,
@@ -637,31 +609,7 @@ Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? on
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                      const SizedBox(height: 2),
-                                      if (id != 'mood')
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
-                                            Text(
-                                              '${_getMockQuickLogValue(id)}',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w900,
-                                                color: isDark ? Colors.white : Colors.black87,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 2),
-                                            Text(
-                                              'days',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: isDark ? Colors.grey[500] : Colors.grey[400],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                      // Detail values row completely removed to standardize tile size.
                                       const SizedBox(height: 8),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,

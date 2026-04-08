@@ -25,14 +25,10 @@ import 'models/notification_model.dart';
 import 'services/notification_service.dart';
 import 'screens/notifications_screen.dart';
 
-
 class LandingScreen extends StatefulWidget {
   final String userName;
 
-  const LandingScreen({
-    super.key, 
-    this.userName = 'Nagasai', 
-  });
+  const LandingScreen({super.key, this.userName = 'Nagasai'});
 
   @override
   State<LandingScreen> createState() => _LandingScreenState();
@@ -61,7 +57,7 @@ class _LandingScreenState extends State<LandingScreen> {
   Widget build(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
-    
+
     return PremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -73,7 +69,7 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Stack(
                 children: [
                   Positioned.fill(child: _buildMainContent(textColor, isDark)),
-                  
+
                   // Bottom Navigation Bar
                   Positioned(
                     left: 20,
@@ -93,12 +89,7 @@ class _LandingScreenState extends State<LandingScreen> {
   Widget _buildMainContent(Color textColor, bool isDark) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(
-        left: 20, 
-        right: 20, 
-        top: 20, 
-        bottom: 120,
-      ), 
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 120),
       child: StreamBuilder<List<HabitModel>>(
         stream: FirestoreService().getHabitsStream(),
         builder: (context, habitSnapshot) {
@@ -107,32 +98,56 @@ class _LandingScreenState extends State<LandingScreen> {
             builder: (context, goalSnapshot) {
               final habits = habitSnapshot.data ?? [];
               final goals = goalSnapshot.data ?? [];
-              
+
               // Habit Stats
               final totalHabits = habits.length;
-              final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
-              final activeHabits = habits.where((h) => h.currentStreak > 0).length;
-              final habitScore = totalHabits > 0 ? ((activeHabits / totalHabits) * 100).toInt() : 0;
+              final maxStreak = habits.isNotEmpty
+                  ? habits.map((h) => h.currentStreak).reduce(max)
+                  : 0;
+              final activeHabits = habits
+                  .where((h) => h.currentStreak > 0)
+                  .length;
+              final habitScore = totalHabits > 0
+                  ? ((activeHabits / totalHabits) * 100).toInt()
+                  : 0;
 
               // Goal Stats (Today)
               final now = DateTime.now();
-              final todayGoals = goals.where((g) => g.targetDate.year == now.year && g.targetDate.month == now.month && g.targetDate.day == now.day).toList();
+              final todayGoals = goals
+                  .where(
+                    (g) =>
+                        g.targetDate.year == now.year &&
+                        g.targetDate.month == now.month &&
+                        g.targetDate.day == now.day,
+                  )
+                  .toList();
               final totalTodayGoals = todayGoals.length;
-              final completedTodayGoals = todayGoals.where((g) => g.isCompleted).length;
-              
+              final completedTodayGoals = todayGoals
+                  .where((g) => g.isCompleted)
+                  .length;
+
               final user = AuthService().currentUser;
 
               return StreamBuilder<List<ActivityLog>>(
-                stream: user != null ? ActivityService.listenToActivities(user.uid) : Stream.value([]),
+                stream: user != null
+                    ? ActivityService.listenToActivities(user.uid)
+                    : Stream.value([]),
                 builder: (context, activitySnapshot) {
                   final activities = activitySnapshot.data ?? [];
                   final todayLogs = activities.where((a) {
-                    final logDate = DateTime(a.createdAt.year, a.createdAt.month, a.createdAt.day);
+                    final logDate = DateTime(
+                      a.createdAt.year,
+                      a.createdAt.month,
+                      a.createdAt.day,
+                    );
                     final today = DateTime(now.year, now.month, now.day);
                     return logDate.isAtSameMomentAs(today);
                   }).toList();
 
-                  final totalDuration = todayLogs.fold(0, (sum, log) => sum + (log.duration ?? 0));
+                  final totalDuration = todayLogs.fold(
+                    0,
+                    (sum, log) => sum + (log.duration ?? 0),
+                  );
                   final totalTasks = todayLogs.length;
                   final calories = totalDuration * 5;
 
@@ -142,75 +157,112 @@ class _LandingScreenState extends State<LandingScreen> {
                       _buildHeader(textColor),
                       const SizedBox(height: 24),
                       AnimatedGoalsCard(
-                        completedGoals: goals.where((g) => g.isCompleted).length,
+                        completedGoals: goals
+                            .where((g) => g.isCompleted)
+                            .length,
                         totalGoals: goals.length,
-                        score: goals.isNotEmpty ? ((goals.where((g) => g.isCompleted).length / goals.length) * 100).toInt() : 0,
+                        score: goals.isNotEmpty
+                            ? ((goals.where((g) => g.isCompleted).length /
+                                          goals.length) *
+                                      100)
+                                  .toInt()
+                            : 0,
                         hasAnyGoals: goals.isNotEmpty,
                         themeManager: _themeManager,
                       ),
                       const SizedBox(height: 32),
                       _buildSectionHeader('Overview', textColor),
                       const SizedBox(height: 16),
-                      _buildOverviewGrid(maxStreak: maxStreak, score: habitScore, totalHabits: activities.length),
+                      _buildOverviewGrid(
+                        maxStreak: maxStreak,
+                        score: habitScore,
+                        totalHabits: activities.length,
+                      ),
                       const SizedBox(height: 32),
                       _buildQuickLogHeader(context, textColor),
                       const SizedBox(height: 16),
                       _buildQuickLogList(context),
                       const SizedBox(height: 32),
-                      _buildTodayGoalsSection(context, goals, textColor, isDark),
+                      _buildTodayGoalsSection(
+                        context,
+                        goals,
+                        textColor,
+                        isDark,
+                      ),
                       const SizedBox(height: 32),
                       _buildAiCoachCard(),
                       const SizedBox(height: 12),
                       _buildActionRowItem(
-                        icon: Icons.track_changes, 
-                        color: const Color(0xFF13C6DF), 
-                        title: 'My Habits', 
+                        icon: Icons.track_changes,
+                        color: const Color(0xFF13C6DF),
+                        title: 'My Habits',
                         subtitle: '$activeHabits Active Habits',
                         isDark: isDark,
-                        onTap: () {}, 
+                        onTap: () {},
                       ),
                       const SizedBox(height: 12),
                       _buildActionRowItem(
-                        icon: Icons.flag, 
-                        color: const Color(0xFFFFBF00), 
-                        title: 'My Goals', 
+                        icon: Icons.flag,
+                        color: const Color(0xFFFFBF00),
+                        title: 'My Goals',
                         subtitle: 'Track your personal goals',
                         isDark: isDark,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GoalsScreen())),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GoalsScreen(),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _buildActionRowItem(
-                        icon: Icons.bar_chart, 
-                        color: const Color(0xFF8B5CF6), 
-                        title: 'Analytics', 
+                        icon: Icons.bar_chart,
+                        color: const Color(0xFF8B5CF6),
+                        title: 'Analytics',
                         subtitle: 'View Your Stats',
                         isDark: isDark,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnalyticsScreen())),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AnalyticsScreen(),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 32),
                       _buildSectionHeader(
-                        'Daily Activity', 
-                        textColor, 
+                        'Daily Activity',
+                        textColor,
                         trailingText: 'SEE ALL >',
                         onTrailingTap: () => Navigator.push(
-                          context, 
-                          MaterialPageRoute(builder: (context) => const AllCategoriesScreen()),
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AllCategoriesScreen(),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _buildDailyActivityGrid(calories, totalDuration, totalTasks),
+                      _buildDailyActivityGrid(
+                        calories,
+                        totalDuration,
+                        totalTasks,
+                      ),
                     ],
                   );
-                }
+                },
               );
             },
           );
-        }
+        },
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, Color textColor, {String? trailingText, VoidCallback? onTrailingTap}) {
+  Widget _buildSectionHeader(
+    String title,
+    Color textColor, {
+    String? trailingText,
+    VoidCallback? onTrailingTap,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -240,14 +292,22 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   // --- Today's Priorities (Vanishing Goals) ---
-  Widget _buildTodayGoalsSection(BuildContext context, List<GoalModel> goals, Color textColor, bool isDark) {
+  Widget _buildTodayGoalsSection(
+    BuildContext context,
+    List<GoalModel> goals,
+    Color textColor,
+    bool isDark,
+  ) {
     final now = DateTime.now();
-    final activeTodayGoals = goals.where((g) => 
-      !g.isCompleted && 
-      g.targetDate.year == now.year && 
-      g.targetDate.month == now.month && 
-      g.targetDate.day == now.day
-    ).toList();
+    final activeTodayGoals = goals
+        .where(
+          (g) =>
+              !g.isCompleted &&
+              g.targetDate.year == now.year &&
+              g.targetDate.month == now.month &&
+              g.targetDate.day == now.day,
+        )
+        .toList();
 
     if (activeTodayGoals.isEmpty) return const SizedBox.shrink();
 
@@ -276,10 +336,12 @@ class _LandingScreenState extends State<LandingScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        ...activeTodayGoals.map((goal) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildGoalActionCard(goal, isDark, textColor),
-        )),
+        ...activeTodayGoals.map(
+          (goal) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildGoalActionCard(goal, isDark, textColor),
+          ),
+        ),
       ],
     );
   }
@@ -297,7 +359,9 @@ class _LandingScreenState extends State<LandingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.4) : Colors.white,
+        color: isDark
+            ? const Color(0xFF1B113D).withValues(alpha: 0.4)
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
@@ -316,12 +380,13 @@ class _LandingScreenState extends State<LandingScreen> {
               height: 28,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFFFBF00),
-                  width: 2,
-                ),
+                border: Border.all(color: const Color(0xFFFFBF00), width: 2),
               ),
-              child: const Icon(Icons.check, color: Colors.transparent, size: 16),
+              child: const Icon(
+                Icons.check,
+                color: Colors.transparent,
+                size: 16,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -350,7 +415,11 @@ class _LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: isDark ? Colors.white10 : Colors.black12, size: 20),
+          Icon(
+            Icons.chevron_right,
+            color: isDark ? Colors.white10 : Colors.black12,
+            size: 20,
+          ),
         ],
       ),
     );
@@ -434,18 +503,23 @@ class _LandingScreenState extends State<LandingScreen> {
             width: 2,
           ),
           image: DecorationImage(
-            image: (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ?? false)
-                ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!) 
-                : const AssetImage('Assets/onboarding_image_3.png') as ImageProvider,
+            image:
+                (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ??
+                    false)
+                ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
+                : const AssetImage('Assets/onboarding_image_3.png')
+                      as ImageProvider,
             fit: BoxFit.cover,
           ),
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
       ),
     );
@@ -453,7 +527,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildNotificationIcon() {
     final isDark = _themeManager.isDarkMode;
-    
+
     return StreamBuilder<List<NotificationModel>>(
       stream: NotificationService().getNotificationsStream(),
       builder: (context, snapshot) {
@@ -463,25 +537,33 @@ class _LandingScreenState extends State<LandingScreen> {
         return GestureDetector(
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+            MaterialPageRoute(
+              builder: (context) => const NotificationsScreen(),
+            ),
           ),
           child: Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white,
               shape: BoxShape.circle,
               border: Border.all(
-                color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.2 : 0.05),
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: isDark ? 0.2 : 0.05,
+                ),
                 width: 1,
               ),
-              boxShadow: isDark ? null : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -501,7 +583,12 @@ class _LandingScreenState extends State<LandingScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFFF2D95), // Vibrant pink dot
                         shape: BoxShape.circle,
-                        border: Border.all(color: isDark ? const Color(0xFF1A0B2E) : Colors.white, width: 1.5),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF1A0B2E)
+                              : Colors.white,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),
@@ -509,14 +596,18 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ),
         );
-      }
+      },
     );
   }
 
   // Animated Goals Card extracted
 
   // --- Overview Grid ---
-  Widget _buildOverviewGrid({int maxStreak = 0, int score = 0, int totalHabits = 0}) {
+  Widget _buildOverviewGrid({
+    int maxStreak = 0,
+    int score = 0,
+    int totalHabits = 0,
+  }) {
     final isDark = _themeManager.isDarkMode;
     return GridView.count(
       shrinkWrap: true,
@@ -527,54 +618,78 @@ class _LandingScreenState extends State<LandingScreen> {
       childAspectRatio: 1.4,
       children: [
         _buildOverviewCard(
-          icon: Icons.local_fire_department, 
-          iconColor: const Color(0xFFFF5B5B), 
-          title: 'STREAK', 
-          value: '$maxStreak', 
+          icon: Icons.local_fire_department,
+          iconColor: const Color(0xFFFF5B5B),
+          title: 'STREAK',
+          value: '$maxStreak',
           unit: 'days',
-          cardGradient: isDark 
-            ? [const Color(0xFF382370).withValues(alpha: 0.4), const Color(0xFF1B113D).withValues(alpha: 0.4)]
-            : [const Color(0xFFFFE5E5), const Color(0xFFFFE5E5).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF382370).withValues(alpha: 0.4),
+                  const Color(0xFF1B113D).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFFFE5E5),
+                  const Color(0xFFFFE5E5).withValues(alpha: 0.4),
+                ],
         ),
         _buildOverviewCard(
-          icon: Icons.track_changes, 
-          iconColor: const Color(0xFFFDB913), 
-          title: 'SCORE', 
-          value: '$score', 
+          icon: Icons.track_changes,
+          iconColor: const Color(0xFFFDB913),
+          title: 'SCORE',
+          value: '$score',
           unit: '%',
-          cardGradient: isDark 
-            ? [const Color(0xFF3D2C1A).withValues(alpha: 0.4), const Color(0xFF1D140B).withValues(alpha: 0.4)]
-            : [const Color(0xFFFFF7E0), const Color(0xFFFFF7E0).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF3D2C1A).withValues(alpha: 0.4),
+                  const Color(0xFF1D140B).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFFFF7E0),
+                  const Color(0xFFFFF7E0).withValues(alpha: 0.4),
+                ],
         ),
         _buildOverviewCard(
-          icon: Icons.trending_up, 
-          iconColor: const Color(0xFF5AC8FA), 
-          title: 'ACTIVITIES', 
-          value: '$totalHabits', 
+          icon: Icons.trending_up,
+          iconColor: const Color(0xFF5AC8FA),
+          title: 'ACTIVITIES',
+          value: '$totalHabits',
           unit: 'total',
-          cardGradient: isDark 
-            ? [const Color(0xFF1B264E).withValues(alpha: 0.4), const Color(0xFF0D1426).withValues(alpha: 0.4)]
-            : [const Color(0xFFE3F2FD), const Color(0xFFE3F2FD).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF1B264E).withValues(alpha: 0.4),
+                  const Color(0xFF0D1426).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFE3F2FD),
+                  const Color(0xFFE3F2FD).withValues(alpha: 0.4),
+                ],
         ),
         _buildOverviewCard(
-          icon: Icons.access_time_filled, 
-          iconColor: const Color(0xFFAF52DE), 
-          title: 'TIME', 
-          value: '12h', 
+          icon: Icons.access_time_filled,
+          iconColor: const Color(0xFFAF52DE),
+          title: 'TIME',
+          value: '12h',
           unit: 'focus',
-          cardGradient: isDark 
-            ? [const Color(0xFF382370).withValues(alpha: 0.4), const Color(0xFF1B113D).withValues(alpha: 0.4)]
-            : [const Color(0xFFF3E5F5), const Color(0xFFF3E5F5).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF382370).withValues(alpha: 0.4),
+                  const Color(0xFF1B113D).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFF3E5F5),
+                  const Color(0xFFF3E5F5).withValues(alpha: 0.4),
+                ],
         ),
       ],
     );
   }
 
   Widget _buildOverviewCard({
-    required IconData icon, 
-    required Color iconColor, 
-    required String title, 
-    required String value, 
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String value,
     required String unit,
     required List<Color> cardGradient,
   }) {
@@ -582,9 +697,16 @@ class _LandingScreenState extends State<LandingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: cardGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: LinearGradient(
+          colors: cardGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4),
+          width: 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,7 +715,10 @@ class _LandingScreenState extends State<LandingScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Icon(icon, color: iconColor, size: 16),
               ),
               const SizedBox(width: 8),
@@ -651,7 +776,10 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const EditQuickLogScreen())),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const EditQuickLogScreen()),
+          ),
           child: const Text(
             'EDIT',
             style: TextStyle(
@@ -674,7 +802,13 @@ class _LandingScreenState extends State<LandingScreen> {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Center(
-              child: Text('All daily logs completed! ðŸŽ‰', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+              child: Text(
+                'All daily logs completed! ðŸŽ‰',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           );
         }
@@ -696,10 +830,13 @@ class _LandingScreenState extends State<LandingScreen> {
             if (label == label.toUpperCase()) {
               label = label[0] + label.substring(1).toLowerCase();
             }
-            
+
             return _buildQuickLogSmallCard(action.icon, label, () {
               HapticFeedback.lightImpact();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => action.page));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => action.page),
+              );
             });
           },
         );
@@ -707,9 +844,13 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildQuickLogSmallCard(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildQuickLogSmallCard(
+    IconData icon,
+    String label,
+    VoidCallback onTap,
+  ) {
     final isDark = _themeManager.isDarkMode;
-    
+
     // Exact colors from images
     Color baseColor;
     if (label == 'Mood') {
@@ -724,9 +865,9 @@ class _LandingScreenState extends State<LandingScreen> {
       baseColor = const Color(0xFF8B5CF6);
     }
 
-    final List<Color> cardGradient = isDark 
-      ? [baseColor.withValues(alpha: 0.15), baseColor.withValues(alpha: 0.05)]
-      : [baseColor.withValues(alpha: 0.2), baseColor.withValues(alpha: 0.1)];
+    final List<Color> cardGradient = isDark
+        ? [baseColor.withValues(alpha: 0.15), baseColor.withValues(alpha: 0.05)]
+        : [baseColor.withValues(alpha: 0.2), baseColor.withValues(alpha: 0.1)];
 
     return GestureDetector(
       onTap: onTap,
@@ -754,8 +895,8 @@ class _LandingScreenState extends State<LandingScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                icon, 
-                color: isDark ? baseColor.withValues(alpha: 0.9) : baseColor, 
+                icon,
+                color: isDark ? baseColor.withValues(alpha: 0.9) : baseColor,
                 size: 20,
               ),
             ),
@@ -785,9 +926,13 @@ class _LandingScreenState extends State<LandingScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.4) : Colors.white,
+        color: isDark
+            ? const Color(0xFF1B113D).withValues(alpha: 0.4)
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4),
+        ),
       ),
       child: Row(
         children: [
@@ -797,7 +942,11 @@ class _LandingScreenState extends State<LandingScreen> {
               color: const Color(0xFFF98E2F).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.psychology, color: Color(0xFFF98E2F), size: 28),
+            child: const Icon(
+              Icons.psychology,
+              color: Color(0xFFF98E2F),
+              size: 28,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -826,7 +975,9 @@ class _LandingScreenState extends State<LandingScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFFF98E2F), Color(0xFFFDB913)]),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFF98E2F), Color(0xFFFDB913)],
+              ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -836,7 +987,13 @@ class _LandingScreenState extends State<LandingScreen> {
                 ),
               ],
             ),
-            child: const Text('START', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'START',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -844,9 +1001,9 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildActionRowItem({
-    required IconData icon, 
-    required Color color, 
-    required String title, 
+    required IconData icon,
+    required Color color,
+    required String title,
     required String subtitle,
     required bool isDark,
     VoidCallback? onTap,
@@ -856,9 +1013,13 @@ class _LandingScreenState extends State<LandingScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1B113D).withValues(alpha: 0.4) : Colors.white,
+          color: isDark
+              ? const Color(0xFF1B113D).withValues(alpha: 0.4)
+              : Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4)),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.4),
+          ),
         ),
         child: Row(
           children: [
@@ -894,14 +1055,15 @@ class _LandingScreenState extends State<LandingScreen> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: isDark ? Colors.white24 : Colors.grey.shade400),
+            Icon(
+              Icons.chevron_right,
+              color: isDark ? Colors.white24 : Colors.grey.shade400,
+            ),
           ],
         ),
       ),
     );
   }
-
-
 
   Widget _buildDailyActivityGrid(int calories, int focusTime, int tasks) {
     final isDark = _themeManager.isDarkMode;
@@ -920,9 +1082,15 @@ class _LandingScreenState extends State<LandingScreen> {
           value: '$calories',
           unit: 'kcal',
           progress: (calories / 500).clamp(0.0, 1.0),
-          cardGradient: isDark 
-            ? [const Color(0xFF3D1F1A).withValues(alpha: 0.4), const Color(0xFF221110).withValues(alpha: 0.4)]
-            : [const Color(0xFFFFEEEA), const Color(0xFFFFEEEA).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF3D1F1A).withValues(alpha: 0.4),
+                  const Color(0xFF221110).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFFFEEEA),
+                  const Color(0xFFFFEEEA).withValues(alpha: 0.4),
+                ],
         ),
         _buildActivityCard(
           iconSource: Icons.timer,
@@ -931,9 +1099,15 @@ class _LandingScreenState extends State<LandingScreen> {
           value: '$focusTime',
           unit: 'min',
           progress: (focusTime / 120).clamp(0.0, 1.0),
-          cardGradient: isDark 
-            ? [const Color(0xFF1E2F1A).withValues(alpha: 0.4), const Color(0xFF0F180D).withValues(alpha: 0.4)]
-            : [const Color(0xFFF1F8E9), const Color(0xFFF1F8E9).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF1E2F1A).withValues(alpha: 0.4),
+                  const Color(0xFF0F180D).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFF1F8E9),
+                  const Color(0xFFF1F8E9).withValues(alpha: 0.4),
+                ],
           isChart: true,
         ),
         _buildActivityCard(
@@ -943,9 +1117,15 @@ class _LandingScreenState extends State<LandingScreen> {
           value: '$tasks',
           unit: 'tasks',
           progress: (tasks / 5).clamp(0.0, 1.0),
-          cardGradient: isDark 
-            ? [const Color(0xFF3D1A2F).withValues(alpha: 0.4), const Color(0xFF1F0D18).withValues(alpha: 0.4)]
-            : [const Color(0xFFFCE4EC), const Color(0xFFFCE4EC).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF3D1A2F).withValues(alpha: 0.4),
+                  const Color(0xFF1F0D18).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFFCE4EC),
+                  const Color(0xFFFCE4EC).withValues(alpha: 0.4),
+                ],
         ),
         _buildActivityCard(
           iconSource: Icons.auto_awesome,
@@ -954,9 +1134,15 @@ class _LandingScreenState extends State<LandingScreen> {
           value: tasks > 0 ? 'Peak' : 'Start',
           unit: 'today',
           progress: tasks > 0 ? 1.0 : 0.0,
-          cardGradient: isDark 
-            ? [const Color(0xFF261A3D).withValues(alpha: 0.4), const Color(0xFF130D1F).withValues(alpha: 0.4)]
-            : [const Color(0xFFF3E5F5), const Color(0xFFF3E5F5).withValues(alpha: 0.4)],
+          cardGradient: isDark
+              ? [
+                  const Color(0xFF261A3D).withValues(alpha: 0.4),
+                  const Color(0xFF130D1F).withValues(alpha: 0.4),
+                ]
+              : [
+                  const Color(0xFFF3E5F5),
+                  const Color(0xFFF3E5F5).withValues(alpha: 0.4),
+                ],
         ),
       ],
     );
@@ -976,9 +1162,18 @@ class _LandingScreenState extends State<LandingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: cardGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: LinearGradient(
+          colors: cardGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: (isDark ? Colors.white : Colors.black).withValues(alpha: isDark ? 0.05 : 0.05), width: 1.5),
+        border: Border.all(
+          color: (isDark ? Colors.white : Colors.black).withValues(
+            alpha: isDark ? 0.05 : 0.05,
+          ),
+          width: 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1002,36 +1197,41 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
           const Spacer(),
           Center(
-            child: isChart 
-              ? SizedBox(
-                  height: 60,
-                  width: double.infinity,
-                  child: CustomPaint(painter: LineChartPainter(color: iconColor)),
-                )
-              : Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: 5,
-                        backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
-                        valueColor: AlwaysStoppedAnimation<Color>(iconColor),
-                        strokeCap: StrokeCap.round,
-                      ),
+            child: isChart
+                ? SizedBox(
+                    height: 60,
+                    width: double.infinity,
+                    child: CustomPaint(
+                      painter: LineChartPainter(color: iconColor),
                     ),
-                    Text(
-                      '${(progress * 100).toInt()}%',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  )
+                : Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 5,
+                          backgroundColor:
+                              (isDark ? Colors.white : Colors.black).withValues(
+                                alpha: 0.05,
+                              ),
+                          valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                          strokeCap: StrokeCap.round,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      Text(
+                        '${(progress * 100).toInt()}%',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
           const Spacer(),
           Column(
@@ -1078,16 +1278,23 @@ class _LandingScreenState extends State<LandingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(Icons.home_outlined, const Color(0xFFF98E2F), true, null),
+          _buildNavItem(
+            Icons.home_outlined,
+            const Color(0xFFF98E2F),
+            true,
+            null,
+          ),
           _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, () {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const AnalyticsScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const AnalyticsScreen(),
                 transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
               ),
             );
           }),
@@ -1095,11 +1302,13 @@ class _LandingScreenState extends State<LandingScreen> {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const AiCoachScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const AiCoachScreen(),
                 transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
               ),
             );
           }),
@@ -1107,11 +1316,13 @@ class _LandingScreenState extends State<LandingScreen> {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const SettingsScreen(),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const SettingsScreen(),
                 transitionDuration: const Duration(milliseconds: 200),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
               ),
             );
           }),
@@ -1120,7 +1331,12 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildNavItem(IconData icon, Color color, bool isActive, VoidCallback? onTap) {
+  Widget _buildNavItem(
+    IconData icon,
+    Color color,
+    bool isActive,
+    VoidCallback? onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -1131,14 +1347,15 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildBlob({required double size, required Color color, required double blur}) {
+  Widget _buildBlob({
+    required double size,
+    required Color color,
+    required double blur,
+  }) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: ClipOval(
         child: BackdropFilter(
           filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
@@ -1164,6 +1381,7 @@ class TrianglePainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
   }
+
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
@@ -1207,4 +1425,3 @@ class LineChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
-
