@@ -12,11 +12,13 @@ import 'loading_screen.dart';
 
 import 'utils/quick_log_manager.dart';
 import 'package:health/health.dart';
+import 'services/local_push_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Health().configure();
   await QuickLogManager.loadPreferences();
+  await LocalPushService().init();
   runApp(const MyApp());
 }
 
@@ -27,19 +29,30 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final ThemeManager _themeManager = ThemeManager();
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _themeManager.removeListener(_updateTheme);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      LocalPushService().scheduleAbsenceNotifications();
+    } else if (state == AppLifecycleState.resumed) {
+      LocalPushService().cancelAllNotifications();
+    }
   }
 
   void _updateTheme() {

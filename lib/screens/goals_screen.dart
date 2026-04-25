@@ -16,11 +16,13 @@ class GoalsScreen extends StatefulWidget {
 class _GoalsScreenState extends State<GoalsScreen> {
   final ThemeManager _themeManager = ThemeManager();
   final GoalService _goalService = GoalService();
+  late Stream<List<GoalModel>> _goalsStream;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _goalsStream = _goalService.getGoalsStream();
   }
 
   @override
@@ -69,7 +71,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             
             SafeArea(
               child: StreamBuilder<List<GoalModel>>(
-                stream: _goalService.getGoalsStream(),
+                stream: _goalsStream,
                 builder: (context, snapshot) {
                   final goals = List<GoalModel>.from(snapshot.data ?? []);
                   goals.sort((a, b) {

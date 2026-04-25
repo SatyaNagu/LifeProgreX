@@ -20,11 +20,16 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
   final int _totalStaggerLevels = 7;
   final AnalyticsService _analyticsService = AnalyticsService();
   final ThemeManager _themeManager = ThemeManager();
+  
+  late Stream<AnalyticsData> _analyticsStream;
+  late Stream<List<Map<String, dynamic>>> _achievementsStream;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _analyticsStream = _analyticsService.getAnalyticsDataStream('Month');
+    _achievementsStream = AchievementService().getEarnedAchievementsStream();
     _staggerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -74,7 +79,7 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF03001C) : const Color(0xFFF0F4F8),
         body: StreamBuilder<AnalyticsData>(
-          stream: _analyticsService.getAnalyticsDataStream('Month'),
+          stream: _analyticsStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('Error loading growth data: ${snapshot.error}'));
@@ -346,7 +351,7 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
             crossAxisCount: 2,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 1.2,
+            childAspectRatio: 0.95,
             children: [
               _buildStatCard(data.habitsCompleted.toString(), 'Total Habits', '+0%', const Color(0xFFB24BF3), isDark, borderColor),
               _buildStatCard('${(data.readingMinutes / 60).toStringAsFixed(1)}h', 'Reading Hours', '+0%', const Color(0xFF00D9FF), isDark, borderColor),
@@ -441,7 +446,7 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
 
   Widget _buildAchievementsSection(bool isDark, Color textColor, Color borderColor) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: AchievementService().getEarnedAchievementsStream(),
+      stream: _achievementsStream,
       builder: (context, snapshot) {
         final earned = snapshot.data ?? [];
         final displayList = earned.take(4).toList();

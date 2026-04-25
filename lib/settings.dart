@@ -8,6 +8,7 @@ import 'screens/ai_coach_screen.dart';
 
 import 'appearance.dart';
 import 'help_and_support.dart';
+import 'about_developers.dart';
 import 'screens/achievements_screen.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
@@ -208,6 +209,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               textColor: textColor,
                               subTextColor: subTextColor,
                             ),
+                            _buildDivider(isDark),
+                            _buildNavigationTile(
+                              icon: Icons.groups_outlined,
+                              title: 'About the Developers',
+                              subtitle: 'Meet the team behind LifeProgreX',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AboutDevelopersScreen(),
+                                ),
+                              ),
+                              textColor: textColor,
+                              subTextColor: subTextColor,
+                            ),
                           ],
                         ),
                       ),
@@ -220,17 +235,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onPressed: () async {
                             try {
                               final success = await HealthService().initializeAndRequestPermissions();
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(success ? 'Health Sync Authorized!' : 'Failed to authorize Health Sync. App may be missing permissions.')),
-                                );
-                              }
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(success ? 'Health Sync Authorized!' : 'Failed to authorize Health Sync. App may be missing permissions.')),
+                              );
                             } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Health Error: $e')),
-                                );
-                              }
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Health Error: $e')),
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
