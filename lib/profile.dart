@@ -27,12 +27,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final ThemeManager _themeManager = ThemeManager();
   
+  late Stream<List<HabitModel>> _habitsStream;
+  late Stream<List<ActivityLog>> _activitiesStream;
+
   // Profile state
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _habitsStream = FirestoreService().getHabitsStream();
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    _activitiesStream = ActivityService.listenToActivities(uid);
   }
 
   @override
@@ -371,13 +377,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Stats Row
           // Stats Row
           StreamBuilder<List<HabitModel>>(
-            stream: FirestoreService().getHabitsStream(),
+            stream: _habitsStream,
             builder: (context, snapshot) {
               final habits = snapshot.data ?? [];
               final maxStreak = habits.isNotEmpty ? habits.map((h) => h.currentStreak).reduce(max) : 0;
               
               return StreamBuilder<List<ActivityLog>>(
-                stream: ActivityService.listenToActivities(FirebaseAuth.instance.currentUser?.uid ?? ''),
+                stream: _activitiesStream,
                 builder: (context, activitySnapshot) {
                   final activities = activitySnapshot.data ?? [];
                   final completedHabits = activities.length;

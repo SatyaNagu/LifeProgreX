@@ -24,7 +24,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     with TickerProviderStateMixin {
   final ThemeManager _themeManager = ThemeManager();
   final AnalyticsService _analyticsService = AnalyticsService();
-  String _selectedTab = 'Week';
+  String _selectedTab = 'Day';
+  late Stream<AnalyticsData> _analyticsStream;
 
   late AnimationController _iconRotationController;
   late AnimationController _pulseController;
@@ -39,6 +40,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     super.initState();
     _themeManager.addListener(_updateTheme);
     QuickLogManager.loadPreferences();
+    _analyticsStream = _analyticsService.getAnalyticsDataStream(_selectedTab);
 
     _iconRotationController = AnimationController(
       vsync: this,
@@ -160,7 +162,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ),
         ),
         body: StreamBuilder<AnalyticsData>(
-          stream: _analyticsService.getAnalyticsDataStream(_selectedTab),
+          stream: _analyticsStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting &&
                 !snapshot.hasData) {
@@ -360,7 +362,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           final isSelected = _selectedTab == tab;
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedTab = tab),
+              onTap: () => setState(() {
+                _selectedTab = tab;
+                _analyticsStream = _analyticsService.getAnalyticsDataStream(_selectedTab);
+              }),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 8),

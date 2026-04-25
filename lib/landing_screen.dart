@@ -36,11 +36,23 @@ class LandingScreen extends StatefulWidget {
 
 class _LandingScreenState extends State<LandingScreen> {
   final ThemeManager _themeManager = ThemeManager();
+  
+  late Stream<List<HabitModel>> _habitsStream;
+  late Stream<List<GoalModel>> _goalsStream;
+  late Stream<List<ActivityLog>> _activitiesStream;
+  late Stream<List<NotificationModel>> _notificationsStream;
 
   @override
   void initState() {
     super.initState();
     _themeManager.addListener(_updateTheme);
+    _habitsStream = FirestoreService().getHabitsStream();
+    _goalsStream = GoalService().getGoalsStream();
+    final user = AuthService().currentUser;
+    _activitiesStream = user != null
+        ? ActivityService.listenToActivities(user.uid)
+        : Stream.value([]);
+    _notificationsStream = NotificationService().getNotificationsStream();
   }
 
   @override
@@ -91,10 +103,10 @@ class _LandingScreenState extends State<LandingScreen> {
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 120),
       child: StreamBuilder<List<HabitModel>>(
-        stream: FirestoreService().getHabitsStream(),
+        stream: _habitsStream,
         builder: (context, habitSnapshot) {
           return StreamBuilder<List<GoalModel>>(
-            stream: GoalService().getGoalsStream(),
+            stream: _goalsStream,
             builder: (context, goalSnapshot) {
               final habits = habitSnapshot.data ?? [];
               final goals = goalSnapshot.data ?? [];
@@ -129,9 +141,7 @@ class _LandingScreenState extends State<LandingScreen> {
               final user = AuthService().currentUser;
 
               return StreamBuilder<List<ActivityLog>>(
-                stream: user != null
-                    ? ActivityService.listenToActivities(user.uid)
-                    : Stream.value([]),
+                stream: _activitiesStream,
                 builder: (context, activitySnapshot) {
                   final activities = activitySnapshot.data ?? [];
                   final todayLogs = activities.where((a) {
@@ -152,48 +162,76 @@ class _LandingScreenState extends State<LandingScreen> {
                   final calories = totalDuration * 5;
 
                   final analyticsMathScore = (() {
-                     double moodPoints = 0; int moodCount = 0;
-                     double workoutPoints = 0; int workoutCount = 0;
-                     double skillPoints = 0; int skillCount = 0;
+                    double moodPoints = 0;
+                    int moodCount = 0;
+                    double workoutPoints = 0;
+                    int workoutCount = 0;
+                    double skillPoints = 0;
+                    int skillCount = 0;
 
-                     for (var a in activities) {
-                        final type = a.type.toLowerCase();
-                        if (type == 'mood' && a.value != null) {
-                           int score = 4;
-                           final lbl = a.value!.toLowerCase();
-                           if (lbl == 'terrible') score = 0;
-                           else if (lbl == 'bad') score = 2;
-                           else if (lbl == 'okay') score = 4;
-                           else if (lbl == 'good') score = 6;
-                           else if (lbl == 'great') score = 8;
-                           else if (lbl == 'amazing') score = 10;
-                           moodPoints += score;
-                           moodCount++;
-                        } else if (type.contains('workout') || type.contains('gym') || type.contains('fit')) {
-                           double? intensity;
-                           if (a.data.containsKey('intensity')) {
-                              intensity = double.tryParse(a.data['intensity'].toString());
-                           }
-                           if (intensity == null && a.value != null) {
-                              intensity = double.tryParse(a.value!.toString());
-                           }
-                           if (intensity != null) { workoutPoints += intensity; workoutCount++; }
-                        } else if (type.contains('learn') || type.contains('skill')) {
-                           double? sInt;
-                           if (a.data.containsKey('points')) {
-                              sInt = double.tryParse(a.data['points'].toString());
-                           }
-                           if (sInt == null && a.duration != null && a.duration! > 0) {
-                              sInt = a.duration! / 9.0;
-                           }
-                           if (sInt != null) { skillPoints += sInt; skillCount++; }
+                    for (var a in activities) {
+                      final type = a.type.toLowerCase();
+                      if (type == 'mood' && a.value != null) {
+                        int score = 4;
+                        final lbl = a.value!.toLowerCase();
+                        if (lbl == 'terrible') {
+                          score = 0;
+                        } else if (lbl == 'bad')
+                          score = 2;
+                        else if (lbl == 'okay')
+                          score = 4;
+                        else if (lbl == 'good')
+                          score = 6;
+                        else if (lbl == 'great')
+                          score = 8;
+                        else if (lbl == 'amazing')
+                          score = 10;
+                        moodPoints += score;
+                        moodCount++;
+                      } else if (type.contains('workout') ||
+                          type.contains('gym') ||
+                          type.contains('fit')) {
+                        double? intensity;
+                        if (a.data.containsKey('intensity')) {
+                          intensity = double.tryParse(
+                            a.data['intensity'].toString(),
+                          );
                         }
-                     }
-                     double avgMood = moodCount > 0 ? (moodPoints / moodCount) * 10 : 0.0;
-                     double avgWorkout = workoutCount > 0 ? (workoutPoints / workoutCount) * 10 : 0.0;
-                     double avgSkill = skillCount > 0 ? (skillPoints / skillCount) * 10 : 0.0;
-                     
-                     return ((avgMood + avgWorkout + avgSkill) / 3.0).ceil();
+                        if (intensity == null && a.value != null) {
+                          intensity = double.tryParse(a.value!.toString());
+                        }
+                        if (intensity != null) {
+                          workoutPoints += intensity;
+                          workoutCount++;
+                        }
+                      } else if (type.contains('learn') ||
+                          type.contains('skill')) {
+                        double? sInt;
+                        if (a.data.containsKey('points')) {
+                          sInt = double.tryParse(a.data['points'].toString());
+                        }
+                        if (sInt == null &&
+                            a.duration != null &&
+                            a.duration! > 0) {
+                          sInt = a.duration! / 9.0;
+                        }
+                        if (sInt != null) {
+                          skillPoints += sInt;
+                          skillCount++;
+                        }
+                      }
+                    }
+                    double avgMood = moodCount > 0
+                        ? (moodPoints / moodCount) * 10
+                        : 0.0;
+                    double avgWorkout = workoutCount > 0
+                        ? (workoutPoints / workoutCount) * 10
+                        : 0.0;
+                    double avgSkill = skillCount > 0
+                        ? (skillPoints / skillCount) * 10
+                        : 0.0;
+
+                    return ((avgMood + avgWorkout + avgSkill) / 3.0).ceil();
                   })();
 
                   return Column(
@@ -393,12 +431,12 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildGoalActionCard(GoalModel goal, bool isDark, Color textColor) {
     final Map<GoalCategory, String> categoryEmoji = {
-      GoalCategory.fitness: 'ðŸ’ª',
-      GoalCategory.learning: 'ðŸ“š',
-      GoalCategory.wellness: 'â¤ï¸',
-      GoalCategory.career: 'ðŸ’¼',
-      GoalCategory.habits: 'â­',
-      GoalCategory.personal: 'ðŸŽ¯',
+      GoalCategory.fitness: '💪',
+      GoalCategory.learning: '📚',
+      GoalCategory.wellness: '❤️',
+      GoalCategory.career: '💼',
+      GoalCategory.habits: '⭐',
+      GoalCategory.personal: '🎯',
     };
 
     return Container(
@@ -440,7 +478,7 @@ class _LandingScreenState extends State<LandingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${categoryEmoji[goal.category] ?? 'ðŸŽ¯'} ${goal.title}',
+                  '${categoryEmoji[goal.category] ?? '🎯'} ${goal.title}',
                   style: TextStyle(
                     color: textColor,
                     fontSize: 16,
@@ -476,11 +514,11 @@ class _LandingScreenState extends State<LandingScreen> {
     final hour = DateTime.now().hour;
     String greeting;
     if (hour < 12) {
-      greeting = "Good Morning";
+      greeting = "Good Morning 👋";
     } else if (hour < 17) {
-      greeting = "Good Afternoon";
+      greeting = "Good Afternoon 👋";
     } else {
-      greeting = "Good Evening";
+      greeting = "Good Evening 👋";
     }
 
     return Row(
@@ -574,7 +612,7 @@ class _LandingScreenState extends State<LandingScreen> {
     final isDark = _themeManager.isDarkMode;
 
     return StreamBuilder<List<NotificationModel>>(
-      stream: NotificationService().getNotificationsStream(),
+      stream: _notificationsStream,
       builder: (context, snapshot) {
         final notifications = snapshot.data ?? [];
         final hasUnread = notifications.any((n) => !n.isRead);
@@ -848,7 +886,7 @@ class _LandingScreenState extends State<LandingScreen> {
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Center(
               child: Text(
-                'All daily logs completed! ðŸŽ‰',
+                'All daily logs completed! 🎉',
                 style: TextStyle(
                   color: Colors.grey,
                   fontWeight: FontWeight.bold,
@@ -876,7 +914,7 @@ class _LandingScreenState extends State<LandingScreen> {
               label = label[0] + label.substring(1).toLowerCase();
             }
 
-            return _buildQuickLogSmallCard(action.icon, label, () {
+            return _buildQuickLogSmallCard(action.icon, label, action.color, () {
               HapticFeedback.lightImpact();
               Navigator.push(
                 context,
@@ -892,23 +930,10 @@ class _LandingScreenState extends State<LandingScreen> {
   Widget _buildQuickLogSmallCard(
     IconData icon,
     String label,
+    Color baseColor,
     VoidCallback onTap,
   ) {
     final isDark = _themeManager.isDarkMode;
-
-    // Exact colors from images
-    Color baseColor;
-    if (label == 'Mood') {
-      baseColor = const Color(0xFFFF2D95);
-    } else if (label == 'Workout') {
-      baseColor = const Color(0xFFFF6B35);
-    } else if (label == 'Reading') {
-      baseColor = const Color(0xFF13C6DF);
-    } else if (label == 'Skill') {
-      baseColor = const Color(0xFF9FE82E);
-    } else {
-      baseColor = const Color(0xFF8B5CF6);
-    }
 
     final List<Color> cardGradient = isDark
         ? [baseColor.withValues(alpha: 0.15), baseColor.withValues(alpha: 0.05)]
