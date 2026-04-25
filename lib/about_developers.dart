@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
 
@@ -13,6 +14,7 @@ class AboutDevelopersScreen extends StatefulWidget {
 
 class _AboutDevelopersScreenState extends State<AboutDevelopersScreen> {
   final ThemeManager _themeManager = ThemeManager();
+  String? _expandedProfileId;
 
   @override
   void initState() {
@@ -91,6 +93,9 @@ class _AboutDevelopersScreenState extends State<AboutDevelopersScreen> {
                     isDark: isDark,
                     themeManager: _themeManager,
                     colorSeed: const Color(0xFF8B5CF6),
+                    isExpanded: _expandedProfileId == 'satya',
+                    onToggle: () => setState(() => _expandedProfileId = _expandedProfileId == 'satya' ? null : 'satya'),
+                    animationType: 1,
                   ),
                   const SizedBox(height: 20),
                   
@@ -103,6 +108,9 @@ class _AboutDevelopersScreenState extends State<AboutDevelopersScreen> {
                     isDark: isDark,
                     themeManager: _themeManager,
                     colorSeed: const Color(0xFF00D9FF),
+                    isExpanded: _expandedProfileId == 'sai',
+                    onToggle: () => setState(() => _expandedProfileId = _expandedProfileId == 'sai' ? null : 'sai'),
+                    animationType: 2,
                   ),
                   const SizedBox(height: 20),
 
@@ -115,6 +123,9 @@ class _AboutDevelopersScreenState extends State<AboutDevelopersScreen> {
                     isDark: isDark,
                     themeManager: _themeManager,
                     colorSeed: const Color(0xFFFF2D95),
+                    isExpanded: _expandedProfileId == 'bhanu',
+                    onToggle: () => setState(() => _expandedProfileId = _expandedProfileId == 'bhanu' ? null : 'bhanu'),
+                    animationType: 3,
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -175,7 +186,7 @@ class _AboutDevelopersScreenState extends State<AboutDevelopersScreen> {
   }
 }
 
-class DeveloperProfileCard extends StatefulWidget {
+class DeveloperProfileCard extends StatelessWidget {
   final String name;
   final String role;
   final String email;
@@ -184,6 +195,9 @@ class DeveloperProfileCard extends StatefulWidget {
   final bool isDark;
   final ThemeManager themeManager;
   final Color colorSeed;
+  final bool isExpanded;
+  final VoidCallback onToggle;
+  final int animationType;
 
   const DeveloperProfileCard({
     super.key,
@@ -195,29 +209,25 @@ class DeveloperProfileCard extends StatefulWidget {
     required this.isDark,
     required this.themeManager,
     required this.colorSeed,
+    required this.isExpanded,
+    required this.onToggle,
+    required this.animationType,
   });
 
-  @override
-  State<DeveloperProfileCard> createState() => _DeveloperProfileCardState();
-}
-
-class _DeveloperProfileCardState extends State<DeveloperProfileCard> with SingleTickerProviderStateMixin {
-  bool _isExpanded = false;
-
   String get initials {
-    List<String> parts = widget.name.split(' ');
+    List<String> parts = name.split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return widget.name[0].toUpperCase();
+    return name[0].toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
-    final textColor = widget.isDark ? Colors.white : const Color(0xFF111827);
-    final subTextColor = widget.isDark ? Colors.white54 : const Color(0xFF6B7280);
-    final cardBgColor = widget.isDark ? const Color(0xFF141414) : Colors.white;
-    final expandedBgColor = widget.isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF8FAFC);
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subTextColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final cardBgColor = isDark ? const Color(0xFF141414) : Colors.white;
+    final expandedBgColor = isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF8FAFC);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -226,10 +236,10 @@ class _DeveloperProfileCardState extends State<DeveloperProfileCard> with Single
         color: cardBgColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: _isExpanded ? widget.colorSeed.withValues(alpha: 0.5) : Colors.transparent,
+          color: isExpanded ? colorSeed.withValues(alpha: 0.5) : Colors.transparent,
           width: 1.5,
         ),
-        boxShadow: widget.isDark
+        boxShadow: isDark
             ? null
             : [
                 BoxShadow(
@@ -243,11 +253,7 @@ class _DeveloperProfileCardState extends State<DeveloperProfileCard> with Single
         children: [
           // Header Row (Always visible)
           InkWell(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
+            onTap: onToggle,
             borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -255,50 +261,12 @@ class _DeveloperProfileCardState extends State<DeveloperProfileCard> with Single
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Profile Photo / Initials Circle
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: widget.imagePath == null ? LinearGradient(
-                        colors: [
-                          widget.colorSeed.withValues(alpha: 0.8),
-                          widget.colorSeed.withValues(alpha: 0.4)
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ) : null,
-                      image: widget.imagePath != null 
-                          ? DecorationImage(
-                              image: AssetImage(widget.imagePath!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                      boxShadow: [
-                        BoxShadow(
-                          color: widget.colorSeed.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        )
-                      ],
-                    ),
-                    child: widget.imagePath == null ? Center(
-                      child: Text(
-                        initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ) : null,
-                  ),
+                  _buildAnimatedAvatar(),
                   const SizedBox(height: 16),
                   
                   // Name and Collapse Arrow
                   Text(
-                    widget.name,
+                    name,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: textColor,
@@ -308,13 +276,13 @@ class _DeveloperProfileCardState extends State<DeveloperProfileCard> with Single
                   ),
                   const SizedBox(height: 12),
                   AnimatedRotation(
-                    turns: _isExpanded ? 0.5 : 0.0,
+                    turns: isExpanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOutCubic,
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: widget.isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -341,21 +309,21 @@ class _DeveloperProfileCardState extends State<DeveloperProfileCard> with Single
                   color: expandedBgColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: widget.isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
+                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow(Icons.badge_outlined, 'Role', widget.role, textColor, subTextColor, widget.colorSeed, null),
+                    _buildInfoRow(Icons.badge_outlined, 'Role', role, textColor, subTextColor, colorSeed, null),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.email_outlined, 'Email', widget.email, textColor, subTextColor, widget.colorSeed, () {
-                      Clipboard.setData(ClipboardData(text: widget.email));
+                    _buildInfoRow(Icons.email_outlined, 'Email', email, textColor, subTextColor, colorSeed, () {
+                      Clipboard.setData(ClipboardData(text: email));
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email copied to clipboard'), duration: Duration(seconds: 2), backgroundColor: Color(0xFF10C655)));
                     }),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.link_outlined, 'LinkedIn', widget.linkedin, textColor, subTextColor, widget.colorSeed, () async {
-                      final url = Uri.parse(widget.linkedin);
+                    _buildInfoRow(Icons.link_outlined, 'LinkedIn', linkedin, textColor, subTextColor, colorSeed, () async {
+                      final url = Uri.parse(linkedin);
                       try {
                         await launchUrl(url, mode: LaunchMode.externalApplication);
                       } catch (e) {
@@ -368,13 +336,74 @@ class _DeveloperProfileCardState extends State<DeveloperProfileCard> with Single
                 ),
               ),
             ),
-            crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 300),
             sizeCurve: Curves.easeInOutCubic,
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildAnimatedAvatar() {
+    Widget avatar = Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: imagePath == null ? LinearGradient(
+          colors: [
+            colorSeed.withValues(alpha: 0.8),
+            colorSeed.withValues(alpha: 0.4)
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ) : null,
+        image: imagePath != null 
+            ? DecorationImage(
+                image: AssetImage(imagePath!),
+                fit: BoxFit.cover,
+              )
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: colorSeed.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          )
+        ],
+      ),
+      child: imagePath == null ? Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
+          ),
+        ),
+      ) : null,
+    );
+
+    if (animationType == 1) {
+      // Satya: Architectural scale up and glowing shimmer
+      return avatar.animate(target: isExpanded ? 1 : 0)
+        .scaleXY(end: 1.15, duration: 400.ms, curve: Curves.easeOutBack)
+        .shimmer(duration: 800.ms, color: Colors.white.withValues(alpha: 0.5));
+    } else if (animationType == 2) {
+      // Sai: Creative shake and dynamic tint shift
+      return avatar.animate(target: isExpanded ? 1 : 0)
+        .shake(hz: 3, duration: 400.ms)
+        .tint(color: colorSeed, end: 0.2, duration: 300.ms)
+        .scaleXY(end: 1.1, duration: 300.ms, curve: Curves.easeOutCirc);
+    } else if (animationType == 3) {
+      // Bhanu: Precise 3D flip (rotate) representing QA inspection
+      return avatar.animate(target: isExpanded ? 1 : 0)
+        .flipH(end: 1, duration: 600.ms, curve: Curves.easeInOutCubic)
+        .scaleXY(end: 1.1, duration: 600.ms);
+    }
+    return avatar;
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value, Color textColor, Color subTextColor, Color iconColor, VoidCallback? onTap) {

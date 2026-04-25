@@ -25,7 +25,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   final ThemeManager _themeManager = ThemeManager();
   final AnalyticsService _analyticsService = AnalyticsService();
   String _selectedTab = 'Day';
-  late Stream<AnalyticsData> _analyticsStream;
 
   late AnimationController _iconRotationController;
   late AnimationController _pulseController;
@@ -40,7 +39,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     super.initState();
     _themeManager.addListener(_updateTheme);
     QuickLogManager.loadPreferences();
-    _analyticsStream = _analyticsService.getAnalyticsDataStream(_selectedTab);
 
     _iconRotationController = AnimationController(
       vsync: this,
@@ -162,7 +160,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ),
         ),
         body: StreamBuilder<AnalyticsData>(
-          stream: _analyticsStream,
+          stream: _analyticsService.getAnalyticsDataStream(_selectedTab),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting &&
                 !snapshot.hasData) {
@@ -362,10 +360,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           final isSelected = _selectedTab == tab;
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() {
-                _selectedTab = tab;
-                _analyticsStream = _analyticsService.getAnalyticsDataStream(_selectedTab);
-              }),
+              onTap: () => setState(() => _selectedTab = tab),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -866,9 +861,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     final percentage = (data.averageMood * 10).toStringAsFixed(0);
     // Find absolute dominant emoji for the summary
     String summaryEmoji = '😐';
-    if (data.averageMood >= 8)
+    if (data.averageMood >= 8) {
       summaryEmoji = '😁';
-    else if (data.averageMood >= 6)
+    } else if (data.averageMood >= 6)
       summaryEmoji = '😊';
     else if (data.averageMood >= 4)
       summaryEmoji = '🙂';
