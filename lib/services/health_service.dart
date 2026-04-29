@@ -1,6 +1,7 @@
 import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class HealthService {
   static final HealthService _instance = HealthService._internal();
@@ -35,7 +36,7 @@ class HealthService {
       }
       return true;
     } catch (e) {
-      print("Health authorization error deeply: $e");
+      debugPrint("Health authorization error deeply: $e");
       // Fallback: throw the error forward so the UI can display exact Exception (e.g. SDK constraint, missing App).
       throw Exception(e.toString());
     }
@@ -49,7 +50,7 @@ class HealthService {
       int? steps = await _health.getTotalStepsInInterval(startOfDay, now);
       return steps ?? 0;
     } catch (e) {
-      print("Failed getting steps: $e");
+      debugPrint("Failed getting steps: $e");
       return 0;
     }
   }
@@ -71,7 +72,7 @@ class HealthService {
       }
       return totalCalories;
     } catch (e) {
-      print("Failed getting calories: $e");
+      debugPrint("Failed getting calories: $e");
       return 0.0;
     }
   }
@@ -94,7 +95,7 @@ class HealthService {
       }
       return 0;
     } catch (e) {
-      print("Failed getting HR: $e");
+      debugPrint("Failed getting HR: $e");
       return 0;
     }
   }
@@ -122,7 +123,7 @@ class HealthService {
       double hours = totalSleepMins / 60.0;
       return "${hours.toStringAsFixed(1)}h";
     } catch (e) {
-      print("Failed getting sleep: $e");
+      debugPrint("Failed getting sleep: $e");
       return "0.0h";
     }
   }

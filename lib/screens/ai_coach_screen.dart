@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../utils/theme_manager.dart';
 import '../utils/premium_background.dart';
 import 'analytics_screen.dart';
+import '../landing_screen.dart';
 import '../settings.dart';
 import '../services/firestore_service.dart';
 import '../services/goal_service.dart';
@@ -424,7 +425,20 @@ class _AiCoachScreenState extends State<AiCoachScreen>
           Row(
             children: [
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          const LandingScreen(),
+                      transitionDuration: const Duration(milliseconds: 200),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                    ),
+                  );
+                },
                 child: Container(
                   width: 40,
                   height: 40,
@@ -846,7 +860,18 @@ class _AiCoachScreenState extends State<AiCoachScreen>
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(Icons.home_outlined, Colors.white54, false, () {
-            Navigator.popUntil(context, (route) => route.isFirst);
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const LandingScreen(),
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+              ),
+            );
           }),
           _buildNavItem(Icons.bar_chart_outlined, Colors.white54, false, () {
             Navigator.pushReplacement(

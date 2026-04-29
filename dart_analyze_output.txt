@@ -1,0 +1,32 @@
+Analyzing LifeProgreX...
+
+warning - lib/landing_screen.dart:110:21 - The value of the local variable 'habitScore' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/landing_screen.dart:124:21 - The value of the local variable 'totalTodayGoals' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/landing_screen.dart:125:21 - The value of the local variable 'completedTodayGoals' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/landing_screen.dart:1395:10 - The declaration '_buildBlob' isn't referenced. Try removing the declaration of '_buildBlob'. - unused_element
+   info - lib/landing_screen.dart:164:51 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/landing_screen.dart:165:51 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/landing_screen.dart:166:52 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/landing_screen.dart:167:52 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/landing_screen.dart:168:53 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/landing_screen.dart:169:55 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/ai_coach_screen.dart:202:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/screens/analytics_screen.dart:865:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/analytics_screen.dart:867:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/analytics_screen.dart:869:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/analytics_screen.dart:871:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/analytics_screen.dart:873:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/analytics_service.dart:130:17 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/analytics_service.dart:132:17 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/analytics_service.dart:134:17 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/analytics_service.dart:136:17 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/analytics_service.dart:138:17 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/health_service.dart:38:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/health_service.dart:52:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/health_service.dart:74:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/health_service.dart:97:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/health_service.dart:125:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/settings.dart:224:54 - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext. - use_build_context_synchronously
+   info - lib/settings.dart:230:54 - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext. - use_build_context_synchronously
+
+28 issues found.

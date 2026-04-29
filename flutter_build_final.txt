@@ -1,0 +1,9 @@
+Warning: Building for device with codesigning disabled. You will have to manually codesign before deploying to device.
+Building com.example.life-progex for device (ios-release)...
+Running pod install...                                             21.5s
+Running Xcode build...                                          
+Xcode build done.                                           54.1s
+Failed to build iOS app
+Uncategorized (Xcode): Command CompileC failed with a nonzero exit code
+
+Encountered error while building for device.

@@ -1,0 +1,475 @@
+Resolving dependencies...
+Downloading packages...
+  _flutterfire_internals 1.3.59 (1.3.69 available)
+  async 2.13.0 (2.13.1 available)
+  cli_util 0.4.2 (0.5.0 available)
+  cloud_firestore 5.6.12 (6.3.0 available)
+  cloud_firestore_platform_interface 6.6.12 (7.2.0 available)
+  cloud_firestore_web 4.4.12 (5.3.0 available)
+  cupertino_icons 1.0.8 (1.0.9 available)
+  device_info_plus 12.4.0 (13.1.0 available)
+  device_info_plus_platform_interface 7.0.3 (8.1.0 available)
+  firebase_auth 5.7.0 (6.4.0 available)
+  firebase_auth_platform_interface 7.7.3 (8.1.9 available)
+  firebase_auth_web 5.15.3 (6.1.5 available)
+  firebase_core 3.15.2 (4.7.0 available)
+  firebase_core_platform_interface 6.0.2 (6.0.3 available)
+  firebase_core_web 2.24.1 (3.6.0 available)
+  flutter_launcher_icons 0.13.1 (0.14.4 available)
+  flutter_local_notifications 17.2.4 (21.0.0 available)
+  flutter_local_notifications_linux 4.0.1 (8.0.0 available)
+  flutter_local_notifications_platform_interface 7.2.0 (11.0.0 available)
+  flutter_svg 2.2.3 (2.2.4 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.10 available)
+  google_sign_in_ios 5.9.0 (6.3.0 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.3 available)
+  intl 0.19.0 (0.20.2 available)
+  matcher 0.12.18 (0.12.19 available)
+  meta 1.17.0 (1.18.2 available)
+  native_toolchain_c 0.17.6 (0.18.0 available)
+  share_plus 12.0.2 (13.1.0 available)
+  share_plus_platform_interface 6.1.0 (7.1.0 available)
+  shared_preferences 2.5.4 (2.5.5 available)
+  shared_preferences_android 2.4.21 (2.4.23 available)
+  shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+  test_api 0.7.9 (0.7.11 available)
+  timezone 0.9.4 (0.11.0 available)
+  vector_graphics 1.1.19 (1.1.21 available)
+  vector_math 2.2.0 (2.3.0 available)
+  vm_service 15.0.2 (15.1.0 available)
+  win32 5.15.0 (6.1.0 available)
+  win32_registry 2.1.0 (3.0.3 available)
+  xml 6.6.1 (7.0.1 available)
+Got dependencies!
+42 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Warning: Building for device with codesigning disabled. You will have to manually codesign before deploying to device.
+Building com.example.life-progex for device (ios-release)...
+Running pod install...                                             21.0s
+Running Xcode build...                                          
+Xcode build done.                                           375.0s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD INTERRUPTED **
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/wd/lq46x1f513q3d828dbfky_km0000gn/T/flutter_tools.rzCb6z/flutter_ios_build_temp_dirlSbl67/temporary_xcresult_bundle
+
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:79:30: warning: expression implicitly coerced from 'TimeInterval?' (aka 'Optional<Double>') to 'Any'
+                        "value": dateOfBirth?.timeIntervalSince1970,
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:79:43: note: provide a default value to avoid this warning
+                        "value": dateOfBirth?.timeIntervalSince1970,
+                                 ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+                                                                    ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:79:43: note: force-unwrap the value to avoid this warning
+                        "value": dateOfBirth?.timeIntervalSince1970,
+                                 ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+                                                                   !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:79:43: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                        "value": dateOfBirth?.timeIntervalSince1970,
+                                 ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+                                                                    as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:92:30: warning: expression implicitly coerced from 'Int?' to 'Any'
+                        "value": gender?.rawValue,
+                                 ^~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:92:38: note: provide a default value to avoid this warning
+                        "value": gender?.rawValue,
+                                 ~~~~~~~~^~~~~~~~
+                                                  ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:92:38: note: force-unwrap the value to avoid this warning
+                        "value": gender?.rawValue,
+                                 ~~~~~~~~^~~~~~~~
+                                                 !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:92:38: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                        "value": gender?.rawValue,
+                                 ~~~~~~~~^~~~~~~~
+                                                  as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:105:30: warning: expression implicitly coerced from 'Int?' to 'Any'
+                        "value": bloodType?.rawValue,
+                                 ^~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:105:41: note: provide a default value to avoid this warning
+                        "value": bloodType?.rawValue,
+                                 ~~~~~~~~~~~^~~~~~~~
+                                                     ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:105:41: note: force-unwrap the value to avoid this warning
+                        "value": bloodType?.rawValue,
+                                 ~~~~~~~~~~~^~~~~~~~
+                                                    !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:105:41: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                        "value": bloodType?.rawValue,
+                                 ~~~~~~~~~~~^~~~~~~~
+                                                     as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:354:49: warning: forced cast of '[String : Any?]' to same type has no effect
+                            foods.append(sampleDict as! [String: Any?])
+                                                    ^~~~~~~~~~~~~~~~~~
+
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:197:40: warning: expression implicitly coerced from 'String?' to 'Any'
+                            "dataUnitKey": unit?.unitString,
+                                           ^~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:197:46: note: provide a default value to avoid this warning
+                            "dataUnitKey": unit?.unitString,
+                                           ~~~~~~^~~~~~~~~~
+                                                            ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:197:46: note: force-unwrap the value to avoid this warning
+                            "dataUnitKey": unit?.unitString,
+                                           ~~~~~~^~~~~~~~~~
+                                                           !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:197:46: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            "dataUnitKey": unit?.unitString,
+                                           ~~~~~~^~~~~~~~~~
+                                                            as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:255:48: warning: expression implicitly coerced from 'String?' to 'Any'
+                            "workoutActivityType": self.workoutActivityTypeMap.first(where: {
+                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:257:29: note: provide a default value to avoid this warning
+                            })?.key,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+                                    ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:257:29: note: force-unwrap the value to avoid this warning
+                            })?.key,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+                                   !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:257:29: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            })?.key,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+                                    as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:258:46: warning: expression implicitly coerced from 'Double?' to 'Any'
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:258:72: note: provide a default value to avoid this warning
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:258:72: note: force-unwrap the value to avoid this warning
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:258:72: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:262:42: warning: expression implicitly coerced from 'Double?' to 'Any'
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:262:64: note: provide a default value to avoid this warning
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                                          ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:262:64: note: force-unwrap the value to avoid this warning
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                                          !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:262:64: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                                          as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:486:40: warning: expression implicitly coerced from 'String?' to 'Any'
+                            "dataUnitKey": unit?.unitString,
+                                           ^~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:486:46: note: provide a default value to avoid this warning
+                            "dataUnitKey": unit?.unitString,
+                                           ~~~~~~^~~~~~~~~~
+                                                            ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:486:46: note: force-unwrap the value to avoid this warning
+                            "dataUnitKey": unit?.unitString,
+                                           ~~~~~~^~~~~~~~~~
+                                                           !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:486:46: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            "dataUnitKey": unit?.unitString,
+                                           ~~~~~~^~~~~~~~~~
+                                                            as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:544:48: warning: expression implicitly coerced from 'String?' to 'Any'
+                            "workoutActivityType": self.workoutActivityTypeMap.first(where: {
+                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:546:29: note: provide a default value to avoid this warning
+                            })?.key,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+                                    ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:546:29: note: force-unwrap the value to avoid this warning
+                            })?.key,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+                                   !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:546:29: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            })?.key,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+                                    as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:547:46: warning: expression implicitly coerced from 'Double?' to 'Any'
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:547:72: note: provide a default value to avoid this warning
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:547:72: note: force-unwrap the value to avoid this warning
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:547:72: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            "totalEnergyBurned": sample.totalEnergyBurned?.doubleValue(
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:551:42: warning: expression implicitly coerced from 'Double?' to 'Any'
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:551:64: note: provide a default value to avoid this warning
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                                          ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:551:64: note: force-unwrap the value to avoid this warning
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                                          !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:551:64: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                            "totalDistance": sample.totalDistance?.doubleValue(for: HKUnit.meter()),
+                                             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                                          as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:421:13: warning: variable 'predicate' was never mutated; consider changing to 'let' constant
+            var predicate = HKQuery.predicateForObjects(with: [uuid])
+            ~~~ ^
+            let
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:423:13: warning: initialization of immutable value 'sourceIdForCharacteristic' was never used; consider replacing with assignment to '_' or removing it
+            let sourceIdForCharacteristic = "com.apple.Health"
+            ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+            _
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:424:13: warning: initialization of immutable value 'sourceNameForCharacteristic' was never used; consider replacing with assignment to '_' or removing it
+            let sourceNameForCharacteristic = "Health"
+            ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~
+            _
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:806:9: warning: switch must be exhaustive
+            switch quantityType.aggregationStyle {
+            ^
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:806:9: note: add missing case: '.discreteTemporallyWeighted'
+            switch quantityType.aggregationStyle {
+            ^
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:806:9: note: add missing case: '.discreteEquivalentContinuousLevel'
+            switch quantityType.aggregationStyle {
+            ^
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:806:9: note: add missing cases
+            switch quantityType.aggregationStyle {
+            ^
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1004:73: warning: left side of nil coalescing operator '??' has non-optional type '[String : Any]', so the right side is never used
+            var metadata = HealthUtilities.sanitizeMetadata(route.metadata) ?? [:]
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1102:45: warning: expression implicitly coerced from 'Double?' to 'Any'
+                            "averageHeartRate": ecg.averageHeartRate?
+                                                ^~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1103:30: note: provide a default value to avoid this warning
+                                .doubleValue(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1103:30: note: force-unwrap the value to avoid this warning
+                                .doubleValue(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1103:30: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                                .doubleValue(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1107:46: warning: expression implicitly coerced from 'Double?' to 'Any'
+                            "samplingFrequency": ecg.samplingFrequency?
+                                                 ^~~~~~~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1108:30: note: provide a default value to avoid this warning
+                                .doubleValue(for: HKUnit.hertz()),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                  ?? <#default value#>
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1108:30: note: force-unwrap the value to avoid this warning
+                                .doubleValue(for: HKUnit.hertz()),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                 !
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataReader.swift:1108:30: note: explicitly cast to 'Any' with 'as Any' to silence this warning
+                                .doubleValue(for: HKUnit.hertz()),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                                  as Any
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/HealthDataWriter.swift:438:26: warning: result of call to 'removeWorkoutRouteBuilder(for:)' is unused
+                        self.removeWorkoutRouteBuilder(for: builderId)
+                             ^                        ~~~~~~~~~~~~~~~~
+    /Users/nagasai/.pub-cache/hosted/pub.dev/health-13.3.1/ios/Classes/SwiftHealthPlugin.swift:169:15: warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+                } catch {
+                  ^
+    /Users/nagasai/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/ios/Classes/strategies/PhonePermissionStrategy.m:49:35: warning: 'subscriberCellularProvider' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+       49 |     CTCarrier *carrier = [netInfo subscriberCellularProvider];
+          |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+          |                                   serviceSubscriberCellularProviders
+    In module 'CoreTelephony' imported from /Users/nagasai/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/ios/Classes/strategies/PhonePermissionStrategy.m:8:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Headers/CTTelephonyNetworkInfo.h:114:50: note: property 'subscriberCellularProvider' is declared deprecated here
+      114 | @property(readonly, retain, nullable) CTCarrier *subscriberCellularProvider API_DEPRECATED_WITH_REPLACEMENT("serviceSubscriberCellularProviders", ios(4.0, 12.0)) API_UNAVAILABLE(macos);
+          |                                                  ^
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Headers/CTTelephonyNetworkInfo.h:114:50: note: 'subscriberCellularProvider' has been explicitly marked deprecated here
+    1 warning generated.
+    ld: warning: ignoring duplicate libraries: '-lc++'
+    /Users/nagasai/.pub-cache/hosted/pub.dev/share_plus-12.0.2/ios/share_plus/Sources/share_plus/FPPSharePlusPlugin.m:25:46: warning: 'keyWindow' is deprecated: first deprecated in iOS 13.0 - Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes [-Wdeprecated-declarations]
+       25 |     return [UIApplication sharedApplication].keyWindow.rootViewController;
+          |                                              ^
+    In module 'UIKit' imported from /Users/nagasai/LifeProgreX/ios/Pods/Target Support Files/share_plus/share_plus-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:108:51: note: 'keyWindow' has been explicitly marked deprecated here
+      108 | @property(nullable, nonatomic,readonly) UIWindow *keyWindow API_DEPRECATED("Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes", ios(2.0, 13.0)) API_UNAVAILABLE(visionos, watchos);
+          |                                                   ^
+    1 warning generated.
+    /Users/nagasai/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/ios/Classes/FlutterLocalNotificationsPlugin.m:1238:30: warning: 'UNNotificationPresentationOptionAlert' is deprecated: first deprecated in iOS 14.0 [-Wdeprecated-declarations]
+     1238 |       presentationOptions |= UNNotificationPresentationOptionAlert;
+          |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          |                              UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner
+    In module 'UserNotifications' imported from /Users/nagasai/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/ios/Classes/FlutterLocalNotificationsPlugin.h:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UNUserNotificationCenter.h:84:5: note: 'UNNotificationPresentationOptionAlert' has been explicitly marked deprecated here
+       84 |     UNNotificationPresentationOptionAlert API_DEPRECATED_WITH_REPLACEMENT("UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner", macos(10.14, 11.0), ios(10.0, 14.0), watchos(3.0, 7.0), tvos(10.0, 14.0)) = (1 << 2),
+          |     ^
+    /Users/nagasai/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/ios/Classes/FlutterLocalNotificationsPlugin.m:6:17: warning: method definition for 'setRegisterPlugins:' not found [-Wincomplete-implementation]
+        6 | @implementation FlutterLocalNotificationsPlugin {
+          |                 ^
+    In file included from /Users/nagasai/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/ios/Classes/FlutterLocalNotificationsPlugin.m:1:
+    /Users/nagasai/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/ios/Classes/FlutterLocalNotificationsPlugin.h:5:1: note: method 'setRegisterPlugins:' declared here
+        5 | + (void)setRegisterPlugins:(FlutterPluginRegistrantCallback *)callback;
+          | ^
+    2 warnings generated.
+    /Users/nagasai/.pub-cache/hosted/pub.dev/device_info_plus-12.4.0/ios/device_info_plus/Sources/device_info_plus/FPPDeviceInfoPlusPlugin.m:101:45: warning: implicit conversion loses integer precision: 'vm_size_t' (aka 'unsigned long') to 'natural_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+      101 |     natural_t mem_free = vm_stat.free_count * page_size;
+          |               ~~~~~~~~   ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+    1 warning generated.
+    ld: warning: ignoring duplicate libraries: '-lc++'
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOSCustomBrowser.m:151:44: warning: 'openURL:' is deprecated: first deprecated in iOS 10.0 [-Wdeprecated-declarations]
+      151 |         [[UIApplication sharedApplication] openURL:_appStoreURL];
+          |                                            ^~~~~~~
+          |                                            openURL:options:completionHandler:
+    In module 'UIKit' imported from /Users/nagasai/LifeProgreX/ios/Pods/Target Support Files/AppAuth/AppAuth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:97:1: note: 'openURL:' has been explicitly marked deprecated here
+       97 | - (BOOL)openURL:(NSURL*)url API_DEPRECATED_WITH_REPLACEMENT("openURL:options:completionHandler:", ios(2.0, 10.0)) API_UNAVAILABLE(visionos, watchos);
+          | ^
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOSCustomBrowser.m:165:63: warning: 'openURL:' is deprecated: first deprecated in iOS 10.0 [-Wdeprecated-declarations]
+      165 |     BOOL openedInBrowser = [[UIApplication sharedApplication] openURL:requestURL];
+          |                                                               ^~~~~~~
+          |                                                               openURL:options:completionHandler:
+    In module 'UIKit' imported from /Users/nagasai/LifeProgreX/ios/Pods/Target Support Files/AppAuth/AppAuth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:97:1: note: 'openURL:' has been explicitly marked deprecated here
+       97 | - (BOOL)openURL:(NSURL*)url API_DEPRECATED_WITH_REPLACEMENT("openURL:options:completionHandler:", ios(2.0, 10.0)) API_UNAVAILABLE(visionos, watchos);
+          | ^
+    2 warnings generated.
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:53:3: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+       53 |   SFAuthenticationSession *_authenticationVC;
+          |   ^~~~~~~~~~~~~~~~~~~~~~~
+          |   ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:143:7: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+      143 |       SFAuthenticationSession *authenticationVC =
+          |       ^~~~~~~~~~~~~~~~~~~~~~~
+          |       ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:144:37: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+      144 |           [[SFAuthenticationSession alloc] initWithURL:requestURL
+          |                                     ^~~~~
+          |                                     ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:180:58: warning: 'openURL:' is deprecated: first deprecated in iOS 10.0 [-Wdeprecated-declarations]
+      180 |     openedUserAgent = [[UIApplication sharedApplication] openURL:requestURL];
+          |                                                          ^~~~~~~
+          |                                                          openURL:options:completionHandler:
+    In module 'UIKit' imported from /Users/nagasai/LifeProgreX/ios/Pods/Target Support Files/AppAuth/AppAuth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:97:1: note: 'openURL:' has been explicitly marked deprecated here
+       97 | - (BOOL)openURL:(NSURL*)url API_DEPRECATED_WITH_REPLACEMENT("openURL:options:completionHandler:", ios(2.0, 10.0)) API_UNAVAILABLE(visionos, watchos);
+          | ^
+    /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:203:3: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+      203 |   SFAuthenticationSession *authenticationVC = _authenticationVC;
+          |   ^~~~~~~~~~~~~~~~~~~~~~~
+          |   ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/nagasai/LifeProgreX/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    5 warnings generated.
+    /Users/nagasai/LifeProgreX/ios/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDAppCheck/UI/GIDActivityIndicatorViewController.m:34:13: warning: 'UIActivityIndicatorViewStyleGray' is deprecated: first deprecated in iOS 13.0 [-Wdeprecated-declarations]
+       34 |     style = UIActivityIndicatorViewStyleGray;
+          |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          |             UIActivityIndicatorViewStyleMedium
+    In module 'UIKit' imported from /Users/nagasai/LifeProgreX/ios/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDAppCheck/UI/GIDActivityIndicatorViewController.h:21:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIActivityIndicatorView.h:20:5: note: 'UIActivityIndicatorViewStyleGray' has been explicitly marked deprecated here
+       20 |     UIActivityIndicatorViewStyleGray API_DEPRECATED_WITH_REPLACEMENT("UIActivityIndicatorViewStyleMedium", ios(2.0, 13.0)) API_UNAVAILABLE(tvos, visionos, watchos) = 2,
+          |     ^
+    1 warning generated.
+    /Users/nagasai/LifeProgreX/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Auth/Auth.swift:1940:14: warning: weak variable 'weakSelf' was never mutated; consider changing to 'let' constant
+        weak var weakSelf = self
+             ~~~ ^
+             let
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.c:8:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/trees.c:37:
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/deflate.h:16:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/inftrees.c:6:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/inflate.c:83:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/inffast.c:6:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/infback.c:13:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/deflate.c:52:
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/deflate.h:16:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/crc32.c:30:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    In file included from /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/adler32.c:8:
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:170:11: warning: 'OS_CODE' macro redefined [-Wmacro-redefined]
+      170 | #  define OS_CODE 19
+          |           ^
+    /Users/nagasai/LifeProgreX/ios/Pods/gRPC-Core/third_party/zlib/zutil.h:141:11: note: previous definition is here
+      141 | #  define OS_CODE  7
+          |           ^
+    1 warning generated.
+    ld: warning: ignoring duplicate libraries: '-lc++'
+    ld: warning: ignoring duplicate libraries: '-lc++'
+
+Encountered error while building for device.

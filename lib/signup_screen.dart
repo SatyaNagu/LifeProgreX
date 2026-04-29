@@ -76,12 +76,14 @@ class _SignupScreenState extends State<SignupScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (firstName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       CustomPopup.show(
         context: context,
         title: 'Missing Fields',
-        message: 'Please fill all required fields',
+        message: 'Please fill all required fields including First Name',
         primaryColor: const Color(0xFFF98E2F), // Orange
       );
       return;
@@ -107,16 +109,23 @@ class _SignupScreenState extends State<SignupScreen> {
         email,
         password,
       );
-      if (user != null && mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => user.user?.emailVerified == true
-                ? const WelcomeScreen(isNewUser: true)
-                : const EmailVerificationScreen(isNewUser: true),
-          ),
-          (route) => false,
-        );
+      if (user != null) {
+        final fullName = [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
+        if (fullName.isNotEmpty) {
+          await user.user?.updateDisplayName(fullName);
+          await user.user?.reload();
+        }
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => user.user?.emailVerified == true
+                  ? const WelcomeScreen(isNewUser: true)
+                  : const EmailVerificationScreen(isNewUser: true),
+            ),
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

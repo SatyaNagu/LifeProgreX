@@ -1,0 +1,26 @@
+Analyzing LifeProgreX...                                        
+
+   info • The imported package 'package_info_plus' isn't a dependency of the importing package • lib/landing_screen.dart:28:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:package_info_plus/package_info_plus.dart' • lib/landing_screen.dart:28:8 • uri_does_not_exist
+   info • Don't invoke 'print' in production code • lib/screens/ai_coach_screen.dart:203:9 • avoid_print
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:870:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:872:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:874:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:876:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:878:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:138:32 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:139:32 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:140:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:141:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:142:34 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:143:36 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:187:38 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:188:38 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:189:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:190:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:191:40 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:192:42 • curly_braces_in_flow_control_structures
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/services/pdf_service.dart:105:11 • deprecated_member_use
+   info • 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/services/pdf_service.dart:105:17 • deprecated_member_use
+
+22 issues found. (ran in 8.8s)

@@ -11,7 +11,7 @@ class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     super.key,
     this.isNewUser = false,
-    this.userName = 'Nagasai',
+    this.userName = '',
   });
 
   @override
@@ -151,7 +151,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   if (name != null && name.trim().isNotEmpty) {
                                     return name.split(' ')[0];
                                   }
-                                  return widget.userName.split(' ')[0];
+                                  return widget.userName.isNotEmpty ? widget.userName.split(' ')[0] : 'User';
                                 })(),
                                 style: const TextStyle(
                                   color: Color(0xFF8B5CF6), // Purple highlight

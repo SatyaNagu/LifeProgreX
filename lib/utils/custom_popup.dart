@@ -6,8 +6,10 @@ class CustomPopup {
     required String title,
     required String message,
     String buttonText = 'OK',
+    String? secondaryButtonText,
     Color primaryColor = const Color(0xFF8B5CF6), // Default purple
     VoidCallback? onConfirm,
+    VoidCallback? onCancel,
   }) {
     showGeneralDialog(
       context: context,
@@ -49,7 +51,7 @@ class CustomPopup {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.info_outline,
+                      Icons.emoji_events_outlined,
                       color: primaryColor,
                       size: 32,
                     ),
@@ -80,33 +82,58 @@ class CustomPopup {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        if (onConfirm != null) {
-                          onConfirm();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                  // Buttons
+                  Row(
+                    children: [
+                      if (secondaryButtonText != null)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: SizedBox(
+                              height: 50,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  if (onCancel != null) onCancel();
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white70,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Text(secondaryButtonText),
+                              ),
+                            ),
+                          ),
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        buttonText,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              if (onConfirm != null) onConfirm();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              buttonText,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),

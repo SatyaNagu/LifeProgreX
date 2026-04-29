@@ -1,0 +1,50 @@
+
+┌─────────────────────────────────────────────────────────┐
+│ A new version of Flutter is available!                  │
+│                                                         │
+│ To update to the latest version, run "flutter upgrade". │
+└─────────────────────────────────────────────────────────┘
+Analyzing LifeProgreX...                                        
+
+warning • The value of the local variable 'habitScore' isn't used • lib/landing_screen.dart:205:21 • unused_local_variable
+warning • The value of the local variable 'totalTodayGoals' isn't used • lib/landing_screen.dart:219:21 • unused_local_variable
+warning • The value of the local variable 'completedTodayGoals' isn't used • lib/landing_screen.dart:220:21 • unused_local_variable
+warning • The value of the local variable 'user' isn't used • lib/landing_screen.dart:224:21 • unused_local_variable
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:263:27 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:265:27 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:267:27 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:269:27 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/landing_screen.dart:271:27 • curly_braces_in_flow_control_structures
+warning • The declaration '_buildBlob' isn't referenced • lib/landing_screen.dart:1555:10 • unused_element
+   info • Don't invoke 'print' in production code • lib/screens/ai_coach_screen.dart:203:9 • avoid_print
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:870:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:872:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:874:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:876:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/analytics_screen.dart:878:7 • curly_braces_in_flow_control_structures
+   info • Don't use 'BuildContext's across async gaps • lib/screens/life_resume_screen.dart:253:36 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/life_resume_screen.dart:268:36 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/screens/life_resume_screen.dart:270:37 • use_build_context_synchronously
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:138:32 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:139:32 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:140:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:141:33 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:142:34 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:143:36 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:187:38 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:188:38 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:189:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:190:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:191:40 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/analytics_service.dart:192:42 • curly_braces_in_flow_control_structures
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:38:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:52:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:74:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:97:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:125:7 • avoid_print
+   info • Use interpolation to compose strings and values • lib/services/pdf_service.dart:43:45 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/services/pdf_service.dart:45:46 • prefer_interpolation_to_compose_strings
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/services/pdf_service.dart:105:11 • deprecated_member_use
+   info • 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/services/pdf_service.dart:105:17 • deprecated_member_use
+
+40 issues found. (ran in 7.8s)

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'auth_service.dart';
-import 'login_screen.dart';
-import 'landing_screen.dart';
+import 'package:life_progex/auth_service.dart';
+import 'package:life_progex/login_screen.dart';
+import 'package:life_progex/landing_screen.dart';
 import 'dart:math';
-import 'services/firestore_service.dart';
-import 'models/habit_model.dart';
-import 'services/activity_service.dart';
-import 'models/activity_model.dart';
+import 'package:life_progex/services/firestore_service.dart';
+import 'package:life_progex/models/habit_model.dart';
+import 'package:life_progex/services/activity_service.dart';
+import 'package:life_progex/models/activity_model.dart';
 
-import 'personal_information.dart';
-import 'email_preferences.dart';
-import 'privacy_and_security.dart';
+import 'package:life_progex/personal_information.dart';
+import 'package:life_progex/email_preferences.dart';
+import 'package:life_progex/privacy_and_security.dart';
 
-import 'utils/premium_background.dart';
-import 'utils/theme_manager.dart';
+import 'package:life_progex/utils/premium_background.dart';
+import 'package:life_progex/utils/theme_manager.dart';
+import 'package:life_progex/widgets/avatar_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -308,22 +309,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             children: [
               // Avatar
-              Container(
+              AvatarWidget(
                 width: 70,
                 height: 70,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFF98E2F), // Orange border
-                    width: 2,
-                  ),
-                  image: DecorationImage(
-                    image: (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ?? false)
-                        ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!) 
-                        : const AssetImage('Assets/onboarding_image_3.png') as ImageProvider,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                isDark: isDark,
+                uid: FirebaseAuth.instance.currentUser?.uid ?? '',
               ),
               const SizedBox(width: 16),
               // Name & Badge
@@ -547,5 +537,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-

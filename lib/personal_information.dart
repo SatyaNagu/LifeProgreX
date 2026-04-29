@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 import 'utils/custom_popup.dart';
 import 'utils/premium_background.dart';
 import 'utils/theme_manager.dart';
@@ -22,6 +24,9 @@ class _PersonalInformationScreenState
   late final TextEditingController _emailController;
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+  String? _selectedBase64Image;
 
   bool _isSaving = false;
   bool _isLoading = true;
@@ -64,6 +69,12 @@ class _PersonalInformationScreenState
         // Also sync displayName fields if stored in Firestore and Auth is empty
         final storedFirstName = data['firstName'] as String?;
         final storedLastName = data['lastName'] as String?;
+        
+        final existingBase64 = data['profilePictureBase64'] as String?;
+        if (existingBase64 != null) {
+          _selectedBase64Image = existingBase64;
+        }
+
         if (_firstNameController.text.isEmpty && storedFirstName != null) {
           _firstNameController.text = storedFirstName;
         }
@@ -90,6 +101,34 @@ class _PersonalInformationScreenState
 
   void _updateTheme() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 200,
+        maxHeight: 200,
+        imageQuality: 50,
+      );
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final base64Str = base64Encode(bytes);
+        
+        setState(() {
+          _selectedBase64Image = base64Str;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomPopup.show(
+          context: context,
+          title: 'Error',
+          message: 'Failed to pick image: $e',
+          primaryColor: Colors.redAccent,
+        );
+      }
+    }
   }
 
   @override
@@ -173,49 +212,67 @@ class _PersonalInformationScreenState
                               Stack(
                                 alignment: Alignment.bottomRight,
                                 children: [
-                                  Container(
-                                    width: 100,
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color:
-                                            const Color(0xFFF98E2F),
-                                        width: 3,
-                                      ),
-                                      image: DecorationImage(
-                                        image: (FirebaseAuth.instance
-                                                    .currentUser
-                                                    ?.photoURL
-                                                    ?.isNotEmpty ??
-                                                false)
-                                            ? NetworkImage(FirebaseAuth
-                                                    .instance
-                                                    .currentUser!
-                                                    .photoURL!)
-                                            : const AssetImage(
-                                                    'Assets/onboarding_image_3.png')
-                                                as ImageProvider,
-                                        fit: BoxFit.cover,
-                                      ),
+                                  GestureDetector(
+                                    onTap: _pickImage,
+                                    child: Builder(
+                                      builder: (context) {
+                                        final photoUrl = FirebaseAuth.instance.currentUser?.photoURL;
+                                        final hasNetworkPhoto = photoUrl != null && photoUrl.isNotEmpty;
+                                        
+                                        ImageProvider? imageProvider;
+                                        if (_selectedBase64Image != null && _selectedBase64Image!.isNotEmpty) {
+                                          try {
+                                            imageProvider = MemoryImage(base64Decode(_selectedBase64Image!));
+                                          } catch (e) {
+                                            // Invalid base64
+                                          }
+                                        } else if (hasNetworkPhoto) {
+                                          imageProvider = NetworkImage(photoUrl);
+                                        }
+                                        
+                                        return Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF1B113D) : const Color(0xFFF1F5F9),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: const Color(0xFFF98E2F),
+                                              width: 3,
+                                            ),
+                                            image: imageProvider != null ? DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover,
+                                            ) : null,
+                                          ),
+                                          child: imageProvider == null ? Icon(
+                                            Icons.person,
+                                            color: isDark ? Colors.white70 : const Color(0xFF9CA3AF),
+                                            size: 50,
+                                          ) : null,
+                                        );
+                                      }
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF7C3AED),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDark
-                                            ? const Color(0xFF221A3D)
-                                            : Colors.white,
-                                        width: 3,
+                                  GestureDetector(
+                                    onTap: _pickImage,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF7C3AED),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isDark
+                                              ? const Color(0xFF221A3D)
+                                              : Colors.white,
+                                          width: 3,
+                                        ),
                                       ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                      size: 16,
+                                      child: const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -392,27 +449,32 @@ class _PersonalInformationScreenState
     setState(() => _isSaving = true);
 
     try {
-      // 1. Update Firebase Auth displayName (used everywhere in the app)
+      // 1. Update Firebase Auth displayName
       final fullName =
           lastName.isNotEmpty ? '$firstName $lastName' : firstName;
       await user.updateDisplayName(fullName);
       await user.reload();
 
-      // 2. Persist all fields (including firstName/lastName redundantly for
-      //    easy querying) plus phone & bio to Firestore users collection.
+      // 2. Persist all fields (including profile picture as Base64) to Firestore
+      final Map<String, dynamic> updateData = {
+        'firstName': firstName,
+        'lastName': lastName,
+        'displayName': fullName,
+        'phone': phone,
+        'bio': bio,
+        'email': user.email,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      
+      if (_selectedBase64Image != null && _selectedBase64Image!.isNotEmpty) {
+        updateData['profilePictureBase64'] = _selectedBase64Image;
+      }
+      
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .set(
-        {
-          'firstName': firstName,
-          'lastName': lastName,
-          'displayName': fullName,
-          'phone': phone,
-          'bio': bio,
-          'email': user.email,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
+        updateData,
         SetOptions(merge: true),
       );
 
@@ -426,29 +488,20 @@ class _PersonalInformationScreenState
         );
       }
     } on FirebaseException catch (e) {
-      if (e.code == 'permission-denied') {
-        // Firebase Auth update succeeded, but Firestore write was denied.
-        // We will swallow this intentionally to avoid showing the red popup UI,
-        // Since the user is testing without updated console backend rules.
-        if (mounted) {
-          setState(() => _isSaving = false);
-          CustomPopup.show(
-            context: context,
-            title: 'Success',
-            message: 'Profile updated successfully!',
-            primaryColor: const Color(0xFF00D12E),
-          );
+      if (mounted) {
+        setState(() => _isSaving = false);
+        
+        String errorMessage = e.message ?? 'Unknown error';
+        if (e.code == 'permission-denied') {
+          errorMessage = 'Permission Denied: Please check your Firestore Security Rules for the "users" collection.';
         }
-      } else {
-        if (mounted) {
-          setState(() => _isSaving = false);
-          CustomPopup.show(
-            context: context,
-            title: 'Error',
-            message: 'Failed to save profile: ${e.message}',
-            primaryColor: Colors.redAccent,
-          );
-        }
+        
+        CustomPopup.show(
+          context: context,
+          title: 'Error',
+          message: 'Failed to save profile: $errorMessage',
+          primaryColor: Colors.redAccent,
+        );
       }
     } catch (e) {
       if (mounted) {

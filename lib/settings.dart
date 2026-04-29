@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'auth_service.dart';
-import 'login_screen.dart';
-import 'landing_screen.dart';
-import 'screens/analytics_screen.dart';
-import 'screens/ai_coach_screen.dart';
-
-import 'appearance.dart';
-import 'help_and_support.dart';
-import 'about_developers.dart';
-import 'screens/achievements_screen.dart';
-import 'utils/premium_background.dart';
-import 'utils/theme_manager.dart';
-import 'services/health_service.dart';
+import 'package:life_progex/auth_service.dart';
+import 'package:life_progex/login_screen.dart';
+import 'package:life_progex/landing_screen.dart';
+import 'package:life_progex/screens/analytics_screen.dart';
+import 'package:life_progex/screens/ai_coach_screen.dart';
+import 'package:life_progex/appearance.dart';
+import 'package:life_progex/help_and_support.dart';
+import 'package:life_progex/about_developers.dart';
+import 'package:life_progex/screens/achievements_screen.dart';
+import 'package:life_progex/utils/premium_background.dart';
+import 'package:life_progex/utils/theme_manager.dart';
+import 'package:life_progex/services/health_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

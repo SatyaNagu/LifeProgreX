@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../widgets/glass_card.dart';
-import '../utils/theme_manager.dart';
-import '../utils/premium_background.dart';
-import '../services/activity_service.dart';
-import '../models/activity_model.dart';
-import '../auth_service.dart';
+import 'package:life_progex/widgets/glass_card.dart';
+import 'package:life_progex/utils/theme_manager.dart';
+import 'package:life_progex/utils/premium_background.dart';
+import 'package:life_progex/services/activity_service.dart';
+import 'package:life_progex/models/activity_model.dart';
+import 'package:life_progex/services/health_service.dart';
+import 'package:life_progex/auth_service.dart';
 import 'package:intl/intl.dart';
 
 class AllCategoriesScreen extends StatefulWidget {
@@ -16,6 +17,39 @@ class AllCategoriesScreen extends StatefulWidget {
 
 class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
   String selectedDate = 'Today';
+  
+  // Health Data State
+  int _steps = 0;
+  int _heartRate = 0;
+  double _healthCalories = 0;
+  String _sleep = '0.0h';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHealthData();
+  }
+
+  Future<void> _loadHealthData() async {
+    try {
+      final health = HealthService();
+      final steps = await health.getTodaySteps();
+      final calories = await health.getTodayActiveCalories();
+      final hr = await health.getLatestHeartRate();
+      final sleep = await health.getSleepDuration();
+      
+      if (mounted) {
+        setState(() {
+          _steps = steps;
+          _healthCalories = calories;
+          _heartRate = hr;
+          _sleep = sleep;
+        });
+      }
+    } catch (e) {
+      debugPrint("Health data load failed: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +89,8 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildSummaryGrid(isDark, textColor, subTextColor, totalDuration, totalTasks),
+                          const SizedBox(height: 16),
+                          if (selectedDate == 'Today') _buildHealthSummaryGrid(isDark, textColor, subTextColor),
                           const SizedBox(height: 32),
                           _buildRecentActivitySection(isDark, textColor, subTextColor, filteredActivities),
                           const SizedBox(height: 100), // Space for FAB
@@ -160,9 +196,8 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
   }
 
   Widget _buildSummaryGrid(bool isDark, Color textColor, Color subTextColor, int totalDuration, int totalTasks) {
-    // 5 kcal per minute focus estimate
-    final calories = totalDuration * 5; 
-    
+    // 5 kcal per minute focus estimate (Only use if health calories not available)
+    final calories = _healthCalories > 0 ? _healthCalories.toInt() : totalDuration * 5;    
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -218,6 +253,55 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
             : [const Color(0xFFF3E5F5), const Color(0xFFF3E5F5).withValues(alpha: 0.4)],
           isDark, textColor, subTextColor,
           progress: totalTasks > 0 ? 1.0 : 0.0,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHealthSummaryGrid(bool isDark, Color textColor, Color subTextColor) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      childAspectRatio: 0.85,
+      children: [
+        _buildSummaryCard(
+          'Daily Steps',
+          '$_steps',
+          'steps',
+          Icons.directions_walk,
+          const Color(0xFF00D1FF),
+          isDark 
+            ? [const Color(0xFF1A1A3D).withValues(alpha: 0.4), const Color(0xFF0D0D1F).withValues(alpha: 0.4)]
+            : [const Color(0xFFE3F2FD), const Color(0xFFE3F2FD).withValues(alpha: 0.4)],
+          isDark, textColor, subTextColor,
+          progress: (_steps / 10000).clamp(0.0, 1.0),
+        ),
+        _buildSummaryCard(
+          'Heart Rate',
+          _heartRate > 0 ? '$_heartRate' : '--',
+          'bpm',
+          Icons.favorite,
+          const Color(0xFFFF2D55),
+          isDark 
+            ? [const Color(0xFF3D1A1A).withValues(alpha: 0.4), const Color(0xFF1F0D0D).withValues(alpha: 0.4)]
+            : [const Color(0xFFFFF0F0), const Color(0xFFFFF0F0).withValues(alpha: 0.4)],
+          isDark, textColor, subTextColor,
+          progress: (_heartRate / 100).clamp(0.0, 1.0),
+        ),
+        _buildSummaryCard(
+          'Sleep',
+          _sleep.replaceAll('h', ''),
+          'hours',
+          Icons.bedtime,
+          const Color(0xFF5E5CE6),
+          isDark 
+            ? [const Color(0xFF1F1A3D).withValues(alpha: 0.4), const Color(0xFF100D1F).withValues(alpha: 0.4)]
+            : [const Color(0xFFF0F0FF), const Color(0xFFF0F0FF).withValues(alpha: 0.4)],
+          isDark, textColor, subTextColor,
+          progress: (double.tryParse(_sleep.replaceAll('h', '')) ?? 0 / 8).clamp(0.0, 1.0),
         ),
       ],
     );

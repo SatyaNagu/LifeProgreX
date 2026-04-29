@@ -93,24 +93,85 @@ class AnalyticsService {
         startTime = now.subtract(const Duration(days: 7));
     }
 
-    return _db
+    return _getAnalyticsForRange(user.uid, startTime, timeframe);
+  }
+
+  // New method for targeted monthly reports
+  Future<AnalyticsData> getLastMonthAnalytics() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
+
+    final now = DateTime.now();
+    // 1st of last month
+    final startOfLastMonth = DateTime(now.year, now.month - 1, 1);
+    // last day of last month (1st of this month minus 1 day)
+    final endOfLastMonth = DateTime(now.year, now.month, 0, 23, 59, 59);
+
+    final habitSnapshot = await _db
         .collection('habits')
         .where('userId', isEqualTo: user.uid)
+        .get();
+
+    final habits = habitSnapshot.docs
+        .map((doc) => HabitModel.fromJson(doc.data(), doc.id))
+        .toList();
+
+    final activitySnapshot = await _db
+        .collection('users')
+        .doc(user.uid)
+        .collection('activities')
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfLastMonth))
+        .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(endOfLastMonth))
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    final activities = activitySnapshot.docs
+        .map((doc) => ActivityLog.fromMap(doc.data(), doc.id))
+        .toList();
+
+    // Map moods as done in the stream
+    final moods = <MoodLogModel>[];
+    for (var a in activities) {
+      if (a.type.toLowerCase() == 'mood' && a.value != null) {
+        int score = 4;
+        final lbl = a.value!.toLowerCase();
+        if (lbl == 'terrible') score = 0;
+        else if (lbl == 'bad') score = 2;
+        else if (lbl == 'okay') score = 4;
+        else if (lbl == 'good') score = 6;
+        else if (lbl == 'great') score = 8;
+        else if (lbl == 'amazing') score = 10;
+        moods.add(MoodLogModel(id: a.id, userId: a.userId, score: score, emoji: a.data['emoji'] ?? '😐', timestamp: a.createdAt));
+      }
+    }
+
+    final achievementSnapshot = await _db
+        .collection('users')
+        .doc(user.uid)
+        .collection('achievements')
+        .where('isUnlocked', isEqualTo: true)
+        .get();
+
+    final earnedBadgeIds = achievementSnapshot.docs.map((doc) => doc.id).toList();
+
+    return _computeAnalytics(habits, moods, activities, 'month', earnedBadgeIds);
+  }
+
+  Stream<AnalyticsData> _getAnalyticsForRange(String userId, DateTime startTime, String timeframe) {
+    return _db
+        .collection('habits')
+        .where('userId', isEqualTo: userId)
         .snapshots()
         .asyncMap((habitSnapshot) async {
           final habits = habitSnapshot.docs
               .map((doc) => HabitModel.fromJson(doc.data(), doc.id))
               .toList();
 
-          // Fetch Activities (Quick Logs) bounded by dynamic timeframe
           final activitySnapshot = await _db
               .collection('users')
-              .doc(user.uid)
+              .doc(userId)
               .collection('activities')
-              .where(
-                'createdAt',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(startTime),
-              )
+              .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startTime))
               .orderBy('createdAt', descending: true)
               .get();
 
@@ -118,58 +179,31 @@ class AnalyticsService {
               .map((doc) => ActivityLog.fromMap(doc.data(), doc.id))
               .toList();
 
-          // Extrapolate Moods from Activities
           final moods = <MoodLogModel>[];
           for (var a in activities) {
             if (a.type.toLowerCase() == 'mood' && a.value != null) {
-              int score = 4; // Default to 'Okay'
+              int score = 4;
               final lbl = a.value!.toLowerCase();
-              if (lbl == 'terrible') {
-                score = 0;
-              } else if (lbl == 'bad')
-                score = 2;
-              else if (lbl == 'okay')
-                score = 4;
-              else if (lbl == 'good')
-                score = 6;
-              else if (lbl == 'great')
-                score = 8;
-              else if (lbl == 'amazing')
-                score = 10;
-
-              final emoji = a.data['emoji'] ?? '😐';
-
-              moods.add(
-                MoodLogModel(
-                  id: a.id,
-                  userId: a.userId,
-                  score: score,
-                  emoji: emoji,
-                  timestamp: a.createdAt,
-                ),
-              );
+              if (lbl == 'terrible') score = 0;
+              else if (lbl == 'bad') score = 2;
+              else if (lbl == 'okay') score = 4;
+              else if (lbl == 'good') score = 6;
+              else if (lbl == 'great') score = 8;
+              else if (lbl == 'amazing') score = 10;
+              moods.add(MoodLogModel(id: a.id, userId: a.userId, score: score, emoji: a.data['emoji'] ?? '😐', timestamp: a.createdAt));
             }
           }
 
-          // Fetch Earned Achievements
           final achievementSnapshot = await _db
               .collection('users')
-              .doc(user.uid)
+              .doc(userId)
               .collection('achievements')
               .where('isUnlocked', isEqualTo: true)
               .get();
 
-          final earnedBadgeIds = achievementSnapshot.docs
-              .map((doc) => doc.id)
-              .toList();
+          final earnedBadgeIds = achievementSnapshot.docs.map((doc) => doc.id).toList();
 
-          return _computeAnalytics(
-            habits,
-            moods,
-            activities,
-            timeframe,
-            earnedBadgeIds,
-          );
+          return _computeAnalytics(habits, moods, activities, timeframe, earnedBadgeIds);
         });
   }
 

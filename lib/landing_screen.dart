@@ -1,34 +1,42 @@
 import 'package:flutter/material.dart';
-import 'profile.dart'; // For navigating to ProfileScreen
-import 'settings.dart';
-import 'screens/ai_coach_screen.dart';
-import 'quicklog_edit/edit_quick_log.dart';
-import 'utils/quick_log_manager.dart';
-import 'utils/theme_manager.dart';
-import 'utils/premium_background.dart';
-import 'screens/all_categories_screen.dart';
-import 'screens/analytics_screen.dart';
-import 'screens/goals_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:life_progex/profile.dart'; // For navigating to ProfileScreen
+import 'package:life_progex/settings.dart';
+import 'package:life_progex/screens/ai_coach_screen.dart';
+import 'package:life_progex/quicklog_edit/edit_quick_log.dart';
+import 'package:life_progex/utils/quick_log_manager.dart';
+import 'package:life_progex/utils/theme_manager.dart';
+import 'package:life_progex/utils/premium_background.dart';
+import 'package:life_progex/screens/all_categories_screen.dart';
+import 'package:life_progex/screens/analytics_screen.dart';
+import 'package:life_progex/screens/goals_screen.dart';
 import 'dart:math';
-import 'dart:ui' as ui;
+// Removed unused dart:ui
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'services/firestore_service.dart';
-import 'models/habit_model.dart';
-import 'models/goal_model.dart';
-import 'services/goal_service.dart';
-import 'services/activity_service.dart';
-import 'models/activity_model.dart';
-import 'auth_service.dart';
-import 'widgets/animated_goals_card.dart';
-import 'models/notification_model.dart';
-import 'services/notification_service.dart';
-import 'screens/notifications_screen.dart';
+import 'package:life_progex/services/firestore_service.dart';
+import 'package:life_progex/models/habit_model.dart';
+import 'package:life_progex/models/goal_model.dart';
+import 'package:life_progex/services/goal_service.dart';
+import 'package:life_progex/services/activity_service.dart';
+import 'package:life_progex/services/health_service.dart';
+import 'package:life_progex/models/activity_model.dart';
+import 'package:life_progex/auth_service.dart';
+import 'package:life_progex/widgets/animated_goals_card.dart';
+import 'package:life_progex/widgets/avatar_widget.dart';
+import 'package:life_progex/models/notification_model.dart';
+import 'package:life_progex/services/notification_service.dart';
+import 'package:life_progex/screens/notifications_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:life_progex/utils/custom_popup.dart';
+import 'package:life_progex/services/pdf_service.dart';
+import 'package:life_progex/services/analytics_service.dart';
+import 'package:intl/intl.dart';
 
 class LandingScreen extends StatefulWidget {
   final String userName;
 
-  const LandingScreen({super.key, this.userName = 'Nagasai'});
+  const LandingScreen({super.key, this.userName = ''});
 
   @override
   State<LandingScreen> createState() => _LandingScreenState();
@@ -41,6 +49,12 @@ class _LandingScreenState extends State<LandingScreen> {
   late Stream<List<GoalModel>> _goalsStream;
   late Stream<List<ActivityLog>> _activitiesStream;
   late Stream<List<NotificationModel>> _notificationsStream;
+  
+  // Health Data State
+  int _steps = 0;
+  int _heartRate = 0;
+  double _healthCalories = 0;
+  String _sleep = '0.0h';
 
   @override
   void initState() {
@@ -53,6 +67,88 @@ class _LandingScreenState extends State<LandingScreen> {
         ? ActivityService.listenToActivities(user.uid)
         : Stream.value([]);
     _notificationsStream = NotificationService().getNotificationsStream();
+    
+    // Check for monthly summary on app start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkMonthlySummary();
+      _loadHealthData();
+    });
+  }
+
+  Future<void> _loadHealthData() async {
+    try {
+      final health = HealthService();
+      final steps = await health.getTodaySteps();
+      final calories = await health.getTodayActiveCalories();
+      final hr = await health.getLatestHeartRate();
+      final sleep = await health.getSleepDuration();
+      
+      if (mounted) {
+        setState(() {
+          _steps = steps;
+          _healthCalories = calories;
+          _heartRate = hr;
+          _sleep = sleep;
+        });
+      }
+    } catch (e) {
+      debugPrint("Health data load failed: $e");
+    }
+  }
+
+  Future<void> _checkMonthlySummary() async {
+    final now = DateTime.now();
+    final prefs = await SharedPreferences.getInstance();
+    const lastPromptedKey = 'last_monthly_summary_prompted'; 
+    
+    final previousMonth = DateTime(now.year, now.month - 1);
+    final monthKey = DateFormat('MM-yyyy').format(previousMonth);
+    
+    final lastPrompted = prefs.getString(lastPromptedKey);
+    
+    if (lastPrompted != monthKey) {
+      final user = AuthService().currentUser;
+      if (user == null) return;
+      
+      // If the user's account was created this month, don't show the summary
+      if (user.metadata.creationTime != null) {
+        final startOfCurrentMonth = DateTime(now.year, now.month, 1);
+        if (user.metadata.creationTime!.isAfter(startOfCurrentMonth)) {
+          await prefs.setString(lastPromptedKey, monthKey);
+          return;
+        }
+      }
+
+      if (!mounted) return;
+      
+      // Mark as prompted immediately so we don't spam the user
+      await prefs.setString(lastPromptedKey, monthKey);
+
+      final monthName = DateFormat('MMMM').format(previousMonth);
+      
+      CustomPopup.show(
+        context: context,
+        title: 'Monthly Summary Ready! 🏆',
+        message: 'Your $monthName growth report is ready. Would you like to share your Life Resume?',
+        buttonText: 'Share PDF',
+        secondaryButtonText: 'Later',
+        primaryColor: const Color(0xFF8B5CF6),
+        onConfirm: () async {
+          try {
+            final data = await AnalyticsService().getLastMonthAnalytics();
+            if (context.mounted) {
+              await PdfService.shareLifeResumePDF(data, user);
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Could not generate summary: $e')),
+              );
+            }
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -112,33 +208,20 @@ class _LandingScreenState extends State<LandingScreen> {
               final goals = goalSnapshot.data ?? [];
 
               // Habit Stats
-              final totalHabits = habits.length;
               final maxStreak = habits.isNotEmpty
                   ? habits.map((h) => h.currentStreak).reduce(max)
                   : 0;
               final activeHabits = habits
                   .where((h) => h.currentStreak > 0)
                   .length;
-              final habitScore = totalHabits > 0
-                  ? ((activeHabits / totalHabits) * 100).toInt()
-                  : 0;
+              // Habit Statistics calculation (Removed unused habitScore)
 
               // Goal Stats (Today)
               final now = DateTime.now();
-              final todayGoals = goals
-                  .where(
-                    (g) =>
-                        g.targetDate.year == now.year &&
-                        g.targetDate.month == now.month &&
-                        g.targetDate.day == now.day,
-                  )
-                  .toList();
-              final totalTodayGoals = todayGoals.length;
-              final completedTodayGoals = todayGoals
-                  .where((g) => g.isCompleted)
-                  .length;
+              // Removed unused todayGoals, totalTodayGoals, completedTodayGoals
+              // Goal statistics for today (Removed unused totalTodayGoals and completedTodayGoals)
 
-              final user = AuthService().currentUser;
+              // Removed unused user variable
 
               return StreamBuilder<List<ActivityLog>>(
                 stream: _activitiesStream,
@@ -176,16 +259,17 @@ class _LandingScreenState extends State<LandingScreen> {
                         final lbl = a.value!.toLowerCase();
                         if (lbl == 'terrible') {
                           score = 0;
-                        } else if (lbl == 'bad')
+                        } else if (lbl == 'bad') {
                           score = 2;
-                        else if (lbl == 'okay')
+                        } else if (lbl == 'okay') {
                           score = 4;
-                        else if (lbl == 'good')
+                        } else if (lbl == 'good') {
                           score = 6;
-                        else if (lbl == 'great')
+                        } else if (lbl == 'great') {
                           score = 8;
-                        else if (lbl == 'amazing')
+                        } else if (lbl == 'amazing') {
                           score = 10;
+                        }
                         moodPoints += score;
                         moodCount++;
                       } else if (type.contains('workout') ||
@@ -325,9 +409,12 @@ class _LandingScreenState extends State<LandingScreen> {
                       ),
                       const SizedBox(height: 16),
                       _buildDailyActivityGrid(
-                        calories,
+                        _healthCalories > 0 ? _healthCalories.toInt() : calories,
                         totalDuration,
                         totalTasks,
+                        _steps,
+                        _heartRate,
+                        _sleep,
                       ),
                     ],
                   );
@@ -511,45 +598,53 @@ class _LandingScreenState extends State<LandingScreen> {
   // --- Header ---
   Widget _buildHeader(Color textColor) {
     final isDark = _themeManager.isDarkMode;
-    final hour = DateTime.now().hour;
-    String greeting;
-    if (hour < 12) {
-      greeting = "Good Morning 👋";
-    } else if (hour < 17) {
-      greeting = "Good Afternoon 👋";
-    } else {
-      greeting = "Good Evening 👋";
-    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                greeting,
-                style: TextStyle(
-                  color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: isDark ? null : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    'Assets/ui_icon.svg',
+                    width: 26,
+                  ),
                 ),
               ),
-              Text(
-                (() {
-                  final name = FirebaseAuth.instance.currentUser?.displayName;
-                  if (name != null && name.trim().isNotEmpty) {
-                    return name.split(' ')[0];
-                  }
-                  return widget.userName.split(' ')[0];
-                })(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Color(0xFF13D3E8), Color(0xFF66BB6A)], // Cyan to Green
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                  child: const Text(
+                    'LifeProgreX',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             ],
@@ -569,6 +664,8 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildProfileIcon(BuildContext context) {
     final isDark = _themeManager.isDarkMode;
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -576,34 +673,11 @@ class _LandingScreenState extends State<LandingScreen> {
           MaterialPageRoute(builder: (context) => const ProfileScreen()),
         );
       },
-      child: Container(
+      child: AvatarWidget(
         width: 44,
         height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: const Color(0xFFF98E2F), // Orange border
-            width: 2,
-          ),
-          image: DecorationImage(
-            image:
-                (FirebaseAuth.instance.currentUser?.photoURL?.isNotEmpty ??
-                    false)
-                ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
-                : const AssetImage('Assets/onboarding_image_3.png')
-                      as ImageProvider,
-            fit: BoxFit.cover,
-          ),
-          boxShadow: isDark
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-        ),
+        isDark: isDark,
+        uid: uid,
       ),
     );
   }
@@ -1042,26 +1116,42 @@ class _LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFF98E2F), Color(0xFFFDB913)],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFF98E2F).withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const AiCoachScreen(),
+                  transitionDuration: const Duration(milliseconds: 200),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
                 ),
-              ],
-            ),
-            child: const Text(
-              'START',
-              style: TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFF98E2F), Color(0xFFFDB913)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFF98E2F).withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'START',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -1135,7 +1225,7 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildDailyActivityGrid(int calories, int focusTime, int tasks) {
+  Widget _buildDailyActivityGrid(int calories, int focusTime, int tasks, int steps, int heartRate, String sleep) {
     final isDark = _themeManager.isDarkMode;
     return GridView.count(
       shrinkWrap: true,
@@ -1163,56 +1253,15 @@ class _LandingScreenState extends State<LandingScreen> {
                 ],
         ),
         _buildActivityCard(
-          iconSource: Icons.timer,
-          iconColor: const Color(0xFF8CE063),
-          title: 'Focus Time',
-          value: '$focusTime',
-          unit: 'min',
-          progress: (focusTime / 120).clamp(0.0, 1.0),
-          cardGradient: isDark
-              ? [
-                  const Color(0xFF1E2F1A).withValues(alpha: 0.4),
-                  const Color(0xFF0F180D).withValues(alpha: 0.4),
-                ]
-              : [
-                  const Color(0xFFF1F8E9),
-                  const Color(0xFFF1F8E9).withValues(alpha: 0.4),
-                ],
-          isChart: true,
-        ),
-        _buildActivityCard(
-          iconSource: Icons.favorite,
-          iconColor: const Color(0xFFFF5BAE),
-          title: 'Wellness',
-          value: '$tasks',
-          unit: 'tasks',
-          progress: (tasks / 5).clamp(0.0, 1.0),
-          cardGradient: isDark
-              ? [
-                  const Color(0xFF3D1A2F).withValues(alpha: 0.4),
-                  const Color(0xFF1F0D18).withValues(alpha: 0.4),
-                ]
-              : [
-                  const Color(0xFFFCE4EC),
-                  const Color(0xFFFCE4EC).withValues(alpha: 0.4),
-                ],
-        ),
-        _buildActivityCard(
-          iconSource: Icons.auto_awesome,
-          iconColor: const Color(0xFFAF52DE),
-          title: 'Consistency',
-          value: tasks > 0 ? 'Peak' : 'Start',
-          unit: 'today',
-          progress: tasks > 0 ? 1.0 : 0.0,
-          cardGradient: isDark
-              ? [
-                  const Color(0xFF261A3D).withValues(alpha: 0.4),
-                  const Color(0xFF130D1F).withValues(alpha: 0.4),
-                ]
-              : [
-                  const Color(0xFFF3E5F5),
-                  const Color(0xFFF3E5F5).withValues(alpha: 0.4),
-                ],
+          iconSource: Icons.directions_walk,
+          iconColor: const Color(0xFF00D1FF),
+          title: 'Daily Steps',
+          value: '$steps',
+          unit: 'steps',
+          progress: (steps / 10000).clamp(0.0, 1.0),
+          cardGradient: isDark 
+              ? [const Color(0xFF1A1A3D).withValues(alpha: 0.4), const Color(0xFF0D0D1F).withValues(alpha: 0.4)]
+              : [const Color(0xFFE3F2FD), const Color(0xFFE3F2FD).withValues(alpha: 0.4)],
         ),
       ],
     );
@@ -1417,23 +1466,7 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildBlob({
-    required double size,
-    required Color color,
-    required double blur,
-  }) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(color: Colors.transparent),
-        ),
-      ),
-    );
-  }
+
 }
 
 // --- Custom Painters ---

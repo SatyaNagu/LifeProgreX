@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'onboarding_screen.dart';
-import 'signup_screen.dart';
-import 'login_screen.dart';
-import 'landing_screen.dart';
+import 'package:life_progex/onboarding_screen.dart';
+import 'package:life_progex/signup_screen.dart';
+import 'package:life_progex/login_screen.dart';
+import 'package:life_progex/landing_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'utils/theme_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'loading_screen.dart';
+import 'package:life_progex/utils/theme_manager.dart';
 
-import 'utils/quick_log_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:life_progex/loading_screen.dart';
+
+import 'package:life_progex/utils/quick_log_manager.dart';
 import 'package:health/health.dart';
-import 'services/local_push_service.dart';
+import 'package:life_progex/services/local_push_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -6,6 +6,7 @@ import '../utils/theme_manager.dart';
 import '../services/achievement_service.dart';
 import '../services/analytics_service.dart';
 import '../models/habit_model.dart';
+import '../services/pdf_service.dart';
 
 class LifeResumeScreen extends StatefulWidget {
   const LifeResumeScreen({super.key});
@@ -20,6 +21,7 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
   final int _totalStaggerLevels = 7;
   final AnalyticsService _analyticsService = AnalyticsService();
   final ThemeManager _themeManager = ThemeManager();
+  bool _isGeneratingPdf = false;
   
   late Stream<AnalyticsData> _analyticsStream;
   late Stream<List<Map<String, dynamic>>> _achievementsStream;
@@ -103,7 +105,7 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildStaggeredMember(0, _buildHeader(context, textColor, subTextColor, isDark)),
+                        _buildStaggeredMember(0, _buildHeader(context, textColor, subTextColor, isDark, data, user)),
                         const SizedBox(height: 24),
                         _buildStaggeredMember(1, _buildProfileHeaderCard(firstName, lastName, formattedJoinDate, user?.photoURL, isDark, textColor, subTextColor, borderColor)),
                         const SizedBox(height: 24),
@@ -203,7 +205,7 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
     );
   }
 
-  Widget _buildHeader(BuildContext context, Color textColor, Color subTextColor, bool isDark) {
+  Widget _buildHeader(BuildContext context, Color textColor, Color subTextColor, bool isDark, AnalyticsData data, User? user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -236,21 +238,50 @@ class _LifeResumeScreenState extends State<LifeResumeScreen> with TickerProvider
             ),
           ],
         ),
-        Row(
-          children: [
-            _buildCircularIconButton(
-              icon: Icons.share_outlined,
-              onTap: () => _showToast(context, 'Life Resume shared successfully!', isDark),
-              isDark: isDark,
-            ),
-            const SizedBox(width: 12),
-            _buildCircularIconButton(
-              icon: Icons.download_outlined,
-              onTap: () => _showToast(context, 'Life Resume downloaded as PDF!', isDark),
-              isDark: isDark,
-            ),
-          ],
-        ),
+        _isGeneratingPdf 
+            ? const SizedBox(width: 40, height: 40, child: CircularProgressIndicator(color: Color(0xFFB24BF3)))
+            : Row(
+                children: [
+                  _buildCircularIconButton(
+                    icon: Icons.share_outlined,
+                    onTap: () async {
+                      if (_isGeneratingPdf) return;
+                      setState(() => _isGeneratingPdf = true);
+                      try {
+                        await PdfService.shareLifeResumePDF(data, user);
+                      } catch (e) {
+                        if (context.mounted) {
+                          _showToast(context, 'Error sharing PDF: $e', isDark);
+                        }
+                      } finally {
+                        setState(() => _isGeneratingPdf = false);
+                      }
+                    },
+                    isDark: isDark,
+                  ),
+                  const SizedBox(width: 12),
+                  _buildCircularIconButton(
+                    icon: Icons.download_outlined,
+                    onTap: () async {
+                      if (_isGeneratingPdf) return;
+                      setState(() => _isGeneratingPdf = true);
+                      try {
+                        final path = await PdfService.downloadLifeResumePDF(data, user);
+                        if (context.mounted) {
+                          _showToast(context, 'PDF saved to: $path', isDark);
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          _showToast(context, 'Error downloading PDF: $e', isDark);
+                        }
+                      } finally {
+                        setState(() => _isGeneratingPdf = false);
+                      }
+                    },
+                    isDark: isDark,
+                  ),
+                ],
+              ),
       ],
     );
   }
