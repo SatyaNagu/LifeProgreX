@@ -2,7 +2,7 @@
 
 A Flutter app for building habits and tracking personal growth. You log what you do each day (sleep, water, workouts, reading, mood and more), keep streaks going on your habits, set goals, and see how it all adds up over time on an analytics page. An AI coach called MAX, built on Google Gemini, looks at your streaks, habits and goals and gives you suggestions.
 
-Built by **Satya Pranav Nagunoori** ([@SatyaNagu](https://github.com/SatyaNagu)) and **Naga Sai Donthi** ([@DonthiNagaSai](https://github.com/DonthiNagaSai)).
+Built by **Satya Pranav Nagunoori** ([@SatyaNagu](https://github.com/SatyaNagu)), **Naga Sai Donthi** ([@DonthiNagaSai](https://github.com/DonthiNagaSai)) and **Bhanu Gomasani**.
 
 ## Features
 
@@ -54,5 +54,7 @@ lib/
 Satya worked on the database design, habit logging, the Goals section, the Gemini integration and the mood score.
 
 Sai worked on the landing and onboarding screens, sign-up, login, email verification and password reset (including Google Sign-In on iOS), the activity log and all the quick-log screens, the Analytics page, and the Life Resume and AI coach screens.
+
+Bhanu Gomasani was the third member of the team.
 
 We worked through pull requests on separate branches and merged into `main`.
